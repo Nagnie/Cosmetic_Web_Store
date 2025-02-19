@@ -5,6 +5,8 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import Header from "../../components/Header/Header.jsx";
+import Sidebar from "../../components/Sidebar/Sidebar.jsx";
+
 const SlideData = [
     {
         title: 'Slide 1',
@@ -36,14 +38,14 @@ const SlideData = [
 const categories = [
     { title: "Skin Care", image: "https://i.pinimg.com/736x/5a/68/6a/5a686a397fa14181d2447358edb61f0c.jpg" },
     { title: "Body Care", image: "https://i.pinimg.com/736x/fe/bb/84/febb8481081d9a24c006755006cbf685.jpg" },
-    { title: "Hair Care", image: "https://i.pinimg.com/736x/a6/36/84/a6368491d6c77e54f488e0c050e28d22.jpg" },
+    { title: "Hair Care", image: "https://i.pinimg.com/736x/a7/c5/46/a7c546b9ab26144432224f6a893f070a.jpg" },
     { title: "Dietary Supplement", image: "https://i.pinimg.com/736x/cb/e7/15/cbe715429af3258e0a0764f90cfaed16.jpg" },
     { title: "Make Up", image: "https://i.pinimg.com/736x/ce/c7/6b/cec76bb3adc9922446ac684056124610.jpg" },
 ];
 
 const Trending = [
     {
-        name: 'Medicube PDRN red Peptide Ampoule 30ml',
+        name: 'Medicube PDRN Pink Peptide Ampoule 30ml',
         image: 'https://image.oliveyoung.co.kr/cfimages/cf-goods/uploads/images/thumbnails/550/10/0000/0021/A00000021429010ko.jpg?l=ko',
         price: '600.000'
     },
@@ -91,8 +93,8 @@ const CategoryCard = ({ category }) => {
             <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
 
             {/* Overlay mờ và text */}
-            <div className="absolute inset-0 bg-gradient-to-t from-pink-950/50 to-transparent flex flex-col justify-end pb-6">
-                <h3 className="text-white text-2xl font-semibold hover:underline">{category.title}</h3>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-4">
+                <h3 className="text-white text-lg font-semibold">{category.title}</h3>
             </div>
         </div>
     );
@@ -100,7 +102,7 @@ const CategoryCard = ({ category }) => {
 
 const ProductCard = ({ product }) => {
     return (
-        <div className="w-full h-100  flex flex-col justify-between p-4 rounded-lg" style={{ backgroundColor: "#FDE5EC" }}>
+        <div className="w-full h-100 bg-red-50 flex flex-col justify-between p-4 rounded-lg">
             <img src={product.image} alt={product.name} className="w-full h-56 object-cover rounded" />
             <div>
                 <h3 className="text-lg font-semibold">{product.name}</h3>
@@ -108,30 +110,32 @@ const ProductCard = ({ product }) => {
             </div>
             <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold">{product.price} VNĐ</span>
-                <button className="text-white px-4 py-2 rounded-lg" style={{ backgroundColor: "#D14D72"}}>Add to cart</button>
+                <button className="text-white  px-4 py-2 rounded-lg">Add to cart</button>
             </div>
         </div>
     )
 }
 
 const Homepage = () => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     return (
         <div className="font-sans">
             <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+            <Sidebar isOpen={isSidebarOpen} closeSidebar={() => setIsSidebarOpen(false)} />
 
             {/* Swiper Section */}
-            <section className={"max-w-6xl mt-35 mx-auto mb-10 pt-10"}>
+            <section className={"mt-20 mb-10 pt-10"}>
                 <style>
                     {`
                       .swiper-pagination-bullet {
-                        opacity: 0.5;
+                        opacity: 0.8;
                         width: 15px;
                         height: 15px;
-                        background-color: #D14D72;
+                        background-color: #FFCFB3;
                       }
                       .swiper-pagination-bullet-active {
                         opacity: 1;
-                        background-color: #D14D72;
+                        background-color: #FA4032;
                       }
                       .swiper {
                         padding-bottom: 40px !important;
@@ -142,7 +146,8 @@ const Homepage = () => {
                     `}
                 </style>
                 {/* Static Overlay */}
-                <div className="absolute top-60 left-29 right-29 h-96 flex items-center justify-center z-20">
+                <div className="absolute top-30 left-29 right-29 h-96 bg-red-950 opacity-30 z-10 rounded-3xl" />
+                <div className="absolute top-30 left-29 right-29 h-96 flex items-center justify-center z-20">
                     <div className="text-white text-center">
                         <h1 className="text-5xl mb-2 font-bold">Welcome to Nâu Cosmetic</h1>
                         <p className="text-2xl">Your destination for all things beauty</p>
@@ -158,7 +163,7 @@ const Homepage = () => {
                         disableOnInteraction: false,
                     }}
                     modules={[Pagination, Autoplay]}
-                    className="h-106 rounded-3xl"
+                    className="w-full h-106 rounded-3xl"
                 >
                     {SlideData.map((slide, index) => (
                         <SwiperSlide key={index}>
@@ -167,7 +172,6 @@ const Homepage = () => {
                                 alt={slide.title}
                                 className="w-full h-full object-cover rounded-3xl"
                             />
-                            <div className="absolute top-0 left-0 right-0 h-96 opacity-20 z-10 rounded-3xl" style={{ backgroundColor: "#D14D72"}}/>
                         </SwiperSlide>
                     ))}
                 </Swiper>
@@ -179,13 +183,12 @@ const Homepage = () => {
                     <h2 className="text-2xl font-bold text-black">Shop by Category</h2>
                     <a
                         href="#"
-                        className="hover:underline text-sm font-medium"
-                        style={{ color: "#D14D72" }}
+                        className="text-red-700 hover:underline text-sm font-medium"
                     >
                         Browse all categories →
                     </a>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 cursor-pointer">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {categories.map((category, index) => (
                         <CategoryCard key={index} category={category} />
                     ))}
@@ -197,17 +200,17 @@ const Homepage = () => {
                 <h2 className="text-3xl font-bold text-center mb-8">Why Choose Us?</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-                    <div className="text-center  p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#FDE5EC' }}>
+                    <div className="text-center">
                         <h3 className="text-xl font-semibold mb-3">Premium Quality</h3>
                         <p className="text-gray-600">We carefully select the finest materials and craftmanship to ensure exceptional quality in every product.</p>
                     </div>
 
-                    <div className="text-center  p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#FFD1DA' }}>
+                    <div className="text-center">
                         <h3 className="text-xl font-semibold mb-3">Customer First</h3>
                         <p className="text-gray-600">Your satisfaction is our priority. Enjoy responsive support and hassle-free shopping experience.</p>
                     </div>
 
-                    <div className="text-center p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#ffbccc' }}>
+                    <div className="text-center">
                         <h3 className="text-xl font-semibold mb-3">Unique Designs</h3>
                         <p className="text-gray-600">Discover our exclusive collections that blend contemporary trends with timeless elegance.</p>
                     </div>
@@ -222,7 +225,7 @@ const Homepage = () => {
                         <ProductCard key={index} product={Trending[index]} />
                     ))}
                 </div>
-                <button className="block mx-auto my-10 text-white rounded-lg px-4 py-2" style={{ backgroundColor: "#ab3556" }}>View all products</button>
+                <button className="block mx-auto my-10 text-white bg-blue-600 px-4 py-2 rounded-lg">View all products</button>
             </div>
 
 
