@@ -32,13 +32,10 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
-  border-color: #f6cfb6;
-}
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 4px auto #fab7cb;
 }
 
 @media (prefers-color-scheme: light) {
