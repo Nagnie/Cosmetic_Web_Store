@@ -34,11 +34,11 @@ const SlideData = [
 ]
 
 const categories = [
-    { title: "Skin Care", image: "https://i.pinimg.com/736x/5a/68/6a/5a686a397fa14181d2447358edb61f0c.jpg" },
-    { title: "Body Care", image: "https://i.pinimg.com/736x/fe/bb/84/febb8481081d9a24c006755006cbf685.jpg" },
-    { title: "Hair Care", image: "https://i.pinimg.com/736x/a6/36/84/a6368491d6c77e54f488e0c050e28d22.jpg" },
-    { title: "Dietary Supplement", image: "https://i.pinimg.com/736x/cb/e7/15/cbe715429af3258e0a0764f90cfaed16.jpg" },
-    { title: "Make Up", image: "https://i.pinimg.com/736x/ce/c7/6b/cec76bb3adc9922446ac684056124610.jpg" },
+    { title: "Anua", image: "https://i.pinimg.com/736x/5a/68/6a/5a686a397fa14181d2447358edb61f0c.jpg" },
+    { title: "Medicube", image: "https://i.pinimg.com/736x/fe/bb/84/febb8481081d9a24c006755006cbf685.jpg" },
+    { title: "Bioderma", image: "https://i.pinimg.com/736x/a6/36/84/a6368491d6c77e54f488e0c050e28d22.jpg" },
+    { title: "Torriden", image: "https://i.pinimg.com/736x/cb/e7/15/cbe715429af3258e0a0764f90cfaed16.jpg" },
+    { title: "Aestura", image: "https://i.pinimg.com/736x/ce/c7/6b/cec76bb3adc9922446ac684056124610.jpg" },
 ];
 
 const Trending = [
@@ -86,13 +86,19 @@ const Trending = [
 
 const CategoryCard = ({ category }) => {
     return (
-        <div className="relative w-full h-66 rounded-lg overflow-hidden shadow-lg">
-            {/* Hình ảnh */}
-            <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+        <div className="relative w-55 h-66 rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-105 mb-4">
+            {/* Image */}
+            <img
+                src={category.image}
+                alt={category.name}
+                className="w-full h-full object-cover"
+            />
 
-            {/* Overlay mờ và text */}
-            <div className="absolute inset-0 bg-gradient-to-t from-pink-950/50 to-transparent flex flex-col justify-end pb-6">
-                <h3 className="text-white text-2xl font-semibold hover:underline">{category.title}</h3>
+            {/* Gradient overlay and text */}
+            <div className="absolute inset-0 bg-gradient-to-t from-pink-950/50 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
+                <h3 className="text-white text-lg sm:text-xl md:text-2xl font-semibold hover:underline">
+                    {category.title}
+                </h3>
             </div>
         </div>
     );
@@ -120,7 +126,11 @@ const Homepage = () => {
             <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
             {/* Swiper Section */}
-            <section className={"max-w-6xl mt-35 mx-auto mb-10 pt-10"}>
+            <section className={"max-w-6xl mt-35 mx-auto mb-20 pt-10"}>
+                <div className="text-center my-5" style={{ color: "#911f3f" }}>
+                    <h1 className="text-5xl mb-2 font-bold">Welcome to Nâu Cosmetic</h1>
+                    <p className="text-2xl">Your destination for all things beauty</p>
+                </div>
                 <style>
                     {`
                       .swiper-pagination-bullet {
@@ -142,50 +152,47 @@ const Homepage = () => {
                     `}
                 </style>
                 {/* Static Overlay */}
+
                 <div className="absolute top-60 left-29 right-29 h-96 flex items-center justify-center z-20">
-                    <div className="text-white text-center">
-                        <h1 className="text-5xl mb-2 font-bold">Welcome to Nâu Cosmetic</h1>
-                        <p className="text-2xl">Your destination for all things beauty</p>
-                    </div>
                 </div>
-                <Swiper
-                    pagination={{
-                        dynamicBullets: true,
-                        clickable: true,
-                    }}
-                    autoplay={{
-                        delay: 10000, // 10 seconds
-                        disableOnInteraction: false,
-                    }}
-                    modules={[Pagination, Autoplay]}
-                    className="h-106 rounded-3xl"
-                >
-                    {SlideData.map((slide, index) => (
-                        <SwiperSlide key={index}>
-                            <img
-                                src={slide.image}
-                                alt={slide.title}
-                                className="w-full h-full object-cover rounded-3xl"
-                            />
-                            <div className="absolute top-0 left-0 right-0 h-96 opacity-20 z-10 rounded-3xl" style={{ backgroundColor: "#D14D72"}}/>
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
+                {/*<Swiper*/}
+                {/*    pagination={{*/}
+                {/*        dynamicBullets: true,*/}
+                {/*        clickable: true,*/}
+                {/*    }}*/}
+                {/*    autoplay={{*/}
+                {/*        delay: 10000, // 10 seconds*/}
+                {/*        disableOnInteraction: false,*/}
+                {/*    }}*/}
+                {/*    modules={[Pagination, Autoplay]}*/}
+                {/*    className="h-106 rounded-3xl"*/}
+                {/*>*/}
+                {/*    {SlideData.map((slide, index) => (*/}
+                {/*        <SwiperSlide key={index}>*/}
+                {/*            <img*/}
+                {/*                src={slide.image}*/}
+                {/*                alt={slide.title}*/}
+                {/*                className="w-full h-full object-cover rounded-3xl"*/}
+                {/*            />*/}
+                {/*            <div className="absolute top-0 left-0 right-0 h-96 opacity-20 z-10 rounded-3xl" style={{ backgroundColor: "#D14D72"}}/>*/}
+                {/*        </SwiperSlide>*/}
+                {/*    ))}*/}
+                {/*</Swiper>*/}
             </section>
 
             {/* Category Section */}
-            <section className="max-w-6xl mx-auto py-10">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-black">Shop by Category</h2>
-                    <a
+            <section className="mx-auto py-3">
+                <div className="flex justify-between items-center mx-10 mb-6">
+                    <h2 className="text-3xl font-semibold text-black">Trending Brand</h2>
+                    <button
                         href="#"
                         className="hover:underline text-sm font-medium"
                         style={{ color: "#D14D72" }}
                     >
-                        Browse all categories →
-                    </a>
+                        Browse all brands →
+                    </button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 cursor-pointer">
+                <div className="flex flex-wrap gap-6 justify-center cursor-pointer">
                     {categories.map((category, index) => (
                         <CategoryCard key={index} category={category} />
                     ))}
@@ -217,7 +224,7 @@ const Homepage = () => {
             {/* Best Sellers Section */}
             <div className="py-10 px-10">
                 <h2 className="text-3xl font-semibold text-center">Best Sellers</h2>
-                <div className="grid grid-cols-4 gap-4 mt-6">
+                <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
                     {Trending.map((_, index) => (
                         <ProductCard key={index} product={Trending[index]} />
                     ))}

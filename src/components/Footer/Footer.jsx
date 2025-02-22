@@ -6,12 +6,12 @@ const Footer = () => {
         <footer className="w-full" style={{ backgroundColor: '#ffb3c1', color: '#8a1b3a' }}>
             {/* Main Footer Content */}
             <div className="mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                     {/* Contact Information */}
                     <div className="space-y-4">
                         <h2 className="text-brown-600 font-semibold text-lg">Contact Us</h2>
-                        <div className="space-y-3 text-gray-800 ms-10">
+                        <div className="space-y-2 justify-center text-gray-800 ms-25 md:ms-10">
                             <div className="flex items-center gap-2">
                                 <Phone size={18} style={{color: '#d7426c'}} />
                                 <span>(555) 123-4567</span>
@@ -22,7 +22,7 @@ const Footer = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <MapPin size={18} style={{color: '#d7426c'}} />
-                                <span>123 Beauty Lane, Fashion City, FC 12345</span>
+                                <span className={"text-start"}>123 Beauty Lane, Fashion City, FC 12345</span>
                             </div>
                         </div>
                     </div>
