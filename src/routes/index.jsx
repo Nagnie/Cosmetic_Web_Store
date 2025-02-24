@@ -5,6 +5,7 @@ import Homepage from "../pages/Home/Home.jsx";
 import ProductList from "../pages/ProductList/ProductList.jsx";
 import Products from "../pages/Products/Products.jsx";
 import AdminLogin from "../pages/Admin/AdminLogin.jsx";
+import Admin from "../pages/Admin/Admin.jsx";
 
 const PublicRoutes = [
     {
@@ -26,7 +27,12 @@ const PublicRoutes = [
         path: "/admin/login",
         component: AdminLogin,
         layout: AdminLayout,
-    }
+    },
+    {
+        path: "/admin",
+        component: Admin,
+        layout: AdminLayout,
+    },
 ];
 
 export { PublicRoutes };
