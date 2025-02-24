@@ -1,7 +1,6 @@
-import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home/Home";
-import './App.css'
+import { PublicRoutes } from "./routes/index.jsx";
+import './App.css';
 
 function App() {
     return (
@@ -9,15 +8,25 @@ function App() {
             <div className="app-container">
                 <div className="content">
                     <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/dashboard" element={<div>Dashboard Page</div>} />
-                        <Route path="/analytics" element={<div>Analytics Page</div>} />
-                        <Route path="/settings" element={<div>Settings Page</div>} />
+                        {PublicRoutes.map((route, index) => {
+                            const Layout = route.layout || (props => <>{props.children}</>);
+                            return (
+                                <Route
+                                    key={index}
+                                    path={route.path}
+                                    element={
+                                        <Layout>
+                                            <route.component />
+                                        </Layout>
+                                    }
+                                />
+                            );
+                        })}
                     </Routes>
                 </div>
             </div>
         </Router>
-    )
+    );
 }
 
-export default App
+export default App;

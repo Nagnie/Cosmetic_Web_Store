@@ -5,6 +5,9 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import Header from "../../components/Header/Header.jsx";
+import { useNavigate } from "react-router-dom";
+import ProductCard from "../../components/ProductCard/ProductCard.jsx";
+
 const SlideData = [
     {
         title: 'Slide 1',
@@ -104,23 +107,9 @@ const CategoryCard = ({ category }) => {
     );
 };
 
-const ProductCard = ({ product }) => {
-    return (
-        <div className="w-full h-100  flex flex-col justify-between p-4 rounded-lg" style={{ backgroundColor: "#FDE5EC" }}>
-            <img src={product.image} alt={product.name} className="w-full h-56 object-cover rounded" />
-            <div>
-                <h3 className="text-lg font-semibold">{product.name}</h3>
-                <p className="text-gray-600">{product.description}</p>
-            </div>
-            <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">{product.price} VNĐ</span>
-                <button className="text-white px-4 py-2 rounded-lg" style={{ backgroundColor: "#D14D72"}}>Add to cart</button>
-            </div>
-        </div>
-    )
-}
-
 const Homepage = () => {
+    const navigate = useNavigate();
+
     return (
         <div className="font-sans">
             <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
@@ -229,7 +218,11 @@ const Homepage = () => {
                         <ProductCard key={index} product={Trending[index]} />
                     ))}
                 </div>
-                <button className="block mx-auto my-10 text-white rounded-lg px-4 py-2" style={{ backgroundColor: "#ab3556" }}>View all products</button>
+                <button className="block mx-auto my-10 text-white rounded-lg px-4 py-2"
+                        style={{ backgroundColor: "#ab3556" }}
+                        onClick={() => navigate("/all_products")}>
+                    View all products
+                </button>
             </div>
 
 
