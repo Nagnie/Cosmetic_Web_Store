@@ -12,7 +12,7 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen min-w-screen flex flex-col items-center justify-center">
+        <div className="min-h-screen min-w-screen flex flex-col items-center justify-center" style={{ background: 'linear-gradient(105deg, #f8a7bd, #ffe9ef)'}}>
             <div className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden mx-auto">
                 {/* Header */}
                 <div className="w-full py-6 px-6 text-center" style={{ background: '#D14D72' }}>
