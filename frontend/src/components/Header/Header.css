@@ -1,0 +1,61 @@
+.header.hidden {
+    transform: translateY(-100%);
+}
+
+.search-bar {
+    width: 40%;
+}
+
+/* Thêm padding-top vào body hoặc main container để tránh nội dung bị che khuất */
+body {
+    padding-top: 50px; /* Điều chỉnh theo chiều cao của header */
+}
+
+nav {
+}
+
+.category {
+    margin: 0;
+    color: #872341;
+    font-size: 1.1em;
+    font-weight: 500;
+    padding: 0 40px;
+    display: flex;
+}
+
+.category:hover {
+    cursor: pointer;
+    color: #cc6684;
+}
+
+@media (max-width: 1030px) {
+    .category {
+        padding: 0 25px;
+    }
+    header h2 {
+        font-size: 2em;
+    }
+    header span {
+        font-size: 1.6em;
+    }
+    header .search-bar button {
+        font-size: 0.8em;
+        padding: 0 10px;
+    }
+    header .search-bar input {
+        padding: 8px 15px;
+    }
+}
+
+@media (max-width: 760px) {
+    .category {
+        padding: 0 35px;
+    }
+    header h2 {
+        font-size: 1.8em;
+    }
+}
+
+nav {
+    flex-wrap: wrap;
+}
