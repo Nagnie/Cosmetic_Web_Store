@@ -5,10 +5,10 @@ const Product = () => {
     // State for cosmetic products
     const [products, setProducts] = useState([
         { id: 1, name: "Rose Facial Cream", category: "Skincare", brand: "Mediheal", price: 24.99, status: 45, image: "/api/placeholder/80/80" },
-        { id: 2, name: "Velvet Matte Lipstick", category: "Makeup", brand: "Mediheal", price: 18.50, status: 32, image: "/api/placeholder/80/80" },
-        { id: 3, name: "Hyaluronic Acid Serum", category: "Skincare", brand: "Mediheal", price: 35.99, status: 18, image: "/api/placeholder/80/80" },
-        { id: 4, name: "Mineral Foundation", category: "Makeup", brand: "Mediheal", price: 29.99, status: 27, image: "/api/placeholder/80/80" },
-        { id: 5, name: "Lavender Bath Salts", category: "Bath & Body", brand: "Mediheal", price: 12.99, status: 56, image: "/api/placeholder/80/80" },
+        { id: 2, name: "Velvet Matte Lipstick", category: "Makeup", brand: "Laneige", price: 18.50, status: 32, image: "/api/placeholder/80/80" },
+        { id: 3, name: "Hyaluronic Acid Serum", category: "Skincare", brand: "Innisfree", price: 35.99, status: 18, image: "/api/placeholder/80/80" },
+        { id: 4, name: "Mineral Foundation", category: "Makeup", brand: "Etude House", price: 29.99, status: 27, image: "/api/placeholder/80/80" },
+        { id: 5, name: "Lavender Bath Salts", category: "Bath & Body", brand: "Sulwhasoo", price: 12.99, status: 56, image: "/api/placeholder/80/80" },
     ]);
 
     // State for form and UI
@@ -21,13 +21,16 @@ const Product = () => {
         category: '',
         price: '',
         stock: '',
-        image: '/api/placeholder/200/200',
+        image: '',
         description: ''
     });
     const [isEditing, setIsEditing] = useState(false);
 
     // Categories for dropdown
     const categories = ["Skincare", "Makeup", "Hair Care", "Bath & Body", "Fragrance"];
+
+    // Brands for dropdown
+    const brands = ["Mediheal", "Laneige", "Innisfree", "Etude House", "Sulwhasoo"];
 
     // Filter products based on search term
     const filteredProducts = products.filter(product =>
@@ -164,14 +167,14 @@ const Product = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-100 text-pink-800">
-                                                {product.category}
-                                              </span>
+                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-100 text-pink-800">
+                                            {product.category}
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-100 text-pink-800">
-                                                {product.brand}
-                                              </span>
+                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-100 text-pink-800">
+                                            {product.brand}
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         ${product.price.toFixed(2)}
@@ -242,6 +245,20 @@ const Product = () => {
                                     </div>
 
                                     <div>
+                                        <label className="block font-medium text-gray-700 mb-1">Price (VNĐ)</label>
+                                        <input
+                                            type="number"
+                                            name="price"
+                                            value={newProduct.price}
+                                            onChange={handleInputChange}
+                                            min="0"
+                                            step="0.01"
+                                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
                                         <label className="block font-medium text-gray-700 mb-1">Category</label>
                                         <select
                                             name="category"
@@ -256,33 +273,33 @@ const Product = () => {
                                             ))}
                                         </select>
                                     </div>
-
                                     <div>
-                                        <label className="block font-medium text-gray-700 mb-1">Price ($)</label>
-                                        <input
-                                            type="number"
-                                            name="price"
-                                            value={newProduct.price}
+                                        <label className="block font-medium text-gray-700 mb-1">Brand</label>
+                                        <select
+                                            name="brand"
+                                            value={newProduct.brand}
                                             onChange={handleInputChange}
-                                            min="0"
-                                            step="0.01"
                                             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
                                             required
-                                        />
+                                        >
+                                            <option value="">Select a brand</option>
+                                            {brands.map(brand => (
+                                                <option key={brand} value={brand}>{brand}</option>
+                                            ))}
+                                        </select>
                                     </div>
+                                </div>
 
-                                    <div>
-                                        <label className="block font-medium text-gray-700 mb-1">Stock</label>
-                                        <input
-                                            type="number"
-                                            name="stock"
-                                            value={newProduct.stock}
-                                            onChange={handleInputChange}
-                                            min="0"
-                                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
-                                            required
-                                        />
-                                    </div>
+                                <div className="mb-4 text-left">
+                                    <label className={"block font-medium text-gray-700 mb-1"}>Images</label>
+                                    <textarea
+                                        type={"text"}
+                                        name={"image"}
+                                        value={newProduct.image}
+                                        onChange={handleInputChange}
+                                        className={"w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"}
+                                        required
+                                    />
                                 </div>
 
                                 <div className="mb-4 text-left">

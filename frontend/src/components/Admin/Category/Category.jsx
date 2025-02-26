@@ -2,11 +2,19 @@ import React, {useState} from 'react';
 import {Edit, Eye, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
 
 const Category = () => {
-    const [categories, setCategory] = useState([
-        { id: 1, name: 'Face', count: 10 },
-        { id: 2, name: 'Body', count: 5 },
-        { id: 3, name: 'Hair', count: 7 },
-        { id: 4, name: 'Makeup', count: 15 },
+    const [categories, setCategories] = useState([
+        { id: 1, name: 'Skin Care', subCategoryCount: 5 },
+        { id: 2, name: 'Hair Care', subCategoryCount: 2 },
+        { id: 3, name: 'Body Care', subCategoryCount: 3 },
+        { id: 4, name: 'Makeup', subCategoryCount: 4 },
+        { id: 5, name: 'Dietary Supplements', subCategoryCount: 2 },
+    ]);
+
+    const [subCategories, setSubCategories] = useState([
+        { id: 1, name: 'Sữa rửa mặt', mainCategory: 'Skin Care', productCount: 10 },
+        { id: 2, name: 'Tẩy trang', mainCategory: 'Skin Care', productCount: 8 },
+        { id: 3, name: 'Dầu gội/xả', mainCategory: 'Hair Care', productCount: 7 },
+        { id: 4, name: 'Sữa tắm', mainCategory: 'Body Care', productCount: 5 },
     ]);
 
     // State for form and UI
@@ -119,54 +127,82 @@ const Category = () => {
                         <PlusCircle className="mr-2" size={18} />
                         Add Category
                     </button>
-                    <div className={`text-right ${categories.length > 0 ? 'block' : 'hidden'}`}>
-                        <span className="text-gray-600">Showing {categories.length} categories</span>
-                    </div>
+                    {/*<div className={`text-right ${categories.length > 0 ? 'block' : 'hidden'}`}>*/}
+                    {/*    <span className="text-gray-600">Showing {categories.length} categories</span>*/}
+                    {/*</div>*/}
                 </div>
 
-                {/* Categories Table */}
-                <div className="bg-white rounded-lg shadow overflow-x-auto text-left">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead style={{ backgroundColor: '#D14D72' }}>
-                        <tr>
-                            <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Category Name</th>
-                            <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Category Count</th>
-                            <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                        {categories.length > 0 ? (
-                            categories.map(category => (
+                <div className={"grid grid-cols-1 sm:grid-cols-5 gap-5"}>
+                    {/* Categories Table */}
+                    <div className="rounded-lg shadow overflow-x-auto text-left mb-8 sm:col-span-2">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead>
+                            <tr style={{ backgroundColor: '#D14D72' }} className={"text-white"}>
+                                <th className="px-6 py-3 font-medium">Category Name</th>
+                                <th className="px-6 py-3 font-medium">Subcategory Count</th>
+                                <th className={"px-6 py-3 font-medium"}>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                            {categories.map(category => (
                                 <tr key={category.id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 whitespace-nowrap">{category.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{category.subCategoryCount}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="font-medium text-gray-900">{category.name}</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {category.count}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <div className="flex space-x-2">
                                             <button onClick={() => handleEdit(category)} className="text-blue-600 hover:text-blue-900">
                                                 <Edit size={18} />
                                             </button>
-                                            <button onClick={() => handleDelete(category)} className="text-red-600 hover:text-red-900">
+                                            <button onClick={() => handleDelete(category.id)} className="text-red-600 hover:text-red-900">
+                                                <Trash2 size={18} />
+                                            </button>
+                                            <button onClick={() => handleView(category)} className="text-green-600 hover:text-green-900">
+                                                <Eye size={18} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Subcategories Table */}
+                    <div className="rounded-lg shadow overflow-x-auto text-left sm:col-span-3">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead>
+                            <tr style={{ backgroundColor: '#D14D72' }} className={"text-white"}>
+                                <th className="px-6 py-3 font-medium">Subcategory Name</th>
+                                <th className="px-6 py-3 font-medium">Main Category</th>
+                                <th className="px-6 py-3 font-medium">Product Count</th>
+                                <th className={"px-6 py-3 font-medium"}>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                            {subCategories.map(subCategory => (
+                                <tr key={subCategory.id} className="hover:bg-gray-50">
+                                    <td className="px-6 py-4 whitespace-nowrap">{subCategory.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-100 text-pink-800">
+                                            {subCategory.mainCategory}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{subCategory.productCount}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex space-x-2">
+                                            <button className="text-blue-600 hover:text-blue-900">
+                                                <Edit size={18} />
+                                            </button>
+                                            <button className="text-red-600 hover:text-red-900">
                                                 <Trash2 size={18} />
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="3" className="px-6 py-4 text-center text-gray-500">
-                                    No categories found.
-                                </td>
-                            </tr>
-                        )}
-                        </tbody>
-                    </table>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </main>
 
@@ -215,6 +251,46 @@ const Category = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* View Category Details Modal */}
+            {viewOpen && (
+                <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto px-2">
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-bold text-gray-800">Category Details</h2>
+                                <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="text-left">
+                                <div>
+                                    <label className="block font-medium text-gray-700 mb-3">Category Name</label>
+                                    <input
+                                        type="text"
+                                        value={currentCategory.name}
+                                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                        readOnly
+                                    />
+                                </div>
+                                <div className="mt-4">
+                                    <label className="block font-medium text-gray-700 mb-3">Subcategory</label>
+                                    <select
+                                        className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                        value={currentCategory.subCategoryCount}
+                                        readOnly
+                                        >
+                                        {subCategories.map(subCategory => (
+                                            <option key={subCategory.id} value={subCategory.id}>{subCategory.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
