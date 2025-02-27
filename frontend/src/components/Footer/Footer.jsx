@@ -5,12 +5,12 @@ const Footer = () => {
     return (
         <footer className="w-full" style={{ backgroundColor: '#ffb3c1', color: '#8a1b3a' }}>
             {/* Main Footer Content */}
-            <div className="mx-auto px-4 py-12">
+            <div className="mx-auto px-4 py-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
                     {/* Contact Information */}
                     <div className="space-y-4">
-                        <h2 className="text-brown-600 font-semibold text-lg">Contact Us</h2>
+                        <h2 className="text-brown-600 font-semibold text-lg">Liên hệ với chúng tôi</h2>
                         <div className="space-y-2 justify-center text-gray-800 ms-25 md:ms-10">
                             <div className="flex items-center gap-2">
                                 <Phone size={18} style={{color: '#d7426c'}} />
@@ -18,7 +18,7 @@ const Footer = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <Mail size={18} style={{color: '#d7426c'}}/>
-                                <span>contact@beautystore.com</span>
+                                <span>naucosmetic@gmail.com</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <MapPin size={18} style={{color: '#d7426c'}} />
@@ -29,7 +29,7 @@ const Footer = () => {
 
                     {/* Opening Hours */}
                     <div className="space-y-4">
-                        <h2 className="text-brown-600 font-semibold text-lg">Opening Hours</h2>
+                        <h2 className="text-brown-600 font-semibold text-lg">Giờ mở cửa</h2>
                         <div className="space-y-2 text-gray-800">
                             <p>Monday - Friday: 9:00 AM - 8:00 PM</p>
                             <p>Saturday: 10:00 AM - 6:00 PM</p>

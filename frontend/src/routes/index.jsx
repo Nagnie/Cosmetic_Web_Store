@@ -14,13 +14,8 @@ const PublicRoutes = [
         layout: GuestLayout,
     },
     {
-        path: "/:category",
-        component: ProductList,
-        layout: GuestLayout,
-    },
-    {
         path: "/all_products",
-        component: Products,
+        component: ProductList,
         layout: GuestLayout,
     },
     {
