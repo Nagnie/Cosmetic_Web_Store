@@ -1,3 +1,7 @@
+import { Brand } from "@/module/brand/entities/brand.entity";
+import { Category } from "@/module/category/entities/category.entity";
+import { Product } from "@/module/product/entities/product.entity";
+import { Subcategory } from "@/module/subcategory/entities/subcategory.entity";
 import { User } from "@/module/user/entities/user.entity";
 import { ConfigService } from "@nestjs/config";
 import { DataSource } from "typeorm";
@@ -13,5 +17,9 @@ export default new DataSource({
   entities: [
     User,
     Image,
+    Brand,
+    Product,
+    Category,
+    Subcategory
   ],
 });

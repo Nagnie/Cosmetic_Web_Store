@@ -13,6 +13,10 @@ import { join } from 'path';
 import { ImageModule } from './module/image/image.module';
 import { MinioService } from './minio/minio.service';
 import { RolesGuard } from './auth/guard/role.guard';
+import { BrandModule } from './module/brand/brand.module';
+import { ProductModule } from './module/product/product.module';
+import { CategoryModule } from './module/category/category.module';
+import { SubcategoryModule } from './module/subcategory/subcategory.module';
 
 @Module({
   imports: [
@@ -43,6 +47,10 @@ import { RolesGuard } from './auth/guard/role.guard';
     UsersModule,
     AuthModule,
     ImageModule,
+    BrandModule,
+    ProductModule,
+    CategoryModule,
+    SubcategoryModule
   ],
   controllers: [AppController],
   providers: [
