@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
@@ -15,7 +16,6 @@ import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as moment from 'moment';
 import { MinioService } from '@/minio/minio.service';
-import { ResetpassAuthDto } from '@/auth/dto/resetpassword-auth.dto';
 
 @Injectable()
 export class UserService {
@@ -43,4 +43,18 @@ export class UserService {
     }
   }
   
+  async create(creaetUserDto: CreateUserDto) {
+    try {
+      const {email, password}  = creaetUserDto;
+      const user = this.usersRepository.create({
+        email,
+        password
+      });
+
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException("Internal server error");
+    }
+  }
 }

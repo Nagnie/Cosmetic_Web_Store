@@ -1,26 +1,14 @@
+import { CreateUserDto } from "@/module/user/dto/create-user.dto";
+import { OmitType, PartialType } from "@nestjs/mapped-types";
 import { Transform } from "class-transformer";
-import { IsEmail, isNotEmpty, IsNotEmpty } from "class-validator";
+import { IsEmail, isNotEmpty, IsNotEmpty, IsString } from "class-validator";
 import * as moment from 'moment';
 
-export class CreateAuthDto {
-    @IsNotEmpty()
-    name: string;
-
-    @IsNotEmpty()
-    @Transform(({ value }) => {
-        return moment(value, "DD/MM/YYYY").toDate()})
-    dob: Date;
-
-    @IsNotEmpty()
-    cccd: string;
-
+export class CreateAuthDto extends OmitType(PartialType(CreateUserDto), []) {
     @IsNotEmpty()
     @IsEmail()
     email: string;
 
     @IsNotEmpty()
     password: string;
-
-    @IsNotEmpty()
-    phone: string;
 }
