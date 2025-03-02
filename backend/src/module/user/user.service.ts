@@ -9,12 +9,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { hashPassword } from '@/helpers/utils';
-import { query, Request } from 'express';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
-import { v4 as uuidv4 } from 'uuid';
-import * as moment from 'moment';
 import { MinioService } from '@/minio/minio.service';
 
 @Injectable()
