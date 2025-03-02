@@ -34,7 +34,7 @@ export class BrandController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a brand by ID' })
-  @ApiParam({ name: 'id', type: String, description: 'ID of the brand to get' })
+  @ApiParam({ name: 'id', type: String, description: 'ID of the brand to get', required: true })
   @ApiResponse({ status: 200, description: 'Brand found successfully.' })
   @ApiResponse({ status: 404, description: 'Brand not found.' })
   findOne(@Param('id') id: string) {
@@ -43,7 +43,7 @@ export class BrandController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update brand by ID' })
-  @ApiParam({ name: 'id', type: String, description: 'ID of the brand to update' })
+  @ApiParam({ name: 'id', type: String, description: 'ID of the brand to update', required: true })
   @ApiBody({ type: UpdateBrandDto })
   @ApiResponse({ status: 200, description: 'Brand updated successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request, validation error.' })
@@ -54,7 +54,7 @@ export class BrandController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a brand by ID' })
-  @ApiParam({ name: 'id', type: String, description: 'ID of the brand to delete' })
+  @ApiParam({ name: 'id', type: String, description: 'ID of the brand to delete', required: true })
   @ApiResponse({ status: 200, description: 'Brand removed successfully.' })
   @ApiResponse({ status: 404, description: 'Brand not found.' })
   remove(@Param('id') id: string) {
