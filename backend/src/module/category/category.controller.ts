@@ -3,12 +3,30 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Public } from '@/helpers/decorator/public';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
+  // [POST]: /category/create
+  @Post('create')
+  @Public()
+  @ApiOperation({ summary: 'Create a new category' }) // Mô tả chức năng của API
+  @ApiResponse({ status: 201, description: 'Category created successfully' })
+  @ApiResponse({ status: 400, description: 'Category already exists' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        cat_name: { type: 'string', example: 'Skincare' },
+      },
+      required: ['cat_name'],
+    },
+  })
+  async create(@Body() createCategory: CreateCategoryDto){
+    return await this.categoryService.create(createCategory);
+  }
   // [GET]: /category
   @Get()
   @Public()

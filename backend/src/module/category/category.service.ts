@@ -7,9 +7,36 @@ import { DataSource } from 'typeorm';
 export class CategoryService {
   constructor(
     private readonly dataSource: DataSource
-  ){
+  ){}
 
+  async create(createCategory: CreateCategoryDto){
+    const { cat_name } = createCategory;
+
+    // Check exist
+    const existingCategory = await this.dataSource.query(`
+        SELECT * FROM category WHERE name = $1;
+      `, [cat_name]);
+
+    if(existingCategory.length > 0){
+      return{
+        statusCode: 400,
+        message: `Category "${cat_name}" already exists`
+      }
+    }
+
+    // If not exist
+    const data = await this.dataSource.query(`
+        INSERT INTO category(name) VALUES ($1) 
+        RETURNING *;
+      `, [cat_name]);
+
+    return {
+      statusCode: 201,
+      message: `Category "${cat_name}" created successfully`,
+      data: data[0]
+    }
   }
+
   async findAll(){
     return await this.dataSource.query(`
         SELECT cat.name AS cat_name, COUNT(scat.id_subcat) AS num_subcat
