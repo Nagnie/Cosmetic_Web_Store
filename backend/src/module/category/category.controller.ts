@@ -1,13 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Public } from '@/helpers/decorator/public';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('category')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly categoryService: CategoryService) { }
 
   // [POST]: /category/create
   @Post('create')
@@ -24,16 +24,22 @@ export class CategoryController {
       required: ['cat_name'],
     },
   })
-  async create(@Body() createCategory: CreateCategoryDto){
+  async create(@Body() createCategory: CreateCategoryDto) {
     return await this.categoryService.create(createCategory);
   }
+
   // [GET]: /category
   @Get()
   @Public()
   @ApiOperation({ summary: 'List categories and number of subcategories' })
   @ApiResponse({ status: 200, description: 'List categories and number of subcategories' })
-  async findAll(){
-    return await this.categoryService.findAll();
+  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of records per page' })
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ) {
+    return await this.categoryService.findAll(Number(page), Number(limit));
   }
 
   // [GET]: /category/:id_cat
@@ -43,7 +49,7 @@ export class CategoryController {
   @ApiParam({ name: 'id_cat', required: true, type: Number, description: `Category's ID` })
   @ApiResponse({ status: 200, description: 'Detail category' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async findOne(@Param('id_cat') id_cat: string){
+  async findOne(@Param('id_cat') id_cat: string) {
     return await this.categoryService.findOne(Number(id_cat));
   }
 
@@ -54,18 +60,18 @@ export class CategoryController {
   @ApiParam({ name: 'id_cat', required: true, type: Number, description: `Category's ID` })
   @ApiResponse({ status: 200, description: 'Update successfully' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async update(@Param('id_cat') id_cat: string, @Body() updateCategory: UpdateCategoryDto){
+  async update(@Param('id_cat') id_cat: string, @Body() updateCategory: UpdateCategoryDto) {
     return await this.categoryService.update(Number(id_cat), updateCategory)
   }
 
   // [DELETE]: /category/delete/:id_cat
   @Delete('delete/:id_cat')
   @Public()
-  @ApiOperation({ summary: 'Delete one category by ID'})
+  @ApiOperation({ summary: 'Delete one category by ID' })
   @ApiParam({ name: 'id_cat', type: Number, description: `Category's ID` })
   @ApiResponse({ status: 200, description: 'Delete successfully' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async delete(@Param('id_cat') id_cat: string){
+  async delete(@Param('id_cat') id_cat: string) {
     return await this.categoryService.delete(Number(id_cat));
   }
 }
