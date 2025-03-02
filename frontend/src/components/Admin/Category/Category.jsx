@@ -20,6 +20,7 @@ const Category = () => {
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
     const [formOpen, setFormOpen] = useState(false);
+    const [formOpenSub, setFormOpenSub] = useState(false);
     const [viewOpen, setViewOpen] = useState(false);
     const [currentCategory, setCurrentCategory] = useState(null);
     const [newCategory, setNewCategory] = useState({
@@ -43,21 +44,38 @@ const Category = () => {
     );
 
 
-    // Handle form submission
+    // Handle form submission for adding or updating Category
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (isEditing && currentCategory) {
             // Update existing Category
-            setCategory(categories.map(category =>
+            setCategories(categories.map(category =>
                 category.id === currentCategory.id ? { ...newCategory, id: currentCategory.id } : category
             ));
         } else {
             // Add new Category
             const categoryId = Math.max(0, ...categories.map(p => p.id)) + 1;
-            setCategory([...categories, { ...newCategory, id: categoryId }]);
+            setCategories([...categories, { ...newCategory, id: categoryId }]);
         }
 
+        // Reset form
+        resetForm();
+    };
+
+    // Handle form submission for adding or updating Subcategory
+    const handleSubmitSub = (e) => {
+        e.preventDefault();
+        if (isEditing && currentCategory) {
+            // Update existing Subcategory
+            setSubCategories(subCategories.map(subCategory =>
+                subCategory.id === currentCategory.id ? {...newCategory, id: currentCategory.id} : subCategory
+            ));
+        } else {
+            // Add new Subcategory
+            const subCategoryId = Math.max(0, ...subCategories.map(p => p.id)) + 1;
+            setSubCategories([...subCategories, { ...newCategory, id: subCategoryId }]);
+        }
         // Reset form
         resetForm();
     };
@@ -79,7 +97,7 @@ const Category = () => {
     // Delete Category
     const handleDelete = (id) => {
         if (window.confirm('Are you sure you want to delete this category?')) {
-            setCategory(categories.filter(category => category.id !== id));
+            setCategories(categories.filter(category => category.id !== id));
         }
     };
 
@@ -119,14 +137,25 @@ const Category = () => {
                         )}
                     </div>
                 </div>
-                <div className={"flex justify-between items-center mb-6"}>
-                    <button
-                        onClick={() => {setFormOpen(true); setIsEditing(false);}}
-                        className="flex items-center bg-white text-pink-600 px-4 py-2 rounded-md shadow hover:bg-gray-100"
-                    >
-                        <PlusCircle className="mr-2" size={18} />
-                        Add Category
-                    </button>
+                <div className={"grid grid-cols-1 sm:grid-cols-5 gap-5 mb-6"}>
+                    <div className={"sm:col-span-2"}>
+                        <button
+                            onClick={() => {setFormOpen(true); setIsEditing(false);}}
+                            className="flex items-center bg-white text-pink-600 px-4 py-2 rounded-md shadow hover:bg-gray-100"
+                        >
+                            <PlusCircle className="mr-2" size={18} />
+                            Add Category
+                        </button>
+                    </div>
+                    <div className={"sm:col-span-3"}>
+                        <button
+                            onClick={() => {setFormOpenSub(true); setIsEditing(false);}}
+                            className="flex items-center bg-white text-pink-600 px-4 py-2 rounded-md shadow hover:bg-gray-100"
+                        >
+                            <PlusCircle className="mr-2" size={18} />
+                            Add Subcategory
+                        </button>
+                    </div>
                     {/*<div className={`text-right ${categories.length > 0 ? 'block' : 'hidden'}`}>*/}
                     {/*    <span className="text-gray-600">Showing {categories.length} categories</span>*/}
                     {/*</div>*/}
