@@ -71,7 +71,7 @@ export class CategoryController {
   @ApiParam({ name: 'id_cat', type: Number, description: `Category's ID` })
   @ApiResponse({ status: 200, description: 'Delete successfully' })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async delete(@Param('id_cat') id_cat: string) {
-    return await this.categoryService.delete(Number(id_cat));
+  async remove(@Param('id_cat') id_cat: string) {
+    return await this.categoryService.remove(Number(id_cat));
   }
 }

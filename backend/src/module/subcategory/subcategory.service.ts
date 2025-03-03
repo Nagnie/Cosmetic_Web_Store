@@ -50,15 +50,26 @@ export class SubcategoryService {
       `, [limit, offset])
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} subcategory`;
+  async update(id_subcat: number, updateSubcategoryDto: UpdateSubcategoryDto) {
+    const { subcat_name, id_cat } = updateSubcategoryDto;
+
+    const data = await this.dataSource.query(`
+      UPDATE sub_category
+      SET name = $1, id_cat = $2
+      WHERE id_subcat = $3
+      RETURNING *;
+    `,
+    [subcat_name, id_cat, id_subcat]);
+
+    return data.length > 0 ? data[0] : null;
   }
 
-  update(id: number, updateSubcategoryDto: UpdateSubcategoryDto) {
-    return `This action updates a #${id} subcategory`;
-  }
+  async remove(id_subcat: number) {
+    const data = await this.dataSource.query(`
+      DELETE FROM sub_category WHERE id_subcat = $1
+      RETURNING *;
+    `, [id_subcat])
 
-  remove(id: number) {
-    return `This action removes a #${id} subcategory`;
+  return data[0];
   }
 }

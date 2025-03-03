@@ -3,12 +3,13 @@ import { SubcategoryService } from './subcategory.service';
 import { CreateSubcategoryDto } from './dto/create-subcategory.dto';
 import { UpdateSubcategoryDto } from './dto/update-subcategory.dto';
 import { Public } from '@/helpers/decorator/public';
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('subcategory')
 export class SubcategoryController {
   constructor(private readonly subcategoryService: SubcategoryService) { }
 
+  // [POST]: /subcategory/create
   @Post('create')
   @Public()
   @ApiOperation({ summary: 'Create a new Subcategory' })
@@ -28,6 +29,7 @@ export class SubcategoryController {
     return await this.subcategoryService.create(createSubcategoryDto);
   }
 
+  // [GET]: /subcategory
   @Get()
   @Public()
   @ApiOperation({ summary: 'List subcategories and number of products' })
@@ -41,18 +43,34 @@ export class SubcategoryController {
     return await this.subcategoryService.findAll(page, limit);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.subcategoryService.findOne(+id);
+  // [PATCH]: /subcategory/update/:id_subcat
+  @Patch('update/:id_subcat')
+  @Public()
+  @ApiOperation({ summary: 'Update a subcategory' })
+  @ApiParam({ name: 'id_subcat', type: 'integer', description: 'Subcategory ID' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        subcat_name: { type: 'string', example: 'New Subcategory Name' },
+        id_cat: { type: 'integer', example: 2 },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Subcategory updated successfully' })
+  @ApiResponse({ status: 404, description: 'Subcategory not found' })
+  async update(@Param('id_subcat') id_subcat: string, @Body() updateSubcategoryDto: UpdateSubcategoryDto) {
+    return await this.subcategoryService.update(Number(id_subcat), updateSubcategoryDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSubcategoryDto: UpdateSubcategoryDto) {
-    return this.subcategoryService.update(+id, updateSubcategoryDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.subcategoryService.remove(+id);
+  // [DELETE]: /subcategory/delete/:id_subcat
+  @Delete('delete/:id_subcat')
+  @Public()
+  @ApiOperation({ summary: 'Delete one subcategory by ID' })
+  @ApiParam({ name: 'id_subcat', type: Number, description: `Subcategory's ID` })
+  @ApiResponse({ status: 200, description: 'Delete successfully' })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  async remove(@Param('id_subcat') id_subcat: string) {
+    return await this.subcategoryService.remove(Number(id_subcat));
   }
 }

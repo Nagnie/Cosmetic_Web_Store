@@ -92,7 +92,7 @@ export class CategoryService {
     return data.length > 0 ? data[0] : null;
   }
 
-  async delete(id_cat: number) {
+  async remove(id_cat: number) {
     const data = await this.dataSource.query(`
         DELETE FROM category WHERE id_cat = $1
         RETURNING *;
