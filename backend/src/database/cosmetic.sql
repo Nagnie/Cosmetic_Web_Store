@@ -107,5 +107,3 @@ INSERT INTO product (name, price, description, status, id_subcat, id_bra) VALUES
 -- Fragrances
 ('Luxury Perfume', 49.99, 'A long-lasting luxury perfume with floral notes.', 'available', 13, 10),
 ('Refreshing Body Mist', 15.99, 'Light body mist with a fresh and citrus scent.', 'available', 14, 11),
-('Classic Men\'s Cologne', 39.99, 'Sophisticated cologne with woody undertones.', 'available', 15, 12);
-
