@@ -1,10 +1,12 @@
 import { useState } from "react";
+
 import {
   ProductActionMobile,
   ProductDetailInfo,
   ProductImageGallery,
 } from "./components";
 import { useScrollLock } from "@hooks/useScrollLock";
+import CustomCarousel from "./components/CustomCarousel";
 
 const ProductDetail = () => {
   const [showBottomSheet, setShowBottomSheet] = useState(false);
@@ -16,7 +18,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="container mx-auto mb-4 px-4">
+    <div className="mx-auto mb-4 px-4">
       <div className="mt-35 grid w-full grid-cols-1 gap-4 pt-10 md:grid-cols-2">
         <div>
           <ProductImageGallery />
@@ -26,6 +28,24 @@ const ProductDetail = () => {
             <ProductDetailInfo isShowBottomSheet={showBottomSheet} />
           </div>
         )}
+      </div>
+
+      <div>
+        <h2 className={`text-primary-dark mt-10 mb-4 text-3xl font-semibold`}>
+          Sản phẩm cùng brand
+        </h2>
+        <div>
+          <CustomCarousel />
+        </div>
+      </div>
+
+      <div>
+        <h2 className={`text-primary-dark mt-10 mb-4 text-3xl font-semibold`}>
+          Sản phẩm cùng danh mục
+        </h2>
+        <div>
+          <CustomCarousel />
+        </div>
       </div>
 
       {showBottomSheet && (

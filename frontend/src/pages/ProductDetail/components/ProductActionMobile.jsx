@@ -6,7 +6,7 @@ const ProductActionMobile = ({ onCartClick }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="fixed right-0 bottom-0 left-0 flex h-14 items-center justify-between border-t border-gray-200 bg-white p-2 shadow-lg">
+    <div className="fixed right-0 bottom-0 left-0 z-50 flex h-14 items-center justify-between border-t border-gray-200 bg-white p-2 shadow-lg">
       <div className="!text-primary flex h-full flex-1 items-center justify-between">
         <div
           className="w-full cursor-pointer !text-2xl"
