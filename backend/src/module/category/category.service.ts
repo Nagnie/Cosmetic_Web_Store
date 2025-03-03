@@ -7,9 +7,9 @@ import { DataSource } from 'typeorm';
 export class CategoryService {
   constructor(
     private readonly dataSource: DataSource
-  ){}
+  ) { }
 
-  async create(createCategory: CreateCategoryDto){
+  async create(createCategory: CreateCategoryDto) {
     const { cat_name } = createCategory;
 
     // Check exist
@@ -17,8 +17,8 @@ export class CategoryService {
         SELECT * FROM category WHERE name = $1;
       `, [cat_name]);
 
-    if(existingCategory.length > 0){
-      return{
+    if (existingCategory.length > 0) {
+      return {
         statusCode: 400,
         message: `Category "${cat_name}" already exists`
       }
@@ -37,7 +37,7 @@ export class CategoryService {
     }
   }
 
-  async findAll(page: number = 1, limit: number = 10){
+  async findAll(page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
 
     return await this.dataSource.query(`
@@ -49,7 +49,7 @@ export class CategoryService {
       `, [limit, offset])
   }
 
-  async findOne(id_cat: number){
+  async findOne(id_cat: number) {
     const data = await this.dataSource.query(`
       SELECT cat.id_cat AS id_cat, cat.name AS cat_name, scat.name AS scat_name
       FROM category AS cat
@@ -59,7 +59,7 @@ export class CategoryService {
       `,
       [id_cat]
     );
-    if(data.length == 0){
+    if (data.length == 0) {
       return null;
     }
 
@@ -67,18 +67,18 @@ export class CategoryService {
       id_cat: data[0].id_cat,
       cat_name: data[0].cat_name,
       sub_categories: data
-      .map((row) => row.scat_name)
-      .filter((name) => name != null) // Loại bỏ giá trị null nếu như category chưa có subcategory
+        .map((row) => row.scat_name)
+        .filter((name) => name != null) // Loại bỏ giá trị null nếu như category chưa có subcategory
     }
 
     return result;
   }
 
-  async update(id_cat: number, updateCategory: UpdateCategoryDto){
+  async update(id_cat: number, updateCategory: UpdateCategoryDto) {
     const { cat_name } = updateCategory;
-    
-    if(!cat_name || cat_name.trim() === ''){
-      return { message: `Don't have data to update`}
+
+    if (!cat_name || cat_name.trim() === '') {
+      return { message: `Don't have data to update` }
     }
 
     const data = await this.dataSource.query(`
@@ -92,7 +92,7 @@ export class CategoryService {
     return data.length > 0 ? data[0] : null;
   }
 
-  async delete(id_cat: number){
+  async delete(id_cat: number) {
     const data = await this.dataSource.query(`
         DELETE FROM category WHERE id_cat = $1
         RETURNING *;

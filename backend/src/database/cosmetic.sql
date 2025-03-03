@@ -72,3 +72,40 @@ INSERT INTO sub_category (name, id_cat) VALUES
 ('Body Mist', 4),
 ('Cologne', 4);
 
+INSERT INTO brand (name) VALUES 
+('Maybelline'),
+('Neutrogena'),
+('Dove'),
+('Chanel'),
+('Gucci'),
+('Versace'),
+('Clinique'),
+('Estée Lauder'),
+('Nivea');
+
+
+-- Chèn dữ liệu mẫu vào bảng product
+INSERT INTO product (name, price, description, status, id_subcat, id_bra) VALUES 
+-- Makeup
+('Liquid Foundation', 15.99, 'A lightweight liquid foundation for all-day wear.', 'available', 1, 1),
+('Matte Lipstick', 9.99, 'Long-lasting matte lipstick with vibrant color.', 'available', 2, 2),
+('Waterproof Eyeliner', 7.99, 'Smudge-proof and waterproof eyeliner.', 'available', 3, 3),
+('Peach Blush', 12.50, 'Soft peach-colored blush for a natural glow.', 'available', 4, 1),
+
+-- Skincare
+('Hydrating Moisturizer', 25.00, 'Moisturizer with hyaluronic acid for deep hydration.', 'available', 5, 4),
+('Gentle Face Cleanser', 18.99, 'Mild cleanser suitable for sensitive skin.', 'available', 6, 5),
+('SPF 50 Sunscreen', 22.50, 'Broad-spectrum sunscreen for ultimate protection.', 'available', 7, 6),
+('Vitamin C Serum', 30.00, 'Brightening serum with vitamin C and antioxidants.', 'available', 8, 4),
+
+-- Haircare
+('Anti-Dandruff Shampoo', 10.99, 'Shampoo formulated to reduce dandruff.', 'available', 9, 7),
+('Deep Conditioner', 14.99, 'Intensive conditioner for dry and damaged hair.', 'available', 10, 8),
+('Argan Hair Oil', 19.99, 'Nourishing hair oil infused with argan oil.', 'available', 11, 9),
+('Keratin Hair Mask', 21.50, 'Strengthening mask for smooth and frizz-free hair.', 'available', 12, 7),
+
+-- Fragrances
+('Luxury Perfume', 49.99, 'A long-lasting luxury perfume with floral notes.', 'available', 13, 10),
+('Refreshing Body Mist', 15.99, 'Light body mist with a fresh and citrus scent.', 'available', 14, 11),
+('Classic Men\'s Cologne', 39.99, 'Sophisticated cologne with woody undertones.', 'available', 15, 12);
+
