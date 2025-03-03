@@ -31,7 +31,7 @@ export class BrandService {
     }
   }
 
-  findAll(req: Request) {
+  async findAll(req: Request) {
     try {
       const {
         page = 1,
@@ -43,12 +43,15 @@ export class BrandService {
       const take = limit as number;
       const skip = ((page as number) - 1) * (limit as number);
 
+      const totalItems = await this.brandRepository.count();
+      const allPage = Math.ceil(totalItems / take);
+
       const data = this.brandRepository.find({
         order: {[(sortBy as string).toLowerCase()]: order},
         skip,
         take
       });
-      return new ResponseDto(HttpStatus.OK, "Successfully", data);
+      return new ResponseDto(HttpStatus.OK, "Successfully", {allPage, data});
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
