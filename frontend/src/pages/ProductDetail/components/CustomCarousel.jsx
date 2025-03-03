@@ -98,6 +98,25 @@ const CustomCarousel = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [products.length]);
 
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const preventDefaultTouch = (e) => e.preventDefault();
+
+    carousel.addEventListener("touchstart", preventDefaultTouch, {
+      passive: false,
+    });
+    carousel.addEventListener("touchmove", preventDefaultTouch, {
+      passive: false,
+    });
+
+    return () => {
+      carousel.removeEventListener("touchstart", preventDefaultTouch);
+      carousel.removeEventListener("touchmove", preventDefaultTouch);
+    };
+  }, []);
+
   const loadMoreProducts = async () => {
     if (loadingMore || !hasMore) return;
 
@@ -127,12 +146,14 @@ const CustomCarousel = () => {
   };
 
   const handleTouchStart = (e) => {
+    e.preventDefault();
     setTouchStartX(e.touches[0].clientX);
     setIsTouching(true);
     setTouchDelta(0);
   };
 
   const handleTouchMove = (e) => {
+    e.preventDefault();
     if (!isTouching) return;
     const currentX = e.touches[0].clientX;
     const delta = touchStartX - currentX;
@@ -181,7 +202,7 @@ const CustomCarousel = () => {
       {/* Carousel container */}
       <div
         ref={carouselRef}
-        className="relative mx-auto w-full overflow-hidden"
+        className="relative mx-auto w-full touch-pan-y overflow-hidden"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
