@@ -1,6 +1,6 @@
 import Header from "../../Header/Header.jsx";
 import Footer from "../../Footer/Footer.jsx";
-import CartDrawer from "@components/Cart/CartDrawer.jsx";
+import CartDrawer from "@components/Cart/CartDrawer/CartDrawer.jsx";
 
 const GuestLayout = ({ children }) => {
   return (

@@ -5,7 +5,7 @@ import { PiHairDryerFill } from "react-icons/pi";
 import { useState } from "react";
 import { useScrollDirection } from "../../hooks/useScrollDirectionHook.jsx";
 import "./Header.css";
-import useCartStore from "@components/Cart/ZustandCartStore.js";
+import { useCartStore } from "@components/Cart";
 
 const Header = () => {
   const scrollDirection = useScrollDirection();
