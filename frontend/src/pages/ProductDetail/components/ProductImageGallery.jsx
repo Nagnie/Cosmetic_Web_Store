@@ -42,15 +42,15 @@ const ProductImageGallery = ({ images = [] }) => {
 
   return (
     <div className="product-gallery select-none">
-      <div className="flex flex-col gap-4 md:flex-row">
-        <div className="scrollbar-hide order-2 flex gap-2 overflow-auto overscroll-contain md:order-1 md:w-1/5 md:flex-col">
+      <div className="flex flex-col gap-2 md:flex-row">
+        <div className="scrollbar-hide order-2 flex gap-2 overflow-auto overscroll-contain md:order-1 md:w-1/6 md:flex-col">
           {imageList.map((image) => (
             <Image
               preview={false}
               key={image.id}
               src={image.src}
               alt="product"
-              className={`aspect-square w-full cursor-pointer object-contain transition-all duration-300 ${
+              className={`aspect-square max-h-[100px] w-full cursor-pointer object-contain transition-all duration-300 md:max-h-auto ${
                 currentImage.id === image.id ||
                 (nextImage && nextImage.id === image.id)
                   ? "border-secondary-medium border-2"
@@ -71,7 +71,7 @@ const ProductImageGallery = ({ images = [] }) => {
             />
           ))}
         </div>
-        <div className="order-1 md:order-2 md:w-4/5">
+        <div className="order-1 md:order-2 md:w-5/6">
           <Image.PreviewGroup
             items={IMAGE_LIST.map((image) => ({
               src: image.src,
