@@ -46,6 +46,21 @@ export class ProductController {
     return await this.productService.getProductsByCategory(req);
   }
 
+  @Get("search")
+  @Public()
+  @ApiOperation({ summary: 'Search products', description: 'Search product by name, cate name, subcate name & brand name' })
+  @ApiResponse({ status: 200, description: 'List products' })
+  @ApiResponse({ status: 500, description: 'Failed to search products' })
+  @ApiQuery({name: "product", required: false, example: "Matte lipstick"})
+  @ApiQuery({name: "category", required: false, example: "makeup"})
+  @ApiQuery({name: "subcate", required: false, example: "shampoo"})
+  @ApiQuery({name: "brand", required: false, example: "Gucci"})
+  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 5, description: 'Number of records per page' })
+  async searchProduct(@Req() req: Request) {
+    return await this.productService.searchProduct(req);
+  }
+
   @Get()
   @Public()
   @ApiOperation({ summary: 'List products' })

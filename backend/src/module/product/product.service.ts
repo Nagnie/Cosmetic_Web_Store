@@ -98,7 +98,7 @@ export class ProductService {
         page = 1,
         limit = 5,
       } = req.query;
-      const brandName = (brand as string).toLowerCase();
+      const brandName = (brand as string).toLowerCase().trim();
       const allItems = await this.dataSource.query(`
         SELECT p.*
         FROM product p
@@ -123,13 +123,13 @@ export class ProductService {
     try {
       const {
         category,
-        subCate,
+        subcate,
         page = 1,
         limit = 5,
       } = req.query;
 
-      const cateName = category ? (category as string).toLowerCase() : null;
-      const subCateName = subCate ? (subCate as string).toLowerCase() : null;
+      const cateName = category ? (category as string).toLowerCase().trim() : null;
+      const subCateName = subcate ? (subcate as string).toLowerCase().trim() : null;
 
       const allItems = await this.dataSource.query(`
         SELECT p.*
@@ -150,6 +150,54 @@ export class ProductService {
       return new ResponseDto(HttpStatus.OK, "Successfully", {allPage, products});
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async searchProduct(req: Request) {
+    try {
+      const {
+        product = null,
+        category = null,
+        subcate = null,
+        brand = null,
+        page = 1,
+        limit = 5,
+      } = req.query;
+
+      const proName = product ? (product as string).toLowerCase().trim() : null;
+      const cateName = category ? (category as string).toLowerCase().trim() : null;
+      const subCateName = subcate ? (subcate as string).toLowerCase().trim() : null;
+      const brandName = brand ? (brand as string).toLowerCase().trim() : null;
+      const allIteams = await this.dataSource.query(`
+        SELECT p.*
+        FROM product p
+        JOIN sub_category sc ON p.id_subcat = sc.id_subcat
+        JOIN category c ON sc.id_cat = c.id_cat
+        JOIN brand b ON p.id_bra = b.id_bra
+        WHERE
+          ($1::TEXT IS NULL OR LOWER(p.name) LIKE $1) AND
+          ($2::TEXT IS NULL OR LOWER(c.name) =  $2) AND 
+          ($3::TEXT IS NULL OR LOWER(sc.name) = $3) AND
+          ($4::TEXT IS NULL OR LOWER(b.name) = $4)  
+      `,[proName, cateName, subCateName, brandName]);
+      const allPage = Math.ceil(allIteams.length / (limit as number)); 
+      const products = await this.dataSource.query(`
+        SELECT p.*
+        FROM product p
+        JOIN sub_category sc ON p.id_subcat = sc.id_subcat
+        JOIN category c ON sc.id_cat = c.id_cat
+        JOIN brand b ON p.id_bra = b.id_bra
+        WHERE
+          ($1::TEXT IS NULL OR LOWER(p.name) LIKE $1) AND
+          ($2::TEXT IS NULL OR LOWER(c.name) =  $2) AND 
+          ($3::TEXT IS NULL OR LOWER(sc.name) = $3) AND
+          ($4::TEXT IS NULL OR LOWER(b.name) = $4)
+        LIMIT $5 OFFSET $6
+      `, [proName, cateName, subCateName, brandName, limit, (page as number - 1) * (limit as number)]);
+
+      return new ResponseDto(HttpStatus.OK, "Successfully", {allPage, products});
+    } catch (error) {
+      throw new InternalServerErrorException("Failed to search products");
     }
   }
 
