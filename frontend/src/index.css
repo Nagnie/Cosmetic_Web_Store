@@ -39,9 +39,10 @@ body {
   /* place-items: center; */
   min-width: 320px;
   min-height: 100vh;
+  overscroll-behavior: none;
 }
 
-html {
+/* html {
   height: 100%;
   overflow: hidden;
   position: relative;
@@ -50,7 +51,7 @@ body {
   height: 100%;
   overflow: auto;
   position: relative;
-}
+} */
 
 h1 {
   font-size: 3.2em;
