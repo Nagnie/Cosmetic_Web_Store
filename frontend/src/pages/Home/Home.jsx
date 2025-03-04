@@ -8,34 +8,6 @@ import Header from "../../components/Header/Header.jsx";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 
-const SlideData = [
-    {
-        title: 'Slide 1',
-        description: 'Description 1',
-        image: 'https://image.oliveyoung.co.kr/uploads/images/display/90000010001/1/7163984838025058368.jpg'
-    },
-    {
-        title: 'Slide 2',
-        description: 'Description 2',
-        image: 'https://image.oliveyoung.co.kr/cfimages/contents/planshop/image/202502041113525796.jpg'
-    },
-    {
-        title: 'Slide 3',
-        description: 'Description 3',
-        image: 'https://image.oliveyoung.co.kr/uploads/images/display/90000010001/1/4295970989401172279.jpg'
-    },
-    {
-        title: 'Slide 4',
-        description: 'Description 4',
-        image: 'https://image.oliveyoung.co.kr/uploads/images/display/90000010001/1/576807548360671.jpg'
-    },
-    {
-        title: 'Slide 5',
-        description: 'Description 5',
-        image: 'https://image.oliveyoung.co.kr/uploads/images/display/90000010001/1/8878704506545864568.jpg'
-    },
-]
-
 const categories = [
     { title: "Anua", image: "https://i.pinimg.com/736x/5a/68/6a/5a686a397fa14181d2447358edb61f0c.jpg" },
     { title: "Medicube", image: "https://i.pinimg.com/736x/fe/bb/84/febb8481081d9a24c006755006cbf685.jpg" },
@@ -112,7 +84,7 @@ const Homepage = () => {
 
     return (
         <div className="font-sans">
-            <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+            <Header />
 
             {/* Swiper Section */}
             <section className={"max-w-6xl mt-35 mx-auto mb-20 pt-10"}>

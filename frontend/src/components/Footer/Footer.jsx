@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Facebook,
   Instagram,
@@ -14,7 +13,6 @@ const Footer = () => {
       className="w-full"
       style={{ backgroundColor: "#ffb3c1", color: "#8a1b3a" }}
     >
-      Main Footer Content
       <div className="mx-auto px-4 py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {/* Contact Information */}
