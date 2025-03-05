@@ -21,16 +21,22 @@ import { AuthGuard } from "@nestjs/passport";
 import { LocalAuthGuard } from "./guard/local-auth.guard";
 import { JwtAuthGuard } from "./guard/jwt-auth.guard";
 import { Public } from "@/helpers/decorator/public";
-import { ResetpassAuthDto } from "./dto/resetpassword-auth.dto";
-import { Throttle } from "@nestjs/throttler";
-import { Roles } from "@/helpers/decorator/roles";
 import { ResponseDto } from "@/helpers/utils";
-import { error } from "console";
+import { ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
 
 @Controller("auth")
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
+    @Public()
+    @Post("register")
+    async register(@Body() createAuthDto: CreateAuthDto) {
+        return await this.authService.register(createAuthDto);
+    }
+
+    @ApiOperation({summary: "Login"})
+    @ApiBody({type: CreateAuthDto})
+    @ApiResponse({type: ResponseDto})
     @UseGuards(LocalAuthGuard)
     @Public()
     @Post("login")
