@@ -69,12 +69,22 @@ export class ProductService {
     const offset = (page - 1) * limit;
 
     return await this.dataSource.query(`
-      SELECT pr.name AS pr_name, cat.name AS cat_name, bra.name AS bra_name,
-      pr.price AS price
-      FROM product AS pr
-      JOIN sub_category AS scat ON pr.id_subcat = scat.id_subcat
+      SELECT pro.name AS pro_name, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name,
+      pro.price AS price,
+      COALESCE((
+        SELECT json_agg(img.link)
+        FROM product_image AS img
+        WHERE img.id_pro = pro.id_pro), '[]'::json
+      ) AS images,
+      COALESCE(
+        (SELECT json_agg(DISTINCT class.name) 
+         FROM classification AS class 
+         WHERE class.id_pro = pro.id_pro), '[]'::json
+      ) AS classification
+      FROM product AS pro
+      JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
       JOIN category AS cat ON scat.id_cat = cat.id_cat
-      JOIN brand AS bra ON pr.id_bra = bra.id_bra
+      JOIN brand AS bra ON pro.id_bra = bra.id_bra
       LIMIT $1 OFFSET $2
     `, [limit, offset])
   }
