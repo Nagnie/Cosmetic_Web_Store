@@ -39,8 +39,8 @@ export class ProductService {
       }
 
       // INSERT CLASSIFICATION
-      if(classification && classification.length > 0){
-        for (const classi of classification){
+      if (classification && classification.length > 0) {
+        for (const classi of classification) {
           await queryRunner.query(`
               INSERT INTO classification(id_pro, name)
               VALUES($1, $2)
@@ -69,7 +69,7 @@ export class ProductService {
     const offset = (page - 1) * limit;
 
     return await this.dataSource.query(`
-      SELECT pro.name AS pro_name, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name,
       pro.price AS price,
       COALESCE((
         SELECT json_agg(img.link)
@@ -91,18 +91,42 @@ export class ProductService {
 
   async findOne(id_pro: number) {
     const productInfo = this.dataSource.query(`
-      SELECT pro.id_pro, pro.name AS pro_name, pro.price, pro.description, 
-      scat.name AS scat_name, bra.name AS bra_name, 
-      COALESCE(json_agg(img.link) FILTER (WHERE img.link IS NOT NULL), '[]') AS images
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name, 
+      COALESCE((
+        SELECT json_agg(img.link)
+        FROM product_image AS img
+        WHERE img.id_pro = pro.id_pro), '[]'::json
+      ) AS images,
+      COALESCE(
+        (SELECT json_agg(DISTINCT class.name) 
+         FROM classification AS class 
+         WHERE class.id_pro = pro.id_pro), '[]'::json
+      ) AS classification
       FROM product AS pro
       JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
+      JOIN category AS cat ON scat.id_cat = cat.id_cat
       JOIN brand AS bra ON pro.id_bra = bra.id_bra
-      LEFT JOIN product_image AS img ON pro.id_pro = img.id_pro
       WHERE pro.id_pro = $1
-      GROUP BY pro.id_pro, scat.name, bra.name;
     `, [id_pro]);
 
     return productInfo;
+  }
+
+  async findSameBrand(bra_name: string, page: number, limit: number){
+    const offset = (page - 1) * limit;
+
+    return await this.dataSource.query(`
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, bra.name AS bra_name, pro.price AS pro_price,
+        COALESCE((
+          SELECT json_agg(img.link)
+          FROM product_image AS img
+          WHERE img.id_pro = pro.id_pro), '[]'::json
+        ) AS images
+        FROM product AS pro
+        JOIN brand AS bra ON pro.id_bra = bra.id_bra
+        WHERE bra.name = $1
+        LIMIT $2 OFFSET $3
+      `, [bra_name, limit, offset])
   }
 
   async update(id_pro: number, updateProductDto: UpdateProductDto) {
@@ -156,6 +180,6 @@ export class ProductService {
       RETURNING *;
     `, [id_pro])
 
-  return data[0];
+    return data[0];
   }
 }
