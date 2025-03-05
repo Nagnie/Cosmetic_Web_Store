@@ -24,11 +24,6 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     @IsNumber({}, { message: `Brand ID must be a number` })
     id_bra: number;
 
-    @ApiProperty({ example: 20, description: `Product's stock` })
-    @IsNumber({}, { message: `Stock must be a number` })
-    @IsOptional()
-    stock: number;
-
     @ApiProperty({ example: 'Available', description: `Product's status` })
     @IsNotEmpty({ message: `Product's status must not be empty` })
     @IsString({ message: `Product's status must be string` })

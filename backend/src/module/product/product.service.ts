@@ -3,13 +3,14 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { DataSource } from 'typeorm';
 import { query } from 'express';
+import { queryObjects } from 'v8';
 
 @Injectable()
 export class ProductService {
   constructor(private readonly dataSource: DataSource) { }
 
   async create(createProductDto: CreateProductDto) {
-    const { pro_name, price, id_subcat, id_bra, stock, status, img_url, desc } = createProductDto;
+    const { pro_name, price, id_subcat, id_bra, status, img_url, classification, desc } = createProductDto;
 
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -20,12 +21,12 @@ export class ProductService {
     try {
       // INSERT PRODUCT
       const insertProduct = await queryRunner.query(`
-        INSERT INTO product(name, price, description, status, id_subcat, id_bra, stock)
-        VALUES($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id_pro
-        `, [pro_name, price, desc, status, id_subcat, id_bra, stock])
+        INSERT INTO product(name, price, description, status, id_subcat, id_bra)
+        VALUES($1, $2, $3, $4, $5, $6)
+        RETURNING *
+        `, [pro_name, price, desc, status, id_subcat, id_bra])
 
-      const id_pro = insertProduct[0].id_pro;
+      const id_pro = insertProduct[0]?.id_pro;
 
       // INSERT IMAGES
       if (img_url && img_url.length > 0) {
@@ -34,6 +35,16 @@ export class ProductService {
               INSERT INTO product_image(id_pro, link)
               VALUES($1, $2)
             `, [id_pro, url])
+        }
+      }
+
+      // INSERT CLASSIFICATION
+      if(classification && classification.length > 0){
+        for (const classi of classification){
+          await queryRunner.query(`
+              INSERT INTO classification(id_pro, name)
+              VALUES($1, $2)
+            `, [id_pro, classi])
         }
       }
 
@@ -59,7 +70,7 @@ export class ProductService {
 
     return await this.dataSource.query(`
       SELECT pr.name AS pr_name, cat.name AS cat_name, bra.name AS bra_name,
-      pr.price AS price, pr.stock AS stock
+      pr.price AS price
       FROM product AS pr
       JOIN sub_category AS scat ON pr.id_subcat = scat.id_subcat
       JOIN category AS cat ON scat.id_cat = cat.id_cat
@@ -85,7 +96,7 @@ export class ProductService {
   }
 
   async update(id_pro: number, updateProductDto: UpdateProductDto) {
-    const { pro_name, price, id_subcat, id_bra, stock, status, img_url, desc } = updateProductDto;
+    const { pro_name, price, id_subcat, id_bra, status, img_url, desc } = updateProductDto;
 
     // START TRANSACTION 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -96,9 +107,9 @@ export class ProductService {
       // Update product table
       await queryRunner.query(`
           UPDATE product 
-          SET name = $1, price = $2, id_subcat = $3, id_bra = $4, stock = $5, status = $6, description = $7
-          WHERE id_pro = $8;
-      `, [pro_name, price, id_subcat, id_bra, stock, status, desc, id_pro]);
+          SET name = $1, price = $2, id_subcat = $3, id_bra = $4, status = $5, description = $6
+          WHERE id_pro = $7;
+      `, [pro_name, price, id_subcat, id_bra, status, desc, id_pro]);
 
       // If having new image list 
       if (img_url && img_url.length > 0) {
