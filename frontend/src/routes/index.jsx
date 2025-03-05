@@ -7,17 +7,14 @@ import ProductDetail from "@pages/ProductDetail/index.js";
 import AdminLogin from "../pages/Admin/AdminLogin.jsx";
 import Admin from "../pages/Admin/Admin.jsx";
 
+import ProtectedRoute from "@components/ProtectedRoute.jsx";
+
 const PublicRoutes = [
   {
     path: "/",
     component: Homepage,
     layout: GuestLayout,
   },
-  // {
-  //   path: "/:category",
-  //   component: ProductList,
-  //   layout: GuestLayout,
-  // },
   {
     path: "/all_products",
     component: ProductList,
@@ -37,6 +34,7 @@ const PublicRoutes = [
     path: "/admin",
     component: Admin,
     layout: AdminLayout,
+    protected: true,
   },
 ];
 
