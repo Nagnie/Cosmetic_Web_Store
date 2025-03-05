@@ -63,8 +63,8 @@ export class ProductController {
 
   @Get()
   @Public()
-  @ApiOperation({ summary: 'List products' })
-  @ApiResponse({ status: 200, description: 'List products' })
+  @ApiOperation({ summary: 'Get all products' })
+  @ApiResponse({ status: 200, description: 'Get all products' })
   @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of records per page' })
   async findAll(
@@ -72,6 +72,38 @@ export class ProductController {
     @Query('limit') limit: number = 10
   ) {
     return await this.productService.findAll(Number(page), Number(limit));
+  }
+
+  @Get('same_brand')
+  @Public()
+  @ApiOperation({ summary: 'Get same brand product by brand name' })
+  @ApiQuery({ name: 'bra_name', required: true, example: 'Dior', description: 'Brand name' })
+  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of records per page' })
+  @ApiResponse({ status: 200, description: 'Same product' })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  async findSameBrand(
+    @Query('bra_name') bra_name: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 4
+  ){
+    return await this.productService.findSameBrand(bra_name, Number(page), Number(limit));
+  }
+
+  @Get('same_subcategory')
+  @Public()
+  @ApiOperation({ summary: 'Get same subcategory product by subcategory name' })
+  @ApiQuery({ name: 'scat_name', required: true, example: 'Lipstick', description: 'Subcategory name' })
+  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 4, description: 'Number of records per page' })
+  @ApiResponse({ status: 200, description: 'Same product' })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  async findSameSubcategory(
+    @Query('scat_name') scat_name: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ){
+    return await this.productService.findSameSubcategory(scat_name, Number(page), Number(limit));
   }
 
   @Get(':id_pro')

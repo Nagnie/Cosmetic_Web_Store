@@ -6,6 +6,7 @@ import { query, Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { ResponseDto } from '@/helpers/utils';
+import { queryObjects } from 'v8';
 
 @Injectable()
 export class ProductService {
@@ -16,7 +17,7 @@ export class ProductService {
   ) { }
 
   async create(createProductDto: CreateProductDto) {
-    const { pro_name, price, id_subcat, id_bra, stock, status, img_url, desc } = createProductDto;
+    const { pro_name, price, id_subcat, id_bra, status, img_url, classification, desc } = createProductDto;
 
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -27,12 +28,12 @@ export class ProductService {
     try {
       // INSERT PRODUCT
       const insertProduct = await queryRunner.query(`
-        INSERT INTO product(name, price, description, status, id_subcat, id_bra, stock)
-        VALUES($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id_pro
-        `, [pro_name, price, desc, status, id_subcat, id_bra, stock])
+        INSERT INTO product(name, price, description, status, id_subcat, id_bra)
+        VALUES($1, $2, $3, $4, $5, $6)
+        RETURNING *
+        `, [pro_name, price, desc, status, id_subcat, id_bra])
 
-      const id_pro = insertProduct[0].id_pro;
+      const id_pro = insertProduct[0]?.id_pro;
 
       // INSERT IMAGES
       if (img_url && img_url.length > 0) {
@@ -41,6 +42,16 @@ export class ProductService {
               INSERT INTO product_image(id_pro, link)
               VALUES($1, $2)
             `, [id_pro, url])
+        }
+      }
+
+      // INSERT CLASSIFICATION
+      if (classification && classification.length > 0) {
+        for (const classi of classification) {
+          await queryRunner.query(`
+              INSERT INTO classification(id_pro, name)
+              VALUES($1, $2)
+            `, [id_pro, classi])
         }
       }
 
@@ -65,27 +76,44 @@ export class ProductService {
     const offset = (page - 1) * limit;
 
     return await this.dataSource.query(`
-      SELECT pr.name AS pr_name, cat.name AS cat_name, bra.name AS bra_name,
-      pr.price AS price, pr.stock AS stock
-      FROM product AS pr
-      JOIN sub_category AS scat ON pr.id_subcat = scat.id_subcat
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name,
+      pro.price AS price,
+      COALESCE((
+        SELECT json_agg(img.link)
+        FROM product_image AS img
+        WHERE img.id_pro = pro.id_pro), '[]'::json
+      ) AS images,
+      COALESCE(
+        (SELECT json_agg(DISTINCT class.name) 
+         FROM classification AS class 
+         WHERE class.id_pro = pro.id_pro), '[]'::json
+      ) AS classification
+      FROM product AS pro
+      JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
       JOIN category AS cat ON scat.id_cat = cat.id_cat
-      JOIN brand AS bra ON pr.id_bra = bra.id_bra
+      JOIN brand AS bra ON pro.id_bra = bra.id_bra
       LIMIT $1 OFFSET $2
     `, [limit, offset])
   }
 
   async findOne(id_pro: number) {
     const productInfo = this.dataSource.query(`
-      SELECT pro.id_pro, pro.name AS pro_name, pro.price, pro.description, 
-      scat.name AS scat_name, bra.name AS bra_name, 
-      COALESCE(json_agg(img.link) FILTER (WHERE img.link IS NOT NULL), '[]') AS images
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name, 
+      COALESCE((
+        SELECT json_agg(img.link)
+        FROM product_image AS img
+        WHERE img.id_pro = pro.id_pro), '[]'::json
+      ) AS images,
+      COALESCE(
+        (SELECT json_agg(DISTINCT class.name) 
+         FROM classification AS class 
+         WHERE class.id_pro = pro.id_pro), '[]'::json
+      ) AS classification
       FROM product AS pro
       JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
+      JOIN category AS cat ON scat.id_cat = cat.id_cat
       JOIN brand AS bra ON pro.id_bra = bra.id_bra
-      LEFT JOIN product_image AS img ON pro.id_pro = img.id_pro
       WHERE pro.id_pro = $1
-      GROUP BY pro.id_pro, scat.name, bra.name;
     `, [id_pro]);
 
     return productInfo;
@@ -107,7 +135,17 @@ export class ProductService {
       `, [brandName]);
       const allPage = Math.ceil(allItems.length / (limit as number)); 
       const products = await this.dataSource.query(`
-        SELECT p.*
+        SELECT p.*,
+        COALESCE((
+          SELECT json_agg(img.link)
+          FROM product_image AS img
+          WHERE img.id_pro = p.id_pro), '[]'::json
+        ) AS images,
+        COALESCE(
+          (SELECT json_agg(DISTINCT class.name) 
+          FROM classification AS class 
+          WHERE class.id_pro = p.id_pro), '[]'::json
+        ) AS classification
         FROM product p
         JOIN brand b ON p.id_bra = b.id_bra
         WHERE LOWER(b.name) = $1
@@ -140,7 +178,17 @@ export class ProductService {
       `, [cateName, subCateName]);
       const allPage = Math.ceil(allItems.length / (limit as number)); 
       const products = await this.dataSource.query(`
-        SELECT p.*
+        SELECT p.*,
+        COALESCE((
+          SELECT json_agg(img.link)
+          FROM product_image AS img
+          WHERE img.id_pro = p.id_pro), '[]'::json
+        ) AS images,
+        COALESCE(
+          (SELECT json_agg(DISTINCT class.name) 
+          FROM classification AS class 
+          WHERE class.id_pro = p.id_pro), '[]'::json
+        ) AS classification
         FROM product p
         JOIN sub_category sc ON p.id_subcat = sc.id_subcat
         JOIN category c ON sc.id_cat = c.id_cat
@@ -182,7 +230,17 @@ export class ProductService {
       `,[proName, cateName, subCateName, brandName]);
       const allPage = Math.ceil(allIteams.length / (limit as number)); 
       const products = await this.dataSource.query(`
-        SELECT p.*
+        SELECT p.*,
+        COALESCE((
+          SELECT json_agg(img.link)
+          FROM product_image AS img
+          WHERE img.id_pro = p.id_pro), '[]'::json
+        ) AS images,
+        COALESCE(
+          (SELECT json_agg(DISTINCT class.name) 
+          FROM classification AS class 
+          WHERE class.id_pro = p.id_pro), '[]'::json
+        ) AS classification
         FROM product p
         JOIN sub_category sc ON p.id_subcat = sc.id_subcat
         JOIN category c ON sc.id_cat = c.id_cat
@@ -201,8 +259,42 @@ export class ProductService {
     }
   }
 
+  async findSameBrand(bra_name: string, page: number, limit: number){
+    const offset = (page - 1) * limit;
+
+    return await this.dataSource.query(`
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price,
+        COALESCE((
+          SELECT json_agg(img.link)
+          FROM product_image AS img
+          WHERE img.id_pro = pro.id_pro), '[]'::json
+        ) AS images
+        FROM product AS pro
+        JOIN brand AS bra ON pro.id_bra = bra.id_bra
+        WHERE bra.name = $1
+        LIMIT $2 OFFSET $3
+      `, [bra_name, limit, offset])
+  }
+
+  async findSameSubcategory(scat_name: string, page: number, limit: number){
+    const offset = (page - 1) * limit;
+
+    return await this.dataSource.query(`
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price,
+        COALESCE((
+          SELECT json_agg(img.link)
+          FROM product_image AS img
+          WHERE img.id_pro = pro.id_pro), '[]'::json
+        ) AS images
+        FROM product AS pro
+        JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
+        WHERE scat.name = $1
+        LIMIT $2 OFFSET $3
+      `, [scat_name, limit, offset])
+  }
+
   async update(id_pro: number, updateProductDto: UpdateProductDto) {
-    const { pro_name, price, id_subcat, id_bra, stock, status, img_url, desc } = updateProductDto;
+    const { pro_name, price, id_subcat, id_bra, status, img_url, classification, desc } = updateProductDto;
 
     // START TRANSACTION 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -213,9 +305,9 @@ export class ProductService {
       // Update product table
       await queryRunner.query(`
           UPDATE product 
-          SET name = $1, price = $2, id_subcat = $3, id_bra = $4, stock = $5, status = $6, description = $7
-          WHERE id_pro = $8;
-      `, [pro_name, price, id_subcat, id_bra, stock, status, desc, id_pro]);
+          SET name = $1, price = $2, id_subcat = $3, id_bra = $4, status = $5, description = $6
+          WHERE id_pro = $7;
+      `, [pro_name, price, id_subcat, id_bra, status, desc, id_pro]);
 
       // If having new image list 
       if (img_url && img_url.length > 0) {
@@ -229,6 +321,21 @@ export class ProductService {
           await queryRunner.query(`
                   INSERT INTO product_image (id_pro, link) VALUES ($1, $2);
               `, [id_pro, img]);
+        }
+      }
+
+      // If having new classification list
+      if (classification && classification.length > 0) {
+        // Xóa ảnh cũ
+        await queryRunner.query(`
+              DELETE FROM classification WHERE id_pro = $1;
+          `, [id_pro]);
+
+        // Thêm ảnh mới
+        for (const classi of classification) {
+          await queryRunner.query(`
+                  INSERT INTO classification (id_pro, name) VALUES ($1, $2);
+              `, [id_pro, classi]);
         }
       }
 
@@ -253,6 +360,6 @@ export class ProductService {
       RETURNING *;
     `, [id_pro])
 
-  return data[0];
+    return data[0];
   }
 }

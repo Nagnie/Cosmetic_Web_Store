@@ -24,11 +24,6 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     @IsNumber({}, { message: `Brand ID must be a number` })
     id_bra: number;
 
-    @ApiProperty({ example: 20, description: `Product's stock` })
-    @IsNumber({}, { message: `Stock must be a number` })
-    @IsOptional()
-    stock: number;
-
     @ApiProperty({ example: 'Available', description: `Product's status` })
     @IsNotEmpty({ message: `Product's status must not be empty` })
     @IsString({ message: `Product's status must be string` })
@@ -43,6 +38,16 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     @IsString({ each: true, message: `Each link must be a string` })
     @IsOptional()
     img_url?: string[];
+
+    @ApiProperty({
+        example: ['20ml', '30ml', '50ml'],
+        description: `List of classification`,
+        isArray: true
+    })
+    @IsArray({ message: `Classification must be an array` })
+    @IsString({ each: true, message: `Each classification must be a string` })
+    @IsOptional()
+    classification?: string[];
 
     @ApiProperty({
         example: 'This foundation provides full coverage with a natural matte finish.',
