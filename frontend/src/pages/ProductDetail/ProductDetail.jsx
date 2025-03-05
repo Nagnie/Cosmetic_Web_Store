@@ -18,8 +18,8 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="mx-auto mb-4 px-4">
-      <div className="mt-35 grid w-full grid-cols-1 gap-4 pt-10 md:grid-cols-2">
+    <div className="mx-auto mt-35 mb-4 px-4 pt-10">
+      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <ProductImageGallery />
         </div>

@@ -6,6 +6,7 @@ import ProductList from "../pages/ProductList/ProductList.jsx";
 import ProductDetail from "@pages/ProductDetail/index.js";
 import AdminLogin from "../pages/Admin/AdminLogin.jsx";
 import Admin from "../pages/Admin/Admin.jsx";
+import CartPage from "@pages/Cart/CartPage.jsx";
 
 const PublicRoutes = [
   {
@@ -24,8 +25,13 @@ const PublicRoutes = [
     layout: GuestLayout,
   },
   {
-    path: "/products/:id",
+    path: "/products/:name",
     component: ProductDetail,
+    layout: GuestLayout,
+  },
+  {
+    path: "/cart",
+    component: CartPage,
     layout: GuestLayout,
   },
   {
