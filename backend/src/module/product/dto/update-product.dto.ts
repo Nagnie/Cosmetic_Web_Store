@@ -40,6 +40,16 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     img_url?: string[];
 
     @ApiProperty({
+        example: ['20ml', '30ml', '50ml'],
+        description: `List of classification`,
+        isArray: true
+    })
+    @IsArray({ message: `Classification must be an array` })
+    @IsString({ each: true, message: `Each classification must be a string` })
+    @IsOptional()
+    classification?: string[];
+
+    @ApiProperty({
         example: 'This foundation provides full coverage with a natural matte finish.',
         description: `Product's description`,
         type: 'string'

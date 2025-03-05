@@ -147,7 +147,7 @@ export class ProductService {
   }
 
   async update(id_pro: number, updateProductDto: UpdateProductDto) {
-    const { pro_name, price, id_subcat, id_bra, status, img_url, desc } = updateProductDto;
+    const { pro_name, price, id_subcat, id_bra, status, img_url, classification, desc } = updateProductDto;
 
     // START TRANSACTION 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -174,6 +174,21 @@ export class ProductService {
           await queryRunner.query(`
                   INSERT INTO product_image (id_pro, link) VALUES ($1, $2);
               `, [id_pro, img]);
+        }
+      }
+
+      // If having new classification list
+      if (classification && classification.length > 0) {
+        // Xóa ảnh cũ
+        await queryRunner.query(`
+              DELETE FROM classification WHERE id_pro = $1;
+          `, [id_pro]);
+
+        // Thêm ảnh mới
+        for (const classi of classification) {
+          await queryRunner.query(`
+                  INSERT INTO classification (id_pro, name) VALUES ($1, $2);
+              `, [id_pro, classi]);
         }
       }
 
