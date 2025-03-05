@@ -116,7 +116,7 @@ export class ProductService {
     const offset = (page - 1) * limit;
 
     return await this.dataSource.query(`
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, bra.name AS bra_name, pro.price AS pro_price,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -127,6 +127,23 @@ export class ProductService {
         WHERE bra.name = $1
         LIMIT $2 OFFSET $3
       `, [bra_name, limit, offset])
+  }
+
+  async findSameSubcategory(scat_name: string, page: number, limit: number){
+    const offset = (page - 1) * limit;
+
+    return await this.dataSource.query(`
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price,
+        COALESCE((
+          SELECT json_agg(img.link)
+          FROM product_image AS img
+          WHERE img.id_pro = pro.id_pro), '[]'::json
+        ) AS images
+        FROM product AS pro
+        JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
+        WHERE scat.name = $1
+        LIMIT $2 OFFSET $3
+      `, [scat_name, limit, offset])
   }
 
   async update(id_pro: number, updateProductDto: UpdateProductDto) {
