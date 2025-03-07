@@ -20,14 +20,15 @@ const LoginPage = () => {
             const response = await axios.post(
                 "http://localhost:3001/api/auth/login",
                 { email, password },
-                { withCredentials: true } // Quan trọng: để gửi cookie từ server
+                { withCredentials: true, } // Quan trọng: để gửi cookie từ server
             );
 
-            if (response.status === 200) {
+            if (response.status === 201) {
                 // Lưu trạng thái đăng nhập
                 localStorage.setItem("isAdmin", "true");
                 navigate("/admin"); // Chuyển hướng đến trang Admin
             }
+            console.log(response);
         } catch (error) {
             setError("Sai tài khoản hoặc mật khẩu!");
         }

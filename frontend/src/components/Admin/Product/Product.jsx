@@ -136,9 +136,6 @@ const Product = () => {
                         <PlusCircle className="mr-2" size={18} />
                         Add Product
                     </button>
-                    <div className={`text-right ${filteredProducts.length > 0 ? 'block' : 'hidden'}`}>
-                        <span className="text-gray-600">Showing {filteredProducts.length} products</span>
-                    </div>
                 </div>
 
 
