@@ -12,6 +12,7 @@ export class BrandController {
   constructor(private readonly brandService: BrandService) {}
 
   @Post()
+  @Public()
   @ApiOperation({ summary: 'Create a new brand' })
   @ApiBody({ type: CreateBrandDto })
   @ApiResponse({ type: ResponseDto })
@@ -21,6 +22,7 @@ export class BrandController {
   }
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get all brands' })
   @ApiQuery({name: 'page', type: Number, required: false, description: 'The page number', example: 1})
   @ApiQuery({name: 'limit', type: Number, required: false, description: 'The number of item per page', example: 5})
@@ -33,6 +35,7 @@ export class BrandController {
   }
 
   @Get(':id')
+  @Public()
   @ApiOperation({ summary: 'Get a brand by ID' })
   @ApiParam({ name: 'id', type: String, description: 'ID of the brand to get', required: true })
   @ApiResponse({ status: 200, description: 'Brand found successfully.' })
@@ -42,6 +45,7 @@ export class BrandController {
   }
 
   @Patch(':id')
+  @Public()
   @ApiOperation({ summary: 'Update brand by ID' })
   @ApiParam({ name: 'id', type: String, description: 'ID of the brand to update', required: true })
   @ApiBody({ type: UpdateBrandDto })
@@ -53,6 +57,7 @@ export class BrandController {
   }
 
   @Delete(':id')
+  @Public()
   @ApiOperation({ summary: 'Delete a brand by ID' })
   @ApiParam({ name: 'id', type: String, description: 'ID of the brand to delete', required: true })
   @ApiResponse({ status: 200, description: 'Brand removed successfully.' })
