@@ -46,7 +46,7 @@ export class BrandService {
       const totalItems = await this.brandRepository.count();
       const allPage = Math.ceil(totalItems / take);
 
-      const data = this.brandRepository.find({
+      const data = await this.brandRepository.find({
         order: {[(sortBy as string).toLowerCase()]: order},
         skip,
         take
