@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Edit, Trash2, Search, X, Save, Eye } from 'lucide-react';
-import { DNA } from "react-loader-spinner";
+import { Circles } from "react-loader-spinner";
 
 const Product = () => {
     const [products, setProducts] = useState([]);
@@ -39,9 +39,7 @@ const Product = () => {
             if (!response.ok) {
                 throw new Error('Something went wrong while fetching the data.');
             }
-
             const result = await response.json();
-
             if (response.status === 200) {
                 setProducts(result);
                 // If your API returns pagination info differently, adjust this
@@ -308,14 +306,15 @@ const Product = () => {
 
                 {/* Loading and Error States */}
                 {loading && (
-                    <div className="flex justify-center items-center h-40">
-                        <DNA
-                            visible={true}
-                            height="100"
-                            width="100"
-                            ariaLabel="dna-loading"
+                    <div className="flex justify-center items-center h-80">
+                        <Circles
+                            height="70"
+                            width="70"
+                            color="#c42e57"
+                            ariaLabel="circles-loading"
                             wrapperStyle={{}}
-                            wrapperClass="dna-wrapper"
+                            wrapperClass=""
+                            visible={true}
                         />
                     </div>
                 )}
