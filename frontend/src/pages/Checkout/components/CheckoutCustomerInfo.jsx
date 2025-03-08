@@ -240,7 +240,7 @@ const CheckoutCustomerInfo = () => {
   };
 
   return (
-    <div className="mx-auto max-w-3xl rounded-lg bg-white p-4 shadow-sm">
+    <div className="rounded-lg bg-white p-4 shadow-sm">
       <h2 className="mb-6 text-2xl font-bold text-gray-800">
         Thông tin giao hàng
       </h2>
