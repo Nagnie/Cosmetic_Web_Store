@@ -8,6 +8,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
+import * as session from 'express-session';
+import { RedisStore } from "connect-redis"
+import { createClient } from 'redis';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: {
@@ -18,6 +22,26 @@ async function bootstrap() {
   });
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3000;
+
+  const redisClient = createClient({
+    url: 'redis://localhost:6379', // Thay đổi IP nếu Redis chạy trên server khác
+  });
+  redisClient.on('error', (err) => console.error('Redis Error:', err));
+  await redisClient.connect();
+
+  app.use(
+    session({
+      store: new RedisStore({ client: redisClient }),
+      secret: 'my-secret',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: false, // Đặt thành true nếu dùng HTTPS
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24, // 1 ngày
+      },
+    }),
+  );
 
   app.use(cookieParser());
   app.useGlobalPipes(
