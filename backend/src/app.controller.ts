@@ -15,6 +15,7 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  // Test redis is working
   @Get('test-session')
   @Public()
   async testSession(@Req() req: Request & { session: any }, @Res() res: Response) {

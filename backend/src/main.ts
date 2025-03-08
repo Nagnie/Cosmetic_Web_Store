@@ -24,7 +24,7 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') || 3000;
 
   const redisClient = createClient({
-    url: 'redis://localhost:6379', // Thay đổi IP nếu Redis chạy trên server khác
+    url: 'redis://localhost:6379', // Change IP if deploy
   });
   redisClient.on('error', (err) => console.error('Redis Error:', err));
   await redisClient.connect();
@@ -36,9 +36,9 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: false, // Đặt thành true nếu dùng HTTPS
+        secure: false, // Change "true" if HTTPS
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24, // 1 ngày
+        maxAge: 1000 * 60 * 30, // 30 minutes
       },
     }),
   );

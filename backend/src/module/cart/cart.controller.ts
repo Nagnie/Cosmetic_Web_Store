@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { Public } from '@/helpers/decorator/public';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 
 @Controller('cart')
 export class CartController {
@@ -14,13 +15,13 @@ export class CartController {
   @ApiOperation({ summary: 'Add products to cart' })
   @ApiResponse({ status: 201, description: 'Products added successfully' })
   @ApiBody({ type: CreateCartDto })
-  async create(@Body() createCartDto: CreateCartDto) {
-    return await this.cartService.create(createCartDto);
+  async create(@Body() createCartDto: CreateCartDto, @Req() req: Request & { session: any }) {
+    return await this.cartService.create(createCartDto, req);
   }
 
   @Get()
-  findAll() {
-    return this.cartService.findAll();
+  async findAll() {
+    return await this.cartService.findAll();
   }
 
   @Get(':id')
