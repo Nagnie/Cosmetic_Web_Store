@@ -1,12 +1,14 @@
-import { PrimaryGeneratedColumn, Entity, Column } from "typeorm";
+import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, JoinColumn } from "typeorm";
+import { Order } from "./order.entity";
 
 @Entity({name: "order_detail"})
 export class OrderDetail {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({name: "order_id"})
-    orderId: number;
+    @ManyToOne(() => Order, order => order.orderDetails)
+    @JoinColumn({name: "order_id"})
+    order: Order;
 
     @Column({name: "product_id"})
     productId: number;

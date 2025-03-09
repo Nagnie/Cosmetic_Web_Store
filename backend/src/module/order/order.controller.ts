@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { Public } from '@/helpers/decorator/public';
+import { Request } from 'express';
 
 @Controller('order')
 export class OrderController {
@@ -13,13 +15,14 @@ export class OrderController {
   }
 
   @Get()
-  findAll() {
-    return this.orderService.findAll();
+  @Public()
+  async findAll(@Req() req: Request) {
+    return this.orderService.findAll(req);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
+  findOne(@Param('id') id: string, @Req() req: Request) {
+    return this.orderService.findOne(+id, req);
   }
 
   @Patch(':id')

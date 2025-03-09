@@ -7,7 +7,7 @@ import { OrderDetail } from './entities/order_detail.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderDetail]), // Đảm bảo đã đăng ký các repository cần thiết
+    TypeOrmModule.forFeature([Order, OrderDetail]),
   ],
   controllers: [OrderController],
   providers: [OrderService],

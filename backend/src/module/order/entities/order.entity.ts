@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { OrderStatus } from "../order_status.enum";
+import { OrderDetail } from "./order_detail.entity";
 
 @Entity({name: "orders"})
 export class Order {
@@ -12,7 +13,7 @@ export class Order {
     @Column({name: "phone"})
     phone: string;
 
-    @Column({name: "addresss"})
+    @Column({name: "address"})
     address: string;
 
     @Column({name: "status"})
@@ -23,4 +24,7 @@ export class Order {
     
     @Column({name: "note"})
     note: string;
+
+    @OneToMany(() => OrderDetail, orderDetail => orderDetail.order)
+    orderDetails: OrderDetail[];
 }
