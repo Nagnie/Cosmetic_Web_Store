@@ -3,6 +3,7 @@ import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { Request } from 'express';
 import { DataSource } from 'typeorm';
+import { DeleteCartDto } from './dto/delete-cart.dto';
 
 @Injectable()
 export class CartService {
@@ -137,7 +138,12 @@ export class CartService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
+  async remove(@Req() req: Request & { session: any }, deleteCartDto: DeleteCartDto) {
+    const { id_pro, id_class } = deleteCartDto;
+    req.session.cart = req.session.cart.filter(
+      item => !(item.id_pro === id_pro && item.id_class === id_class)
+    );
+
+    return { message: 'Item removed from cart' };
   }
 }

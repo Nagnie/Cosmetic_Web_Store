@@ -5,6 +5,7 @@ import { UpdateCartDto } from './dto/update-cart.dto';
 import { Public } from '@/helpers/decorator/public';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { DeleteCartDto } from './dto/delete-cart.dto';
 
 @Controller('cart')
 export class CartController {
@@ -37,6 +38,9 @@ export class CartController {
 
   @Patch('update')
   @Public()
+  @ApiOperation({ summary: 'Update product by ID pro and ID class' })
+  @ApiBody({ type: UpdateCartDto })
+  @ApiResponse({ status: 200, description: 'Update successfully' })
   async update(
     @Req() req: Request & { session: any },
     @Body() updateCartDto: UpdateCartDto
@@ -44,8 +48,12 @@ export class CartController {
     return await this.cartService.update(req, updateCartDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  @Delete('delete')
+  @Public()
+  async remove(
+    @Req() req: Request & { session: any },
+    @Body() deleteCartDto: DeleteCartDto
+  ) {
+    return await this.cartService.remove(req, deleteCartDto);
   }
 }
