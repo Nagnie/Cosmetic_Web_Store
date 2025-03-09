@@ -104,7 +104,7 @@ const Header = () => {
       <header className="flex items-center justify-around bg-white py-6">
         <h2
           className="cursor-pointer text-4xl font-bold"
-          style={{ color: "#872341" }}
+          style={{ color: "#5d4e3e" }}
         >
           Nâu Cosmetic
         </h2>
@@ -117,7 +117,7 @@ const Header = () => {
           />
           <button
             className="rounded-3xl px-4 text-white"
-            style={{ backgroundColor: "#ab3556" }}
+            style={{ backgroundColor: "#8D7B68" }}
           >
             <FaSearch />
           </button>
@@ -133,7 +133,7 @@ const Header = () => {
       </header>
       <nav
         className="relative flex items-center justify-center py-3 text-start shadow-md"
-        style={{ backgroundColor: "#FFF0F5" }}
+        style={{ backgroundColor: "#f6eadc" }}
       >
         {categories.map((category, index) => (
           <div
@@ -142,7 +142,7 @@ const Header = () => {
             onMouseEnter={() => setActiveCategory(index)}
             onMouseLeave={() => setActiveCategory(null)}
           >
-            <p className="flex cursor-pointer items-center transition-colors duration-300 hover:text-pink-600">
+            <p className="flex cursor-pointer items-center transition-colors duration-300 hover:text-orange-800">
               {category.icon}
               {category.name}
             </p>
@@ -154,13 +154,13 @@ const Header = () => {
                 <div
                   key={idx}
                   className="dropdown-section min-w-64"
-                  style={{ color: "#a83354" }}
+                  style={{ color: "#41392f" }}
                 >
                   <ul>
                     {section.items.map((item, itemIdx) => (
                       <li
                         key={itemIdx}
-                        className="cursor-pointer py-1 transition-colors duration-200 hover:bg-red-50 hover:text-pink-700"
+                        className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
                       >
                         {item}
                       </li>

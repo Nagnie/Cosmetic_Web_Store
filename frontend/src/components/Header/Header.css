@@ -16,7 +16,7 @@ nav {
 
 .category {
     margin: 0;
-    color: #872341;
+    color: #42392f;
     font-size: 1.1em;
     font-weight: 500;
     padding: 0 40px;
@@ -25,7 +25,7 @@ nav {
 
 .category:hover {
     cursor: pointer;
-    color: #cc6684;
+    color: #8a735d;
 }
 
 @media (max-width: 1030px) {
@@ -64,7 +64,7 @@ nav {
 .dropdown-menu {
     transform-origin: top center;
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    border-top: 3px solid #ab3556;
+    border-top: 3px solid #8D7B68;
 }
 
 /* Fade-in animation for dropdown sections */
