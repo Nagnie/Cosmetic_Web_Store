@@ -82,7 +82,7 @@ button {
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto #fab7cb;
+  outline: 4px auto #F1DEC9;
 }
 
 @media (prefers-color-scheme: light) {

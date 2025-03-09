@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const CartDrawerFooter = () => {
   return (
     <div>
@@ -17,9 +19,12 @@ const CartDrawerFooter = () => {
           Tiến hành thanh toán
         </button>
       </div>
-      <span className={`text-primary-dark mt-1 block w-full text-center`}>
+      <Link
+        to="/cart"
+        className={`!text-primary-dark mt-1 block w-full text-center`}
+      >
         Xem giỏ hàng
-      </span>
+      </Link>
     </div>
   );
 };

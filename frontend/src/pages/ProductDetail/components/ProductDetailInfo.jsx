@@ -45,9 +45,6 @@ const ProductDetailInfo = ({ isShowBottomSheet = false }) => {
           className="!text-primary-dark !flex w-full !items-center !rounded-full !p-2 !text-xl !font-bold"
           color="red"
         >
-          <span className="!mr-2 !text-base !text-gray-400 !line-through">
-            299.000đ
-          </span>
           <span className="!text-2xl !font-bold">229.000đ</span>
         </Tag>
       </div>
@@ -63,7 +60,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false }) => {
         </p>
       </div>
       <div className="!mt-4">
-        <span className="!font-bold">Dung tích</span>
+        <span className="!font-bold">Phân loại</span>
 
         <div>
           <Tag title="100ml" className={`!mr-2 !font-bold`} color="blue">

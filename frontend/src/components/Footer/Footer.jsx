@@ -11,24 +11,24 @@ const Footer = () => {
   return (
     <footer
       className="w-full"
-      style={{ backgroundColor: "#ffb3c1", color: "#8a1b3a" }}
+      style={{ backgroundColor: "#C8B6A6", color: "#312417" }}
     >
       <div className="mx-auto px-4 py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {/* Contact Information */}
           <div className="space-y-4">
             <h2 className="text-brown-600 text-lg font-semibold">Contact Us</h2>
-            <div className="ms-25 justify-center space-y-2 text-gray-800 md:ms-10">
+            <div className="ms-25 justify-center space-y-2 text-black md:ms-10">
               <div className="flex items-center gap-2">
-                <Phone size={18} style={{ color: "#d7426c" }} />
+                <Phone size={18} style={{ color: "#41372d" }} />
                 <span>(555) 123-4567</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail size={18} style={{ color: "#d7426c" }} />
+                <Mail size={18} style={{ color: "#41372d" }} />
                 <span>contact@beautystore.com</span>
               </div>
               <div className="flex items-center gap-2">
-                <MapPin size={18} style={{ color: "#d7426c" }} />
+                <MapPin size={18} style={{ color: "#41372d" }} />
                 <span className={"text-start"}>
                   123 Beauty Lane, Fashion City, FC 12345
                 </span>
@@ -41,7 +41,7 @@ const Footer = () => {
             <h2 className="text-brown-600 text-lg font-semibold">
               Opening Hours
             </h2>
-            <div className="space-y-2 text-gray-800">
+            <div className="space-y-2 text-black">
               <p>Monday - Friday: 9:00 AM - 8:00 PM</p>
               <p>Saturday: 10:00 AM - 6:00 PM</p>
               <p>Sunday: 11:00 AM - 5:00 PM</p>
@@ -55,23 +55,23 @@ const Footer = () => {
               <a
                 href="https://web.facebook.com/profile.php?id=100094204077003"
                 target="_blank"
-                className="rounded-full bg-white p-2 transition-colors hover:bg-red-50"
+                className="rounded-full bg-white p-2 transition-colors hover:bg-orange-50"
               >
-                <Facebook size={20} style={{ color: "#d7426c" }} />
+                <Facebook size={20} style={{ color: "#41372d" }} />
               </a>
               <a
                 href="#"
                 target="_blank"
-                className="rounded-full bg-white p-2 transition-colors hover:bg-red-50"
+                className="rounded-full bg-white p-2 transition-colors hover:bg-orange-50"
               >
-                <Instagram size={20} style={{ color: "#d7426c" }} />
+                <Instagram size={20} style={{ color: "#41372d" }} />
               </a>
               <a
                 href="#"
                 target="_blank"
-                className="rounded-full bg-white p-2 transition-colors hover:bg-red-50"
+                className="rounded-full bg-white p-2 transition-colors hover:bg-orange-50"
               >
-                <Twitter size={20} style={{ color: "#d7426c" }} />
+                <Twitter size={20} style={{ color: "#41372d" }} />
               </a>
             </div>
           </div>

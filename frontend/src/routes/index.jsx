@@ -3,10 +3,11 @@ import { AdminLayout, GuestLayout } from "../components/Layout/index.jsx";
 //Pages
 import Homepage from "../pages/Home/Home.jsx";
 import ProductList from "../pages/ProductList/ProductList.jsx";
-import Products from "../pages/Products/Products.jsx";
 import ProductDetail from "@pages/ProductDetail/index.js";
 import AdminLogin from "../pages/Admin/AdminLogin.jsx";
 import Admin from "../pages/Admin/Admin.jsx";
+import CartPage from "@pages/Cart/CartPage.jsx";
+import CheckoutPage from "@pages/Checkout/CheckoutPage.jsx";
 
 const PublicRoutes = [
   {
@@ -14,19 +15,29 @@ const PublicRoutes = [
     component: Homepage,
     layout: GuestLayout,
   },
+  // {
+  //   path: "/:category",
+  //   component: ProductList,
+  //   layout: GuestLayout,
+  // },
   {
-    path: "/:category",
+    path: "/all_products",
     component: ProductList,
     layout: GuestLayout,
   },
   {
-    path: "/all_products",
-    component: Products,
+    path: "/products/:name",
+    component: ProductDetail,
     layout: GuestLayout,
   },
   {
-    path: "/products/:id",
-    component: ProductDetail,
+    path: "/cart",
+    component: CartPage,
+    layout: GuestLayout,
+  },
+  {
+    path: "/checkout",
+    component: CheckoutPage,
     layout: GuestLayout,
   },
   {

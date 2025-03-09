@@ -1,6 +1,3 @@
-import React, { useState } from "react";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
@@ -70,7 +67,7 @@ const CategoryCard = ({ category }) => {
             />
 
             {/* Gradient overlay and text */}
-            <div className="absolute inset-0 bg-gradient-to-t from-pink-950/50 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
+            <div className="absolute inset-0 bg-gradient-to-t from-orange-950/50 to-transparent flex flex-col justify-end p-3 sm:p-4 md:p-5 lg:p-6">
                 <h3 className="text-white text-lg sm:text-xl md:text-2xl font-semibold hover:underline">
                     {category.title}
                 </h3>
@@ -87,8 +84,8 @@ const Homepage = () => {
             <Header />
 
             {/* Swiper Section */}
-            <section className={"max-w-6xl mt-35 mx-auto mb-20 pt-10"}>
-                <div className="text-center my-5" style={{ color: "#911f3f" }}>
+            <section className={"max-w-6xl mt-40 mx-auto mb-20 pt-10"}>
+                <div className="text-center my-5" style={{ color: "#574a3a" }}>
                     <h1 className="text-5xl mb-2 font-bold">Welcome to Nâu Cosmetic</h1>
                     <p className="text-2xl">Your destination for all things beauty</p>
                 </div>
@@ -148,7 +145,7 @@ const Homepage = () => {
                     <button
                         href="#"
                         className="hover:underline text-sm font-medium"
-                        style={{ color: "#D14D72" }}
+                        style={{ color: "#91775e" }}
                     >
                         Browse all brands →
                     </button>
@@ -165,17 +162,17 @@ const Homepage = () => {
                 <h2 className="text-3xl font-bold text-center mb-8">Why Choose Us?</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-                    <div className="text-center  p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#FDE5EC' }}>
+                    <div className="text-center  p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#F1DEC9' }}>
                         <h3 className="text-xl font-semibold mb-3">Premium Quality</h3>
                         <p className="text-gray-600">We carefully select the finest materials and craftmanship to ensure exceptional quality in every product.</p>
                     </div>
 
-                    <div className="text-center  p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#FFD1DA' }}>
+                    <div className="text-center  p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#C8B6A6' }}>
                         <h3 className="text-xl font-semibold mb-3">Customer First</h3>
                         <p className="text-gray-600">Your satisfaction is our priority. Enjoy responsive support and hassle-free shopping experience.</p>
                     </div>
 
-                    <div className="text-center p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#ffbccc' }}>
+                    <div className="text-center p-7 rounded-2xl shadow-xl" style={{ backgroundColor: '#A4907C' }}>
                         <h3 className="text-xl font-semibold mb-3">Unique Designs</h3>
                         <p className="text-gray-600">Discover our exclusive collections that blend contemporary trends with timeless elegance.</p>
                     </div>
@@ -191,7 +188,7 @@ const Homepage = () => {
                     ))}
                 </div>
                 <button className="block mx-auto my-10 text-white rounded-lg px-4 py-2"
-                        style={{ backgroundColor: "#ab3556" }}
+                        style={{ backgroundColor: "#675746" }}
                         onClick={() => navigate("/all_products")}>
                     View all products
                 </button>

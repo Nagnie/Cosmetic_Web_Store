@@ -18,6 +18,8 @@ import { ProductModule } from './module/product/product.module';
 import { CategoryModule } from './module/category/category.module';
 import { SubcategoryModule } from './module/subcategory/subcategory.module';
 import { OrderModule } from './module/order/order.module';
+import { CartModule } from './module/cart/cart.module';
+
 
 @Module({
   imports: [
@@ -52,7 +54,8 @@ import { OrderModule } from './module/order/order.module';
     ProductModule,
     CategoryModule,
     SubcategoryModule,
-    OrderModule
+    OrderModule,
+    CartModule
   ],
   controllers: [AppController],
   providers: [
