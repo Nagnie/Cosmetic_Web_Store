@@ -396,6 +396,16 @@ const CheckoutCustomerInfo = () => {
             </Form.Item>
           </div>
 
+          <div>
+            <Form.Item label="Ghi chú" name="note">
+              <Input.TextArea
+                rows={4}
+                placeholder="Nhập ghi chú (nếu có)"
+                className="rounded-md"
+              />
+            </Form.Item>
+          </div>
+
           {/* Submit */}
           <div className="mt-6 flex items-center justify-between gap-4">
             <Link
