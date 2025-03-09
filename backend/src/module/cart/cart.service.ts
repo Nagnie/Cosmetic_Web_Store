@@ -60,6 +60,7 @@ export class CartService {
     //   data: data
     // }
 
+    // Way 02: 
     const cartItemsJson = JSON.stringify(req.session.cart);
     console.log('JSON: ', cartItemsJson);
     const total_items = req.session.cart.length;
@@ -70,7 +71,7 @@ export class CartService {
             SELECT * FROM jsonb_to_recordset($1::jsonb) 
             AS x(id_pro INT, id_class INT, quantity INT)
         )
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, class.id_class AS id_class, class.name AS class_name, pro.price AS pro_price, ci.quantity AS quantity,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, class.id_class AS id_class, class.name AS class_name, (ci.quantity * pro.price) AS pro_price, ci.quantity AS quantity,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -83,25 +84,57 @@ export class CartService {
       `, [cartItemsJson, limit, offset])
 
     let total_prices = 0;
-    for(const item of data){
+    for (const item of data) {
       total_prices += item.pro_price * item.quantity;
     }
 
     return {
       message: "Products in cart",
-      total_items: total_items,
+      page: page,
+      limit: limit,
       total_pages: total_pages,
+      total_items: total_items,
       total_prices: total_prices,
       data: data
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cart`;
-  }
+  async update(@Req() req: Request & { session: any }, updateCartDto: UpdateCartDto) {
+    const { id_pro, old_id_class, id_class, quantity } = updateCartDto;
 
-  update(id: number, updateCartDto: UpdateCartDto) {
-    return `This action updates a #${id} cart`;
+    // If user change classification
+    if (id_class !== old_id_class) {
+      req.session.cart = req.session.cart.filter(item => !(item.id_pro === id_pro && item.id_class === old_id_class));
+      const index = req.session.cart.findIndex(item => item.id_pro === id_pro && item.id_class === id_class);
+
+      if (index !== -1) {
+        req.session.cart[index].quantity = quantity;
+      } else {
+        req.session.cart.push({ id_pro, id_class, quantity });
+      }
+    } else {
+      const index = req.session.cart.findIndex(item => item.id_pro === id_pro && item.id_class === id_class);
+      if (index !== -1) {
+        req.session.cart[index].quantity = quantity;
+      }
+    }
+
+    const updatedItem = await this.dataSource.query(`
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, class.id_class AS id_class, class.name AS class_name, ($1 * pro.price) AS pro_price, $1 AS quantity,
+        COALESCE((
+          SELECT json_agg(img.link)
+          FROM product_image AS img
+          WHERE img.id_pro = pro.id_pro), '[]'::json
+        ) AS images
+        FROM product AS pro
+        JOIN classification AS class ON class.id_class = $2
+        WHERE pro.id_pro = $3
+      `, [quantity, id_class, id_pro])
+
+    return {
+      message: "Update product successfully",
+      updatedItem
+    }
   }
 
   remove(id: number) {
