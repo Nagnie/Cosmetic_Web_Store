@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import "./Admin.css"
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
-    const handleSubmit = (e) => {
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Login attempt with:', { email, password });
+        setError('');
+
+        try {
+            const response = await axios.post(
+                "http://localhost:3001/api/auth/login",
+                { email, password },
+                { withCredentials: true, } // Quan trọng: để gửi cookie từ server
+            );
+
+            if (response.status === 201) {
+                // Lưu trạng thái đăng nhập
+                localStorage.setItem("isAdmin", "true");
+                navigate("/admin"); // Chuyển hướng đến trang Admin
+            }
+            console.log(response);
+        } catch (error) {
+            setError("Sai tài khoản hoặc mật khẩu!");
+        }
     };
 
     return (
@@ -85,18 +108,7 @@ const LoginPage = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Forgot Password Link */}
-                        {/*<div className="flex items-center justify-end">*/}
-                        {/*    <a*/}
-                        {/*        href="#"*/}
-                        {/*        className="text-sm font-medium hover:underline"*/}
-                        {/*        style={{ color: '#D14D72' }}*/}
-                        {/*    >*/}
-                        {/*        Forgot your password?*/}
-                        {/*    </a>*/}
-                        {/*</div>*/}
-
+                        {error && <div className="error-message text-red-800 ">{error}</div>}
                         {/* Submit Button */}
                         <div className="w-full">
                             <button
@@ -114,7 +126,6 @@ const LoginPage = () => {
                                 Sign in
                             </button>
                         </div>
-
                     </div>
                 </form>
             </div>

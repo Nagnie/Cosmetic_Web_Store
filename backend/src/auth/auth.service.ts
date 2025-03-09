@@ -1,15 +1,17 @@
 import {
   BadRequestException,
+  HttpCode,
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '@/module/user/user.service';
-import { comparePassword } from '@/helpers/utils';
+import { comparePassword, hashPassword, ResponseDto } from '@/helpers/utils';
 import { JwtService } from '@nestjs/jwt';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { ResetpassAuthDto } from './dto/resetpassword-auth.dto';
 import moment from 'moment';
 
 @Injectable()
@@ -34,10 +36,11 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { email: user.email, sub: user.username };
-    return {
+    const token = {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
     };
+    return new ResponseDto(HttpStatus.OK, "Login successful", token);
   }
 
   async refreshAccessToken(refreshToken: string) {
@@ -50,6 +53,26 @@ export class AuthService {
       return { access_token: newAccessToken };
     } catch (error) {
       // throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+  }
+
+  async register(createAuthDto: CreateAuthDto) {
+    try {
+      const existingUser = await this.usersService.findByEmail(createAuthDto.email);
+      if (existingUser) {
+        throw new HttpException("User already exists", HttpStatus.BAD_REQUEST);
+      }
+
+      const hashedPassword = await hashPassword(createAuthDto.password);
+      const newUser = await this.usersService.create({
+        email: createAuthDto.email,
+        password: hashedPassword,
+      });
+
+      return new ResponseDto(HttpStatus.CREATED, "User created successfully", newUser);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException("Internal server error");
     }
   }
 }
