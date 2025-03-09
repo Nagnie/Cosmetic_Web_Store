@@ -1,8 +1,32 @@
+import { Breadcrumb } from "antd";
+import { HomeOutlined } from "@ant-design/icons";
+
 import { CartCard, CartPriceInfo } from "./components";
 
 const CartPage = () => {
+  const routes = [
+    {
+      title: (
+        <>
+          <HomeOutlined className="mr-1 text-base" />
+          <span>Trang chủ</span>
+        </>
+      ),
+      href: "/",
+    },
+    {
+      title: "Giỏ hàng (11)",
+      href: "/cart",
+    },
+  ];
+
   return (
     <div className="mx-auto mt-35 mb-4 pt-10 lg:px-4">
+      {/* Breadcrumb */}
+      <div className="mb-4">
+        <Breadcrumb separator=">" items={routes} />
+      </div>
+
       <div className="flex flex-col gap-4 text-left lg:flex-row lg:items-start lg:justify-between">
         <div className="w-full rounded-md bg-white p-4 px-2 shadow-md sm:px-4 lg:w-4/5 lg:px-6">
           <div className="border-b-5 border-gray-300 pb-4">
