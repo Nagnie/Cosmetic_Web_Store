@@ -7,6 +7,9 @@ export class Order {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Column({name: "email"})
+    email: string;
+
     @Column({name: "customer"})
     customer: string;
 

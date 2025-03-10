@@ -40,6 +40,66 @@ CREATE TABLE product_image (
     FOREIGN KEY (id_pro) REFERENCES product(id_pro) ON DELETE CASCADE
 );
 
+CREATE TYPE order_status as ENUM ('delivered', 'delivering', 'ordered', 'not_ordered');
+
+CREATE TABLE orders (
+    id serial primary key,
+    customer varchar(255),
+    email varchar(255),
+    phone varchar(10),
+    address varchar(255),
+    status order_status,
+    sum_price numeric DEFAULT 0,
+    note text
+);
+
+CREATE TABLE order_detail (
+    id serial primary key,
+    order_id int references orders(id),
+    pro_id int references product(id_pro),
+    quantity int,
+    price numeric,
+    class_id int not null
+
+    ADD CONSTRAINT fk_order_product foreign key (pro_id) references product(id_pro)
+)
+
+create function cal_order_sum_price_on_insert_update_item() returns trigger as $$
+begin
+    update orders
+    set sum_price = (
+        select sum(quantity * price)
+        from order_detail
+        where order_id = new.order_id
+    )
+    where id = new.order_id;
+
+    return null;
+end;
+$$ language plpgsql;
+
+create function cal_order_sum_price_on_delete_item() returns trigger as $$
+begin
+    update orders
+    SET sum_price = COALESCE(sum_price, 0) - (
+        SELECT COALESCE(SUM(quantity * price), 0)
+        FROM order_detail
+        WHERE order_id = OLD.order_id
+    )
+    where id = old.order_id;
+
+    return null;
+end;
+$$ language plpgsql;
+
+create trigger update_order_sum_price_on_insert_update
+after insert or update on order_detail
+for each row execute function cal_order_sum_price_on_insert_update_item();
+
+create trigger update_order_sum_price_on_delete
+after delete on order_detail
+for each row execute function cal_order_sum_price_on_delete_item();
+
 -- Chèn danh mục chính (category) liên quan đến mỹ phẩm
 INSERT INTO category (name) VALUES 
 ('Makeup'),
