@@ -4,6 +4,8 @@ import PropTypes from "prop-types";
 import QuantitySelector from "./QuantitySelector";
 
 const ProductDetailInfo = ({ isShowBottomSheet = false }) => {
+  const selected = true;
+
   return (
     <div className="text-left">
       <div className="text-primary-dark text-left text-xl font-bold md:text-2xl">
@@ -42,13 +44,13 @@ const ProductDetailInfo = ({ isShowBottomSheet = false }) => {
         <Tag
           title="Giá"
           bordered={false}
-          className="!text-primary-dark !flex w-full !items-center !rounded-full !p-2 !text-xl !font-bold"
+          className="!text-primary-dark !flex w-full !items-center !rounded-full !p-2 !px-4 !text-xl !font-bold"
           color="red"
         >
           <span className="!text-2xl !font-bold">229.000đ</span>
         </Tag>
       </div>
-      <div className={`!mt-4 ${isShowBottomSheet ? "hidden" : ""}`}>
+      {/* <div className={`!mt-4 ${isShowBottomSheet ? "hidden" : ""}`}>
         <p>
           <span className="!font-bold">
             Colorkey Rose Wild Violet Eau De Parfum
@@ -58,16 +60,22 @@ const ProductDetailInfo = ({ isShowBottomSheet = false }) => {
           ấm áp từ gỗ tuyết tùng, gỗ đàn hương, kết thúc quyến rũ với rêu, cây
           bách, hương thảo. Một mùi hương đầy nữ tính, sâu lắng và khó quên.
         </p>
-      </div>
+      </div> */}
       <div className="!mt-4">
         <span className="!font-bold">Phân loại</span>
 
-        <div>
-          <Tag title="100ml" className={`!mr-2 !font-bold`} color="blue">
+        <div className="!mt-2 !flex !flex-wrap text-sm">
+          <Tag
+            title="100ml"
+            className={`${selected ? "!-translate-y-[1px] !shadow-[0_4px_10px_rgba(87,74,58,0.2),0_0_2px_rgba(87,74,58,0.3)]" : ""} !border-primary-dark !text-primary-dark !flex !h-[35px] !w-fit !items-center !justify-between bg-white !px-4 !font-bold !transition-all !duration-200`}
+          >
             100ml
           </Tag>
 
-          <Tag title="50ml" className="!font-bold" color="blue">
+          <Tag
+            title="50ml"
+            className="!border-primary-dark !text-primary-dark !flex !h-[35px] !w-fit !items-center !justify-between bg-white !px-4 !font-bold"
+          >
             50ml
           </Tag>
         </div>
@@ -78,7 +86,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false }) => {
           <QuantitySelector />
         </div>
 
-        <div className="mt-2 flex w-full flex-col gap-2 sm:flex-row sm:gap-4">
+        <div className="mt-2 flex h-[90px] w-full flex-col gap-2 sm:flex-row sm:gap-4 md:h-auto">
           <Button
             type="default"
             icon={<ShoppingCartOutlined />}

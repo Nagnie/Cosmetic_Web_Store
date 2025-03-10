@@ -18,7 +18,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="mx-auto mt-35 mb-4 px-4 pt-10">
+    <div className="mx-auto mt-35 mb-4 pt-10 sm:px-4">
       <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <ProductImageGallery />
@@ -28,6 +28,28 @@ const ProductDetail = () => {
             <ProductDetailInfo isShowBottomSheet={showBottomSheet} />
           </div>
         )}
+      </div>
+
+      <div className="mt-10">
+        <div className="flex items-center">
+          <div className="bg-primary-dark flex items-center justify-between px-6 py-3 text-white">
+            <span>Mô tả sản phẩm</span>
+          </div>
+        </div>
+
+        <div className="mt-4 text-justify">
+          <div className="mt-5">
+            <p className="text-primary-dark">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
+              aliquam, nunc sed ultricies sollicitudin, metus ex ultricies
+              libero, nec tincidunt diam nunc ac justo. Nullam nec eros
+              pellentesque, ultricies dolor vel, tincidunt purus. Nulla
+              facilisi. Nullam nec eros pellentesque, ultricies dolor vel,
+              tincidunt purus. Nulla facilisi. Nullam nec eros pellentesque,
+              ultricies dolor vel, tincidunt purus. Nulla facilisi.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div>
