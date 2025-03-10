@@ -1,6 +1,6 @@
 export enum OrderStatus {
-    DELIVERED = "DELIVERED",
-    CANCELLED = "CANCELLED",
-    ORDERED = "ORDERED",
-    NOT_ORDERED = "NOT_ORDERED"
-    }
+    DELIVERED = "delivered",
+    DELIVERING = "delivering",
+    ORDERED = "ordered",
+    NOT_ORDERED = "not_ordered"
+}

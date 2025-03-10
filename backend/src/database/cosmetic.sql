@@ -50,7 +50,8 @@ CREATE TABLE orders (
     address varchar(255),
     status order_status,
     sum_price numeric DEFAULT 0,
-    note text
+    note text,
+    checked boolean DEFAULT f
 );
 
 CREATE TABLE order_detail (
