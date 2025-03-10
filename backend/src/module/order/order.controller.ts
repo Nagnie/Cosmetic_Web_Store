@@ -8,11 +8,15 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/
 
 @Controller('order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
-  @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  @Post('finish')
+  @Public()
+  @ApiOperation({ summary: 'Finish order' })
+  @ApiResponse({ status: 201, description: 'Order successfully' })
+  @ApiBody({ type: CreateOrderDto })
+  async create(@Req() req: Request & { session: any }, @Body() createOrderDto: CreateOrderDto) {
+    return await this.orderService.create(req, createOrderDto);
   }
 
   @Get()

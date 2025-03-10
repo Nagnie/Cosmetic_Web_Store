@@ -28,13 +28,13 @@ const CartPriceInfo = () => {
           </span>
         </div>
 
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <p className="font-semibold sm:text-lg">Ghi chú đơn hàng:</p>
           <textarea
             className="focus:ring-secondary mt-2 h-24 w-full resize-none rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:outline-none"
             placeholder="Nhập ghi chú cho đơn hàng của bạn"
           ></textarea>
-        </div>
+        </div> */}
 
         <Link
           to="/checkout"

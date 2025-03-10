@@ -40,13 +40,29 @@ export class CategoryService {
   async findAll(page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
 
-    return await this.dataSource.query(`
+    const data = await this.dataSource.query(`
         SELECT cat.name AS cat_name, COUNT(scat.id_subcat) AS num_subcat
         FROM category AS cat
         LEFT JOIN sub_category AS scat ON cat.id_cat = scat.id_cat
         GROUP BY cat.id_cat, cat.name
         LIMIT $1 OFFSET $2
       `, [limit, offset])
+
+    const totalQuery = await this.dataSource.query(`
+        SELECT COUNT(cat.id_cat) AS total_items
+        FROM category AS cat
+      `);
+    const total_items = Number(totalQuery[0]?.total_items || 0);
+    const total_pages = Math.ceil(total_items / limit);
+
+    return {
+      message: "All categories",
+      page: page,
+      limit: limit,
+      total_pages: total_pages,
+      total_items: total_items,
+      data: data,
+    }
   }
 
   async findOne(id_cat: number) {

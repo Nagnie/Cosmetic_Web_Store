@@ -2,13 +2,13 @@ import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, JoinColumn } from "t
 import { Order } from "./order.entity";
 import { Product } from "@/module/product/entities/product.entity";
 
-@Entity({name: "order_detail"})
+@Entity({ name: "order_detail" })
 export class OrderDetail {
     @PrimaryGeneratedColumn()
     id: number;
 
     @ManyToOne(() => Order, order => order.orderDetails)
-    @JoinColumn({name: "order_id"})
+    @JoinColumn({ name: "order_id" })
     order: Order;
 
     // @Column({ name: "product_id" })
@@ -17,9 +17,12 @@ export class OrderDetail {
     @JoinColumn({name: "pro_id"})
     product: Product;
 
-    @Column({name: "quantity"})
+    @Column({ name: "class_id" })
+    class_id: number;
+
+    @Column({ name: "quantity" })
     quantity: number;
 
-    @Column({name: "price"})
+    @Column({ name: "price" })
     price: number;
 }
