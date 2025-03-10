@@ -4,14 +4,19 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Public } from '@/helpers/decorator/public';
 import { Request } from 'express';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
-  @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  @Post('finish')
+  @Public()
+  @ApiOperation({ summary: 'Finish order' })
+  @ApiResponse({ status: 201, description: 'Order successfully' })
+  @ApiBody({ type: CreateOrderDto })
+  async create(@Req() req: Request & { session: any }, @Body() createOrderDto: CreateOrderDto) {
+    return await this.orderService.create(req, createOrderDto);
   }
 
   @Get()
