@@ -75,7 +75,7 @@ export class ProductService {
   async findAll(page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
 
-    return await this.dataSource.query(`
+    const data = await this.dataSource.query(`
       SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name,
       pro.price AS price,
       COALESCE((
@@ -94,11 +94,31 @@ export class ProductService {
       JOIN brand AS bra ON pro.id_bra = bra.id_bra
       LIMIT $1 OFFSET $2
     `, [limit, offset])
+
+    const totalQuery = await this.dataSource.query(`
+        SELECT COUNT(pro.id_pro) AS total_items
+        FROM product AS pro
+      `);
+
+    const total_items = Number(totalQuery[0]?.total_items || 0);
+    // console.log('TOTAL ITEMS: ', total_items);
+
+    const total_pages = Math.ceil(total_items / limit);
+
+    return {
+      message: "All products",
+      page: page,
+      limit: limit,
+      total_pages: total_pages,
+      total_items: total_items,
+      data: data
+    }
+
   }
 
   async findOne(id_pro: number) {
     const productInfo = this.dataSource.query(`
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name, 
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name, pro.status AS pro_status,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -133,7 +153,7 @@ export class ProductService {
         JOIN brand b ON p.id_bra = b.id_bra
         WHERE LOWER(b.name) = $1
       `, [brandName]);
-      const allPage = Math.ceil(allItems.length / (limit as number)); 
+      const allPage = Math.ceil(allItems.length / (limit as number));
       const products = await this.dataSource.query(`
         SELECT p.*,
         COALESCE((
@@ -151,7 +171,7 @@ export class ProductService {
         WHERE LOWER(b.name) = $1
         LIMIT $2 OFFSET $3
       `, [brandName, limit, (page as number - 1) * (limit as number)]);
-      return new ResponseDto(HttpStatus.OK, "Successfully", {allPage, products});
+      return new ResponseDto(HttpStatus.OK, "Successfully", { allPage, products });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -176,7 +196,7 @@ export class ProductService {
         JOIN category c ON sc.id_cat = c.id_cat
         WHERE ($1::TEXT IS NULL OR LOWER(c.name) =  $1) AND ($2::TEXT IS NULL OR LOWER(sc.name) = $2)
       `, [cateName, subCateName]);
-      const allPage = Math.ceil(allItems.length / (limit as number)); 
+      const allPage = Math.ceil(allItems.length / (limit as number));
       const products = await this.dataSource.query(`
         SELECT p.*,
         COALESCE((
@@ -195,7 +215,7 @@ export class ProductService {
         WHERE ($1::TEXT IS NULL OR LOWER(c.name) =  $1) AND ($2::TEXT IS NULL OR LOWER(sc.name) = $2)
         LIMIT $3 OFFSET $4
       `, [cateName, subCateName, limit, (page as number - 1) * (limit as number)]);
-      return new ResponseDto(HttpStatus.OK, "Successfully", {allPage, products});
+      return new ResponseDto(HttpStatus.OK, "Successfully", { allPage, products });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -227,8 +247,8 @@ export class ProductService {
           ($2::TEXT IS NULL OR LOWER(c.name) =  $2) AND 
           ($3::TEXT IS NULL OR LOWER(sc.name) = $3) AND
           ($4::TEXT IS NULL OR LOWER(b.name) = $4)  
-      `,[proName, cateName, subCateName, brandName]);
-      const allPage = Math.ceil(allIteams.length / (limit as number)); 
+      `, [proName, cateName, subCateName, brandName]);
+      const allPage = Math.ceil(allIteams.length / (limit as number));
       const products = await this.dataSource.query(`
         SELECT p.*,
         COALESCE((
@@ -253,13 +273,13 @@ export class ProductService {
         LIMIT $5 OFFSET $6
       `, [proName, cateName, subCateName, brandName, limit, (page as number - 1) * (limit as number)]);
 
-      return new ResponseDto(HttpStatus.OK, "Successfully", {allPage, products});
+      return new ResponseDto(HttpStatus.OK, "Successfully", { allPage, products });
     } catch (error) {
       throw new InternalServerErrorException("Failed to search products");
     }
   }
 
-  async findSameBrand(bra_name: string, page: number, limit: number){
+  async findSameBrand(bra_name: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
 
     return await this.dataSource.query(`
@@ -276,7 +296,7 @@ export class ProductService {
       `, [bra_name, limit, offset])
   }
 
-  async findSameSubcategory(scat_name: string, page: number, limit: number){
+  async findSameSubcategory(scat_name: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
 
     return await this.dataSource.query(`

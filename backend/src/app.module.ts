@@ -17,6 +17,9 @@ import { BrandModule } from './module/brand/brand.module';
 import { ProductModule } from './module/product/product.module';
 import { CategoryModule } from './module/category/category.module';
 import { SubcategoryModule } from './module/subcategory/subcategory.module';
+import { OrderModule } from './module/order/order.module';
+import { CartModule } from './module/cart/cart.module';
+
 
 @Module({
   imports: [
@@ -50,7 +53,9 @@ import { SubcategoryModule } from './module/subcategory/subcategory.module';
     BrandModule,
     ProductModule,
     CategoryModule,
-    SubcategoryModule
+    SubcategoryModule,
+    OrderModule,
+    CartModule
   ],
   controllers: [AppController],
   providers: [

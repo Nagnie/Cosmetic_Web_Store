@@ -11,7 +11,7 @@ export class SubcategoryService {
 
   async create(createSubcategoryDto: CreateSubcategoryDto) {
     const { subcat_name, id_cat } = createSubcategoryDto;
-    
+
     // Check exist
     const existingSubcategory = await this.dataSource.query(`
     SELECT * FROM sub_category WHERE name = $1;
@@ -40,14 +40,30 @@ export class SubcategoryService {
   async findAll(page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
 
-    return await this.dataSource.query(`
+    const data = await this.dataSource.query(`
         SELECT scat.name AS scat_name, cat.name AS cat_name, COUNT(p.id_pro) AS num_pro
         FROM sub_category AS scat
         JOIN category AS cat ON scat.id_cat = cat.id_cat
         LEFT JOIN product AS p ON p.id_subcat = scat.id_subcat
         GROUP BY scat.id_subcat, scat.name, cat.name
         LIMIT $1 OFFSET $2
-      `, [limit, offset])
+      `, [limit, offset]);
+
+    const totalQuery = await this.dataSource.query(`
+        SELECT COUNT(scat.id_subcat) AS total_items
+        FROM sub_category AS scat
+      `);
+    const total_items = Number(totalQuery[0]?.total_items || 0);
+    const total_pages = Math.ceil(total_items / limit);
+
+    return {
+      message: "All sub categories",
+      page: page,
+      limit: limit,
+      total_pages: total_pages,
+      total_items: total_items,
+      data: data,
+    }
   }
 
   async update(id_subcat: number, updateSubcategoryDto: UpdateSubcategoryDto) {
@@ -59,7 +75,7 @@ export class SubcategoryService {
       WHERE id_subcat = $3
       RETURNING *;
     `,
-    [subcat_name, id_cat, id_subcat]);
+      [subcat_name, id_cat, id_subcat]);
 
     return data.length > 0 ? data[0] : null;
   }
@@ -70,6 +86,6 @@ export class SubcategoryService {
       RETURNING *;
     `, [id_subcat])
 
-  return data[0];
+    return data[0];
   }
 }
