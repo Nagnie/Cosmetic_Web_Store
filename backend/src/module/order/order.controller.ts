@@ -4,6 +4,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Public } from '@/helpers/decorator/public';
 import { Request } from 'express';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('order')
 export class OrderController {
@@ -16,13 +17,18 @@ export class OrderController {
 
   @Get()
   @Public()
+  @ApiOperation({ summary: 'Get all orders' })
+  @ApiResponse({ status: 200, description: 'Get all orders' })
+  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of records per page' })
   async findAll(@Req() req: Request) {
     return this.orderService.findAll(req);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() req: Request) {
-    return this.orderService.findOne(+id, req);
+  @Public()
+  findOne(@Param('id') orderId: string, @Req() req: Request) {
+    return this.orderService.findOne(+orderId, req);
   }
 
   @Patch(':id')
