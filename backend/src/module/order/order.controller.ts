@@ -42,12 +42,23 @@ export class OrderController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
+  @Public()
+  @ApiOperation({ summary: 'Update read & order status' })
+  @ApiParam({name: "id", required: true, description: "Order id"})
+  @ApiBody({type: UpdateOrderDto})
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({status: 500, description: 'Internal server error'})
+  async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+    return await this.orderService.update(+id, updateOrderDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
+  @Public()
+  @ApiParam({name: "id", required: true, description: "Order id"})
+  @ApiOperation({ summary: 'Delete order' })
+  @ApiResponse({ status: 200, description: 'Successfully' })
+  @ApiResponse({status: 500, description: 'Internal server error'})
+  async remove(@Param('id') id: string) {
+    return await this.orderService.remove(+id);
   }
 }

@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, InternalServerErrorException, Req } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, Req } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { DataSource, In, Repository } from 'typeorm';
@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseDto } from '@/helpers/utils';
 import { Request } from 'express';
 import { Image } from '../image/entities/image.entity';
+import { OrderStatus } from './order_status.enum';
 
 @Injectable()
 export class OrderService {
@@ -33,7 +34,7 @@ export class OrderService {
 
     try {
       // INSERT ORDER
-      const status = "not_ordered";
+      const status = OrderStatus.NOT_ORDERED;
       const insertOrder = await queryRunner.query(`
           INSERT INTO orders(customer, email, phone, address, status, sum_price, note)
           VALUES($1, $2, $3, $4, $5, $6, $7)
@@ -115,11 +116,37 @@ export class OrderService {
     }
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async update(id: number, updateOrderDto: UpdateOrderDto) {
+    try {
+      const order = await this.orderRepository.findOne({
+        where: {id}
+      });
+
+      if (!order) {
+        throw new HttpException("Brand not found with id: " + id, HttpStatus.NOT_FOUND);
+      }
+      await this.orderRepository.update(id, updateOrderDto);
+
+      return new ResponseDto(HttpStatus.OK, "Successfully", updateOrderDto);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  async remove(id: number) {
+    try {
+      const order = await this.orderRepository.findOne({
+        where: {id}
+      });
+
+      if (!order) {
+        throw new HttpException("Order not found with id: " + id, HttpStatus.NOT_FOUND);
+      }
+
+      await this.orderRepository.delete(id);
+      return new ResponseDto(200, "Delete order successfully", null);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }
