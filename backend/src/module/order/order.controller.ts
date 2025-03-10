@@ -4,7 +4,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Public } from '@/helpers/decorator/public';
 import { Request } from 'express';
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('order')
 export class OrderController {
@@ -27,6 +27,12 @@ export class OrderController {
 
   @Get(':id')
   @Public()
+  @ApiOperation({ summary: 'Get detail orders' })
+  @ApiResponse({ status: 200, description: 'Detail orders' })
+  @ApiResponse({status: 500, description: 'Internal server error'})
+  @ApiParam({name: "id", required: true, example: 5, description: "Order id"})
+  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number (for product paginating)' })
+  @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of records per page (for product paginating)' })
   findOne(@Param('id') orderId: string, @Req() req: Request) {
     return this.orderService.findOne(+orderId, req);
   }
