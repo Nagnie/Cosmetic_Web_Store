@@ -32,12 +32,12 @@ const CategoryTable = () => {
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');
             }
-
+            console.log(response);
             const result = await response.json();
-
+            console.log(result);
             if (response.status === 200) {
-                setCategories(result);
-                setTotalPages(1);
+                setCategories(result.data);
+                setTotalPages(result.total_pages);
             } else {
                 throw new Error(result.message || 'Failed to fetch categories');
             }

@@ -2,9 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Edit, PlusCircle, Save, Search, Trash2, X } from "lucide-react";
 import { MutatingDots } from 'react-loader-spinner';
 
+// This array is missing from your code
+const categories = [
+    { cat_name: "Skincare" },
+    { cat_name: "Makeup" },
+    { cat_name: "Haircare" }
+];
+
 const SubCategoryTable = () => {
     const [subcategories, setSubcategories] = useState([]);
-    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
@@ -37,11 +43,10 @@ const SubCategoryTable = () => {
 
             const result = await response.json();
 
-            if (Array.isArray(result)) {
-                setSubcategories(result);
-                // Calculate total pages based on the result length and limit
-                // This is a placeholder - you might need to adjust based on your API response
-                setTotalPages(Math.ceil(result.length / limit) || 1);
+            // Fixed processing of API response
+            if (result && result.data) {
+                setSubcategories(result.data);
+                setTotalPages(result.total_pages);
             } else {
                 throw new Error(result.message || 'Failed to fetch subcategories');
             }
@@ -50,27 +55,6 @@ const SubCategoryTable = () => {
             console.error('Error fetching Subcategories:', err);
         } finally {
             setLoading(false);
-        }
-    };
-
-    // Fetch categories for dropdown
-    const fetchCategories = async () => {
-        try {
-            const response = await fetch(`http://localhost:3001/api/category`);
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch categories');
-            }
-
-            const result = await response.json();
-
-            if (Array.isArray(result)) {
-                setCategories(result);
-            } else {
-                throw new Error(result.message || 'Failed to fetch categories');
-            }
-        } catch (err) {
-            console.error('Error fetching Categories:', err);
         }
     };
 
@@ -86,7 +70,6 @@ const SubCategoryTable = () => {
     // Load data on component mount and when page changes
     useEffect(() => {
         fetchSubcategories();
-        fetchCategories(); // Fetch categories for the dropdown
     }, [page]);
 
     // Handle form input changes
@@ -272,7 +255,7 @@ const SubCategoryTable = () => {
     const resetForm = () => {
         setNewSubcategory({
             scat_name: '',
-            cat_name: categories.length > 0 ? categories[0].cat_name : ''
+            cat_name: ''
         });
         setCurrentSubcategory(null);
         setIsEditing(false);

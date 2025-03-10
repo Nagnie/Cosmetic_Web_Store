@@ -39,11 +39,13 @@ const Product = () => {
             if (!response.ok) {
                 throw new Error('Something went wrong while fetching the data.');
             }
+            // console.log(response);
             const result = await response.json();
+            // console.log(result);
             if (response.status === 200) {
-                setProducts(result);
+                setProducts(result.data);
                 // If your API returns pagination info differently, adjust this
-                setTotalPages(Math.ceil(result.length / limit) || 1);
+                setTotalPages(result.total_pages);
             } else {
                 throw new Error(result.message);
             }

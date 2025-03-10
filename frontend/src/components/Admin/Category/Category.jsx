@@ -1,6 +1,4 @@
 import React, {useState} from 'react';
-import {Edit, Eye, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { DNA } from "react-loader-spinner";
 import CategoryTable from "@components/Admin/Category/CategoryTable.jsx";
 import SubCategoryTable from "@components/Admin/Category/SubCategoryTable.jsx";
 
