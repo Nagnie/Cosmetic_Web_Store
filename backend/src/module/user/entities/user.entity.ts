@@ -1,7 +1,7 @@
 import moment from "moment";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({name: "user"})
+@Entity({name: "account"})
 export class User {
     @PrimaryGeneratedColumn({name: "id_acc"})
     id: number;
