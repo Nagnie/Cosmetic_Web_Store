@@ -13,9 +13,6 @@ export class Order {
     @Column({name: "customer"})
     customer: string;
 
-    @Column({name: "email"})
-    email: string;
-
     @Column({name: "phone"})
     phone: string;
 
