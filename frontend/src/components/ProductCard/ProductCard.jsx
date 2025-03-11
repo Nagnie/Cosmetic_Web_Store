@@ -1,7 +1,10 @@
+import { Link } from "react-router-dom";
+
 const ProductCard = ({ product }) => {
   // console.log(product);
   return (
-    <div
+    <Link
+      to={`/products/${product.pro_name}/${product.id_pro}`}
       className="flex h-100 w-full flex-col justify-between rounded-lg p-4"
       style={{ backgroundColor: "#fff3e7" }}
     >
@@ -26,7 +29,7 @@ const ProductCard = ({ product }) => {
           Add to cart
         </button>
       </div>
-    </div>
+    </Link>
   );
 };
 

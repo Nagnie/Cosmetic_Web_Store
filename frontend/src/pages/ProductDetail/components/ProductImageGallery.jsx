@@ -31,7 +31,13 @@ const IMAGE_LIST = [
 
 const ProductImageGallery = ({ images = [], maxVisibleThumbnails = 4 }) => {
   const imageList = images.length ? images : IMAGE_LIST;
-  const [currentImage, setCurrentImage] = useState(imageList[0]);
+
+  const [currentImage, setCurrentImage] = useState(
+    imageList[0] || {
+      id: 0,
+      src: "https://placehold.co/499x499?text=Not found",
+    },
+  );
   const [isChanging, setIsChanging] = useState(false);
   const [nextImage, setNextImage] = useState(null);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -211,7 +217,7 @@ const ProductImageGallery = ({ images = [], maxVisibleThumbnails = 4 }) => {
           >
             {imageList.map((image) => (
               <div
-                key={image.id}
+                key={image.id || image.src || image}
                 className="flex-shrink-0"
                 style={{
                   width: isDesktop ? "100%" : "100px",

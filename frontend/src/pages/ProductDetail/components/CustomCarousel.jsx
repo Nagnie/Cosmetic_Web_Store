@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import PropTypes from "prop-types";
+
 import { ProductCard } from ".";
 
 const LoadingProductCard = () => (
@@ -15,18 +18,43 @@ const LoadingProductCard = () => (
   </div>
 );
 
-const CustomCarousel = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+const CustomCarousel = ({
+  queryKey,
+  queryFn,
+  emptyMessage = "Không có sản phẩm nào",
+  itemsPerPage = 8,
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState(0);
   const [isTouching, setIsTouching] = useState(false);
   const [touchDelta, setTouchDelta] = useState(0);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  // const [loadingMore, setLoadingMore] = useState(false);
   const carouselRef = useRef(null);
-  const itemsPerLoad = 8; // Number of items to load per API call
+
+  // React Query infinite fetch products - adjusted for your API format
+  const {
+    data,
+    isLoading,
+    isError,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey,
+    queryFn: ({ pageParam = 1 }) => queryFn({ pageParam, limit: itemsPerPage }),
+    getNextPageParam: (lastPage) => {
+      // Sử dụng cấu trúc API mới
+      const totalPages = lastPage.total_pages || 0;
+      const currentPage = lastPage.page || 0;
+
+      // Nếu còn trang tiếp theo thì trả về số trang kế
+      return currentPage < totalPages ? currentPage + 1 : undefined;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Làm phẳng mảng các trang sản phẩm thành một mảng duy nhất
+  const products = data?.pages.flatMap((page) => page.data || []) || [];
 
   const getItemsPerView = () => {
     if (typeof window !== "undefined") {
@@ -38,50 +66,6 @@ const CustomCarousel = () => {
   };
 
   const [itemsPerView, setItemsPerView] = useState(getItemsPerView());
-
-  // Simulate API call to fetch products
-  const fetchProducts = async (pageNum) => {
-    if (pageNum === 1) {
-      setLoading(true);
-    } else {
-      setLoadingMore(true);
-    }
-
-    // Simulate API delay - longer delay for demo purposes
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Mock data generation - replace with your actual API call
-    const newProducts = Array(itemsPerLoad)
-      .fill(null)
-      .map((_, index) => ({
-        id: (pageNum - 1) * itemsPerLoad + index + 1,
-        name: `Product ${(pageNum - 1) * itemsPerLoad + index + 1}`,
-        price: (Math.random() * 100 + 10).toFixed(2),
-      }));
-
-    // Simulate end of data after page 3
-    const noMoreData = pageNum >= 3;
-
-    if (pageNum === 1) {
-      setLoading(false);
-    } else {
-      setLoadingMore(false);
-    }
-
-    setHasMore(!noMoreData);
-
-    return newProducts;
-  };
-
-  // Initial data load
-  useEffect(() => {
-    const loadInitialData = async () => {
-      const initialProducts = await fetchProducts(1);
-      setProducts(initialProducts);
-    };
-
-    loadInitialData();
-  }, []);
 
   // Handle window resize
   useEffect(() => {
@@ -99,20 +83,18 @@ const CustomCarousel = () => {
   }, [products.length]);
 
   const loadMoreProducts = async () => {
-    if (loadingMore || !hasMore) return;
+    if (isFetchingNextPage || !hasNextPage) return;
 
-    const nextPage = page + 1;
-    const newProducts = await fetchProducts(nextPage);
-
-    setProducts((prevProducts) => [...prevProducts, ...newProducts]);
-    setPage(nextPage);
+    // setLoadingMore(true);
+    await fetchNextPage();
+    // setLoadingMore(false);
   };
 
   const nextSlide = async () => {
     const maxIndex = Math.max(0, products.length - itemsPerView);
 
     // If we're near the end and there's more data to load
-    if (currentIndex >= maxIndex - 2 && hasMore && !loadingMore) {
+    if (currentIndex >= maxIndex - 2 && hasNextPage && !isFetchingNextPage) {
       await loadMoreProducts();
     }
 
@@ -164,10 +146,18 @@ const CustomCarousel = () => {
       ));
   };
 
+  // Show empty state when no products
+  if (!isLoading && !isError && products.length === 0) {
+    return <div className="py-8 text-center text-gray-500">{emptyMessage}</div>;
+  }
+
+  // Tính tổng số sản phẩm từ phản hồi API gần nhất
+  const totalItems = data?.pages[data.pages.length - 1]?.total_items || 0;
+
   return (
     <div className="relative w-full py-8 pt-2">
       {/* Loading overlay for initial load */}
-      {loading && (
+      {isLoading && (
         <div className="bg-opacity-60 absolute inset-0 z-20 flex items-center justify-center bg-white">
           <div className="text-center">
             <Loader className="mx-auto h-10 w-10 animate-spin text-blue-600" />
@@ -175,6 +165,13 @@ const CustomCarousel = () => {
               Đang tải sản phẩm...
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {isError && (
+        <div className="py-8 text-center text-red-500">
+          Đã xảy ra lỗi khi tải sản phẩm. Vui lòng thử lại sau.
         </div>
       )}
 
@@ -192,29 +189,29 @@ const CustomCarousel = () => {
             transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
           }}
         >
-          {loading ? (
+          {isLoading ? (
             renderLoadingCards()
           ) : (
             <>
               {products.map((product) => (
                 <div
-                  key={product.id}
+                  key={product.id_pro}
                   className="flex-shrink-0 px-2"
                   style={{ width: `${100 / itemsPerView}%` }}
                 >
-                  <ProductCard />
+                  <ProductCard product={product} />
                 </div>
               ))}
 
               {/* Loading more indicator */}
-              {loadingMore && renderLoadingCards()}
+              {isFetchingNextPage && renderLoadingCards()}
             </>
           )}
         </div>
       </div>
 
       {/* Loading indicator for "load more" */}
-      {loadingMore && (
+      {isFetchingNextPage && (
         <div className="absolute top-1/2 right-12 z-10 flex -translate-y-1/2 items-center rounded-lg bg-blue-500 px-3 py-2 text-white shadow-lg">
           <Loader className="mr-2 h-4 w-4 animate-spin" />
           <span className="text-sm">Đang tải thêm...</span>
@@ -224,7 +221,7 @@ const CustomCarousel = () => {
       {/* Navigation buttons */}
       <button
         onClick={prevSlide}
-        disabled={currentIndex === 0 || loading}
+        disabled={currentIndex === 0 || isLoading}
         className="absolute top-1/2 left-0 z-10 -translate-y-1/2 rounded-full bg-white p-2 shadow-md disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Previous"
       >
@@ -234,9 +231,9 @@ const CustomCarousel = () => {
       <button
         onClick={nextSlide}
         disabled={
-          (currentIndex >= products.length - itemsPerView && !hasMore) ||
-          loading ||
-          loadingMore
+          (currentIndex >= products.length - itemsPerView && !hasNextPage) ||
+          isLoading ||
+          isFetchingNextPage
         }
         className="absolute top-1/2 right-0 z-10 -translate-y-1/2 rounded-full bg-white p-2 shadow-md disabled:cursor-not-allowed disabled:opacity-30"
         aria-label="Next"
@@ -247,11 +244,14 @@ const CustomCarousel = () => {
       {/* Pagination info */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          {!loading &&
-            `Đang hiển thị ${currentIndex + 1} đến ${Math.min(currentIndex + itemsPerView, products.length)} trong số ${hasMore ? "nhiều" : products.length} sản phẩm`}
+          {!isLoading &&
+            `Đang hiển thị ${currentIndex + 1} đến ${Math.min(
+              currentIndex + itemsPerView,
+              products.length,
+            )} trong số ${totalItems || products.length} sản phẩm`}
         </div>
 
-        {hasMore && !loading && !loadingMore && (
+        {hasNextPage && !isLoading && !isFetchingNextPage && (
           <button
             onClick={loadMoreProducts}
             className="flex items-center text-sm text-blue-600 hover:text-blue-800"
@@ -263,6 +263,13 @@ const CustomCarousel = () => {
       </div>
     </div>
   );
+};
+
+CustomCarousel.propTypes = {
+  queryKey: PropTypes.array.isRequired,
+  queryFn: PropTypes.func.isRequired,
+  emptyMessage: PropTypes.string,
+  itemsPerPage: PropTypes.number,
 };
 
 export default CustomCarousel;
