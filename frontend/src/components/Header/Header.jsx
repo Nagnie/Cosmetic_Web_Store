@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useScrollDirection } from "../../hooks/useScrollDirectionHook.jsx";
 import "./Header.css";
 import { useCartStore } from "@components/Cart";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const scrollDirection = useScrollDirection();
@@ -102,12 +103,14 @@ const Header = () => {
       className={`${scrollDirection === "down" ? "opacity-0" : "opacity-100"} fixed top-0 right-0 left-0 z-50 transition-opacity duration-500`}
     >
       <header className="flex items-center justify-around bg-white py-6">
-        <h2
-          className="cursor-pointer text-4xl font-bold"
-          style={{ color: "#5d4e3e" }}
-        >
-          Nâu Cosmetic
-        </h2>
+        <Link to="/">
+          <h2
+            className="cursor-pointer text-4xl font-bold"
+            style={{ color: "#5d4e3e" }}
+          >
+            Nâu Cosmetic
+          </h2>
+        </Link>
         <div className="search-bar flex gap-2">
           <input
             type="text"
