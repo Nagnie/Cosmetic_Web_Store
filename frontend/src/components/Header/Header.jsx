@@ -115,6 +115,7 @@ const Header = () => {
             className="rounded-3xl border px-5 py-2"
             style={{ width: "90%" }}
           />
+
           <button
             className="rounded-3xl px-4 text-white"
             style={{ backgroundColor: "#8D7B68" }}
