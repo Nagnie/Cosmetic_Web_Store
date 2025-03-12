@@ -92,6 +92,7 @@ const Header = () => {
   ];
 
   const toggleCartDrawer = useCartStore((state) => state.toggleCartDrawer);
+  const cartItemsCount = useCartStore((state) => state.itemCount);
 
   const handleCartClick = (e) => {
     e.preventDefault();
@@ -130,9 +131,14 @@ const Header = () => {
           onClick={(e) => {
             handleCartClick(e);
           }}
-          className="cursor-pointer text-3xl select-none"
+          className="relative cursor-pointer text-3xl select-none"
         >
           🛒
+          {cartItemsCount > 0 && (
+            <div className="absolute -top-0.5 left-6 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-center align-top text-[12px] text-white">
+              {cartItemsCount}
+            </div>
+          )}
         </span>
       </header>
       <nav

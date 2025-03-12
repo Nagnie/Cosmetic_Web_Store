@@ -1,14 +1,30 @@
+import { useState } from "react";
 import { Button, Tag } from "antd";
-import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+
 import QuantitySelector from "./QuantitySelector";
 import { formatCurrency } from "@utils/utils";
-import { Link } from "react-router-dom";
+import { useAddCartItem } from "@hooks/useCartQueries";
 
 const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
   const selected = true;
 
   const classification = product.classification ?? [];
+  const [quantity, setQuantity] = useState(1);
+
+  const addCartItemMutation = useAddCartItem();
+
+  const handleAddToCart = () => {
+    const item = {
+      id_pro: product.id_pro,
+      id_class: classification[0]?.id_class ?? "",
+      quantity: quantity,
+    };
+
+    addCartItemMutation.mutate(item);
+  };
 
   return (
     <div className="text-left">
@@ -97,7 +113,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
       <div className={`!mt-10 ${isShowBottomSheet ? "" : "hidden md:block"}`}>
         <div className="flex items-center space-x-4">
           <span className="font-bold">SỐ LƯỢNG:</span>
-          <QuantitySelector />
+          <QuantitySelector onChange={setQuantity} />
         </div>
 
         <div className="mt-4 flex h-[90px] w-full flex-col gap-2 sm:flex-row sm:gap-4 md:h-auto">
@@ -105,7 +121,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
             type="default"
             icon={<ShoppingCartOutlined />}
             size="large"
-            // onClick={handleAddToCart}
+            onClick={() => handleAddToCart()}
             className="!bg-secondary !border-secondary !text-primary-dark flex flex-1 items-center justify-center"
           >
             Thêm vào giỏ
