@@ -10,6 +10,26 @@ const productsApi = {
     });
   },
 
+  getProductsByBrandName: async (brandName, { page = 1, limit = 9 }) => {
+    return axios.get(`/product/brand`, {
+      params: {
+        brand: brandName,
+        page,
+        limit,
+      },
+    });
+  },
+
+  getProductsByCategoryName: async (categoryName, { page = 1, limit = 9 }) => {
+    return axios.get(`/product/category`, {
+      params: {
+        category: categoryName,
+        page,
+        limit,
+      },
+    });
+  },
+
   getProductDetail: async (id, { signal }) => {
     return axios.get(`/product/${id}`, { signal });
   },

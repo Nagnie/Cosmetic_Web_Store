@@ -9,11 +9,12 @@ import CustomCarousel from "./components/CustomCarousel";
 import { useQuery } from "@tanstack/react-query";
 import productsApi from "@apis/productsApi";
 import { useParams } from "react-router-dom";
+import ProductDetailSkeleton from "./components/ProductDetailInffoSkeleton";
 
 const ProductDetail = () => {
   const { id } = useParams();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["product", id],
     queryFn: ({ signal }) => productsApi.getProductDetail(id, { signal }),
   });
@@ -26,6 +27,10 @@ const ProductDetail = () => {
   }));
 
   const [showBottomSheet, setShowBottomSheet] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -76,10 +81,14 @@ const ProductDetail = () => {
           <ProductImageGallery images={images} />
         </div>
         <div className={showBottomSheet ? "hidden md:block" : "block"}>
-          <ProductDetailInfo
-            product={product}
-            isShowBottomSheet={showBottomSheet}
-          />
+          {isLoading ? (
+            <ProductDetailSkeleton isShowBottomSheet={showBottomSheet} />
+          ) : (
+            <ProductDetailInfo
+              product={product}
+              isShowBottomSheet={showBottomSheet}
+            />
+          )}
         </div>
       </div>
 
@@ -143,10 +152,14 @@ const ProductDetail = () => {
           ></div>
           <div className="absolute right-0 bottom-0 left-0 max-h-[80vh] transform overflow-y-auto rounded-t-2xl bg-white p-4 shadow-lg transition-transform duration-300">
             <div className="mx-auto mb-4 h-1 w-16 rounded-full bg-gray-300"></div>
-            <ProductDetailInfo
-              product={product}
-              isShowBottomSheet={showBottomSheet}
-            />
+            {isLoading ? (
+              <ProductDetailSkeleton isShowBottomSheet={showBottomSheet} />
+            ) : (
+              <ProductDetailInfo
+                product={product}
+                isShowBottomSheet={showBottomSheet}
+              />
+            )}
           </div>
         </div>
       )}

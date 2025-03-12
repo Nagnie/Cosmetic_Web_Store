@@ -3,6 +3,7 @@ import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
 import QuantitySelector from "./QuantitySelector";
 import { formatCurrency } from "@utils/utils";
+import { Link } from "react-router-dom";
 
 const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
   const selected = true;
@@ -23,9 +24,12 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
           className="!rounded-full"
           color="magenta"
         >
-          <a href="!#" className="!text-primary !font-bold">
+          <Link
+            to={`/all_products?brand=${product.bra_name}`}
+            className="!text-primary !font-bold"
+          >
             {product.bra_name ?? "Colorkey"}
-          </a>
+          </Link>
         </Tag>
         <Tag
           title="Danh mục"
@@ -33,7 +37,9 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
           className="!rounded-full !font-bold"
           color="blue"
         >
-          <a href="!#">{product.cat_name ?? "Nước hoa"}</a>
+          <Link to={`/all_products?category=${product.cat_name}`}>
+            {product.cat_name ?? "Nước hoa"}
+          </Link>
         </Tag>
         <Tag
           title="Tình trạng"
