@@ -1,14 +1,19 @@
-import React from "react";
+import { Link } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
-  console.log(product);
+  // console.log(product);
   return (
-    <div
+    <Link
+      to={`/products/${product.pro_name}/${product.id_pro}`}
       className="flex h-100 w-full flex-col justify-between rounded-lg p-4"
       style={{ backgroundColor: "#fff3e7" }}
     >
       <img
-        src={product.images?.[0] ?? product.image}
+        src={
+          product.images?.[0] ??
+          product.image ??
+          "https://placehold.co/276x350?text=No%20Image"
+        }
         alt={product.pro_name}
         className="h-56 w-full rounded object-cover"
       />
@@ -24,7 +29,7 @@ const ProductCard = ({ product }) => {
           Add to cart
         </button>
       </div>
-    </div>
+    </Link>
   );
 };
 
