@@ -40,28 +40,38 @@ CREATE TABLE product_image (
     FOREIGN KEY (id_pro) REFERENCES product(id_pro) ON DELETE CASCADE
 );
 
+CREATE TABLE classification (
+    id_class SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    FOREIGN KEY (id_pro) REFERENCES product(id_pro) ON DELETE CASCADE
+);
+
+
 CREATE TYPE order_status as ENUM ('delivered', 'delivering', 'ordered', 'not_ordered');
 
 CREATE TABLE orders (
-    id serial primary key,
-    customer varchar(255),
-    email varchar(255),
-    phone varchar(10),
-    address varchar(255),
+    id SERIAL PRIMARY KEY,
+    customer VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(10),
+    address VARCHAR(255),
     status order_status,
-    sum_price numeric DEFAULT 0,
-    note text
+    sum_price DECIMAL(10, 2) DEFAULT 0,
+    note TEXT
 );
 
 CREATE TABLE order_detail (
-    id serial primary key,
-    order_id int references orders(id),
-    pro_id int references product(id_pro),
-    quantity int,
-    price numeric,
-    class_id int not null
-
-    ADD CONSTRAINT fk_order_product foreign key (pro_id) references product(id_pro)
+    id SERIAL PRIMARY KEY,
+    order_id INT,
+    pro_id INT,
+    pro_image TEXT,
+    pro_name VARCHAR(255),
+    quantity INT,
+    price DECIMAL(10,2) NOT NULL,
+    class_id INT,
+    class_name VARCHAR(255),
+    CONSTRAINT fk_pro_id FOREIGN KEY (pro_id) REFERENCES product(id_pro) ON DELETE SET NULL,
+    CONSTRAINT fk_class_id FOREIGN KEY (class_id) REFERENCES classification(id_class) ON DELETE SET NULL
 )
 
 create function cal_order_sum_price_on_insert_update_item() returns trigger as $$
