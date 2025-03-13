@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, PlusCircle, Save, Search, Trash2, X } from "lucide-react";
+import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
 import { MutatingDots } from 'react-loader-spinner';
+import categoriesApi from "@apis/categoriesApi.js";
 
 const CategoryTable = () => {
     const [categories, setCategories] = useState([]);
@@ -27,19 +28,13 @@ const CategoryTable = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/category?page=${page}&limit=${limit}`);
+            const response = await categoriesApi.getCategories({ page, limit });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch categories');
-            }
-            console.log(response);
-            const result = await response.json();
-            console.log(result);
             if (response.status === 200) {
-                setCategories(result.data);
-                setTotalPages(result.total_pages);
+                setCategories(response.data.data);
+                setTotalPages(response.data.total_pages);
             } else {
-                throw new Error(result.message || 'Failed to fetch categories');
+                throw new Error(response.data.message || 'Failed to fetch categories');
             }
         } catch (err) {
             setError(err.message);
@@ -95,18 +90,10 @@ const CategoryTable = () => {
             }
 
             setActionLoading(true);
-            const response = await fetch('http://localhost:3001/api/category/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(categoryData),
-            });
+            const response = await categoriesApi.createCategory(categoryData);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to add category');
+            if (response.status !== 200) {
+                throw new Error(response.data.message || 'Failed to update category');
             }
 
             showActionMessage('Category added successfully', 'success');
@@ -123,25 +110,11 @@ const CategoryTable = () => {
     // Update category
     const updateCategory = async (id, categoryData) => {
         try {
-            // Check if updated name already exists
-            if (categoryExists(categoryData.cat_name)) {
-                showActionMessage(`Category "${categoryData.cat_name}" already exists`, 'error');
-                return false;
-            }
-
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/category/update/${id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(categoryData),
-            });
+            const response = await categoriesApi.updateCategoryDetail(id, categoryData);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to update category');
+            if (response.status !== 200) {
+                throw new Error(response.data.message || 'Failed to update category');
             }
 
             showActionMessage('Category updated successfully', 'success');
@@ -159,14 +132,10 @@ const CategoryTable = () => {
     const deleteCategory = async (id) => {
         try {
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/category/delete/${id}`, {
-                method: 'DELETE',
-            });
+            const response = await categoriesApi.deleteCategory(id)
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to delete category');
+            if (response.status !== 200) {
+                throw new Error(response.data.message || 'Failed to update category');
             }
 
             showActionMessage('Category deleted successfully', 'success');
@@ -204,11 +173,11 @@ const CategoryTable = () => {
         }
     };
 
-    // Edit Category - FIX HERE
+    // Edit Category
     const handleEdit = (category) => {
         setCurrentCategory(category);
         setNewCategory({
-            cat_name: category.cat_name // Fixed to match the correct property name
+            cat_name: category.cat_name,
         });
         setIsEditing(true);
         setFormOpen(true);
@@ -365,21 +334,39 @@ const CategoryTable = () => {
 
                 {/* Pagination */}
                 {!loading && !error && totalPages > 1 && (
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex justify-center items-center mt-10 space-x-2">
+                        {/* First Page */}
                         <button
-                            onClick={handlePrevPage}
+                            onClick={() => handlePrevPage()}
                             disabled={page === 1 || actionLoading}
-                            className={`px-4 py-2 rounded ${page === 1 || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
+                            className={`p-2 me-5 rounded ${page === 1 || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
                         >
-                            Previous
+                            <ChevronLeft />
                         </button>
-                        <span>Page {page} of {totalPages}</span>
+
+                        {/* Page Numbers */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
+                            .map((p, index, arr) => (
+                                <React.Fragment key={p}>
+                                    {index > 0 && p !== arr[index - 1] + 1 && <span>...</span>}
+                                    <button
+                                        onClick={() => setPage(p)}
+                                        className={`px-3 py-2 rounded ${p === page ? 'bg-pink-800 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                                    >
+                                        {p}
+                                    </button>
+                                </React.Fragment>
+                            ))
+                        }
+
+                        {/* Last Page */}
                         <button
-                            onClick={handleNextPage}
+                            onClick={() => handleNextPage()}
                             disabled={page === totalPages || actionLoading}
-                            className={`px-4 py-2 rounded ${page === totalPages || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
+                            className={`p-2 ms-5 rounded ${page === totalPages || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
                         >
-                            Next
+                            <ChevronRight />
                         </button>
                     </div>
                 )}

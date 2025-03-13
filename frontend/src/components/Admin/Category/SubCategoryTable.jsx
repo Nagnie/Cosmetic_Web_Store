@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, PlusCircle, Save, Search, Trash2, X } from "lucide-react";
+import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
 import { MutatingDots } from 'react-loader-spinner';
+import subcategoriesApi from "@apis/subcategoriesApi.js";
 
 // This array is missing from your code
 const categories = [
@@ -19,7 +20,7 @@ const SubCategoryTable = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 10;
+    const limit = 5;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
@@ -35,20 +36,13 @@ const SubCategoryTable = () => {
     const fetchSubcategories = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/subcategory?page=${page}&limit=${limit}`);
+            const response = await subcategoriesApi.getSubcategories({page, limit});
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch subcategories');
-            }
-
-            const result = await response.json();
-
-            // Fixed processing of API response
-            if (result && result.data) {
-                setSubcategories(result.data);
-                setTotalPages(result.total_pages);
+            if (response.status === 200) {
+                setSubcategories(response.data.data);
+                setTotalPages(response.data.total_pages);
             } else {
-                throw new Error(result.message || 'Failed to fetch subcategories');
+                throw new Error(response.data.message || 'Failed to fetch subcategories');
             }
         } catch (err) {
             setError(err.message);
@@ -107,18 +101,10 @@ const SubCategoryTable = () => {
             }
 
             setActionLoading(true);
-            const response = await fetch('http://localhost:3001/api/subcategory/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(subcategoryData),
-            });
+            const response = await subcategoriesApi.createSubcategory(subcategoryData)
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to add subcategory');
+            if (response.status !== 200) {
+                throw new Error(response.data.message || 'Failed to update category');
             }
 
             showActionMessage('Subcategory added successfully', 'success');
@@ -133,7 +119,7 @@ const SubCategoryTable = () => {
     };
 
     // Update subcategory
-    const updateSubcategory = async (oldScatName, oldCatName, subcategoryData) => {
+    const updateSubcategory = async (id, oldScatName, oldCatName, subcategoryData) => {
         try {
             // Check if updated name already exists
             if (subcategoryExists(subcategoryData.scat_name, subcategoryData.cat_name)) {
@@ -142,18 +128,7 @@ const SubCategoryTable = () => {
             }
 
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/subcategory/update`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    old_scat_name: oldScatName,
-                    old_cat_name: oldCatName,
-                    new_scat_name: subcategoryData.scat_name,
-                    new_cat_name: subcategoryData.cat_name
-                }),
-            });
+            const response = await subcategoriesApi.updateSubcategoryDetail(id, { oldScatName, oldCatName, subcategoryData })
 
             const result = await response.json();
 
@@ -397,21 +372,39 @@ const SubCategoryTable = () => {
 
                 {/* Pagination */}
                 {!loading && !error && totalPages > 1 && (
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex justify-center items-center mt-10 space-x-2">
+                        {/* First Page */}
                         <button
-                            onClick={handlePrevPage}
+                            onClick={() => handlePrevPage()}
                             disabled={page === 1 || actionLoading}
-                            className={`px-4 py-2 rounded ${page === 1 || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
+                            className={`p-2 me-5 rounded ${page === 1 || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
                         >
-                            Previous
+                            <ChevronLeft />
                         </button>
-                        <span>Page {page} of {totalPages}</span>
+
+                        {/* Page Numbers */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
+                            .map((p, index, arr) => (
+                                <React.Fragment key={p}>
+                                    {index > 0 && p !== arr[index - 1] + 1 && <span>...</span>}
+                                    <button
+                                        onClick={() => setPage(p)}
+                                        className={`px-3 py-2 rounded ${p === page ? 'bg-pink-800 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                                    >
+                                        {p}
+                                    </button>
+                                </React.Fragment>
+                            ))
+                        }
+
+                        {/* Last Page */}
                         <button
-                            onClick={handleNextPage}
+                            onClick={() => handleNextPage()}
                             disabled={page === totalPages || actionLoading}
-                            className={`px-4 py-2 rounded ${page === totalPages || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
+                            className={`p-2 ms-5 rounded ${page === totalPages || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
                         >
-                            Next
+                            <ChevronRight />
                         </button>
                     </div>
                 )}

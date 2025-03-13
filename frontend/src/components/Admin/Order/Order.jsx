@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, Eye, PlusCircle, Save, Search, Trash2, X } from "lucide-react";
+import { Eye, Search, Trash2, X } from "lucide-react";
 
 const Order = () => {
     const [orders, setOrders] = useState([]);
