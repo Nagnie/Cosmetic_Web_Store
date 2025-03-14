@@ -171,7 +171,13 @@ export class ProductService {
         WHERE LOWER(b.name) = $1
         LIMIT $2 OFFSET $3
       `, [brandName, limit, (page as number - 1) * (limit as number)]);
-      return new ResponseDto(HttpStatus.OK, "Successfully", { allPage, products });
+      return new ResponseDto(HttpStatus.OK, "Successfully", { 
+        total_pages: allPage,
+        total_items: allItems.length,
+        page,
+        limit,
+        products 
+      });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -215,7 +221,13 @@ export class ProductService {
         WHERE ($1::TEXT IS NULL OR LOWER(c.name) =  $1) AND ($2::TEXT IS NULL OR LOWER(sc.name) = $2)
         LIMIT $3 OFFSET $4
       `, [cateName, subCateName, limit, (page as number - 1) * (limit as number)]);
-      return new ResponseDto(HttpStatus.OK, "Successfully", { allPage, products });
+      return new ResponseDto(HttpStatus.OK, "Successfully", { 
+        total_pages: allPage,
+        total_items: allItems.length,
+        page,
+        limit,
+        products 
+      });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -273,7 +285,13 @@ export class ProductService {
         LIMIT $5 OFFSET $6
       `, [proName, cateName, subCateName, brandName, limit, (page as number - 1) * (limit as number)]);
 
-      return new ResponseDto(HttpStatus.OK, "Successfully", { allPage, products });
+      return new ResponseDto(HttpStatus.OK, "Successfully", { 
+        total_pages: allPage,
+        total_items: allIteams.length,
+        page,
+        limit, 
+        products
+      });
     } catch (error) {
       throw new InternalServerErrorException("Failed to search products");
     }
