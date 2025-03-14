@@ -92,24 +92,29 @@ export class OrderService {
           id: orderId
         }
       });
+      
+      if (!order) {
+        return new ResponseDto(HttpStatus.BAD_REQUEST, "Order not found", null);
+      }
+
       const allOrderDetails = await this.orderDetailRepository.find({
         where: {
           order
         },
         take: (limit as number),
         skip: ((page as number) - 1) * (limit as number),
-        relations: ["product"]
       });
-      const idPros = allOrderDetails.flatMap(item => item.product.id_pro);
-      const images = await this.imageRepository.find({
-        where: {
-          product: In(idPros)
-        },
-        relations: ["product"]
-      });
-      allOrderDetails.forEach(item => {
-        item.product.images = images.filter(image => image.product.id_pro === item.product.id_pro);
-      });
+      // console.log(allOrderDetails);
+      // const idPros = allOrderDetails.flatMap(item => item.product.id_pro);
+      // const images = await this.imageRepository.find({
+      //   where: {
+      //     product: In(idPros)
+      //   },
+      //   relations: ["product"]
+      // });
+      // allOrderDetails.forEach(item => {
+      //   item.product.images = images.filter(image => image.product.id_pro === item.product.id_pro);
+      // });
       return new ResponseDto(HttpStatus.OK, "Successfully", { allPage: Math.ceil(allOrderDetails.length / (limit as number)), allOrderDetails })
     } catch (error) {
       throw new InternalServerErrorException(error.message);
