@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Edit, PlusCircle, Save, Search, Trash2, X } from "lucide-react";
-import { DNA } from 'react-loader-spinner';
+import { MutatingDots } from 'react-loader-spinner';
 
-const Brand = () => {
-    const [brands, setBrands] = useState([]);
+const CategoryTable = () => {
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
@@ -17,33 +17,33 @@ const Brand = () => {
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
     const [formOpen, setFormOpen] = useState(false);
-    const [currentBrand, setCurrentBrand] = useState(null);
-    const [newBrand, setNewBrand] = useState({
-        name: '',
+    const [currentCategory, setCurrentCategory] = useState(null);
+    const [newCategory, setNewCategory] = useState({
+        cat_name: '',
     });
     const [isEditing, setIsEditing] = useState(false);
 
     // Fetch data from API
-    const fetchBrands = async () => {
+    const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/brands?order=ASC&sortBy=id&limit=${limit}&page=${page}`);
+            const response = await fetch(`http://localhost:3001/api/category?page=${page}&limit=${limit}`);
 
             if (!response.ok) {
-                throw new Error('Failed to fetch brands');
+                throw new Error('Failed to fetch categories');
             }
 
             const result = await response.json();
 
-            if (result.statusCode === 200) {
-                setBrands(result.data.data);
-                setTotalPages(result.data.allPage);
+            if (response.status === 200) {
+                setCategories(result);
+                setTotalPages(1);
             } else {
-                throw new Error(result.message || 'Failed to fetch brands');
+                throw new Error(result.message || 'Failed to fetch categories');
             }
         } catch (err) {
             setError(err.message);
-            console.error('Error fetching brands:', err);
+            console.error('Error fetching Categories:', err);
         } finally {
             setLoading(false);
         }
@@ -60,100 +60,120 @@ const Brand = () => {
 
     // Load data on component mount and when page changes
     useEffect(() => {
-        fetchBrands();
+        fetchCategories();
     }, [page]);
 
-    // Handle form input changes
+    // Handle form input changes - FIX HERE
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setNewBrand({
-            ...newBrand,
+        setNewCategory({
+            ...newCategory,
             [name]: value,
         });
     };
 
-    // Filter Brands based on search term
-    const filteredBrands = brands.filter(brand =>
-        brand.name.toLowerCase().includes(searchTerm.toLowerCase())
+    // Filter Categories based on search term
+    const filteredCategories = categories.filter(category =>
+        category.cat_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Add new brand
-    const addBrand = async (brandData) => {
+    // Check if category already exists
+    const categoryExists = (categoryName) => {
+        return categories.some(cat =>
+            cat.cat_name.toLowerCase() === categoryName.toLowerCase() &&
+            (!isEditing || (isEditing && cat.id !== currentCategory.id))
+        );
+    };
+
+    // Add new category
+    const addCategory = async (categoryData) => {
         try {
+            // Check if category exists before making API call
+            if (categoryExists(categoryData.cat_name)) {
+                showActionMessage(`Category "${categoryData.cat_name}" already exists`, 'error');
+                return false;
+            }
+
             setActionLoading(true);
-            const response = await fetch('http://localhost:3001/api/brands', {
+            const response = await fetch('http://localhost:3001/api/category/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(brandData),
+                body: JSON.stringify(categoryData),
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || 'Failed to add brand');
+                throw new Error(result.message || 'Failed to add category');
             }
 
-            showActionMessage('Brand added successfully', 'success');
+            showActionMessage('Category added successfully', 'success');
             return true;
         } catch (err) {
             showActionMessage(`Error: ${err.message}`, 'error');
-            console.error('Error adding brand:', err);
+            console.error('Error adding category:', err);
             return false;
         } finally {
             setActionLoading(false);
         }
     };
 
-    // Update brand
-    const updateBrand = async (id, brandData) => {
+    // Update category
+    const updateCategory = async (id, categoryData) => {
         try {
+            // Check if updated name already exists
+            if (categoryExists(categoryData.cat_name)) {
+                showActionMessage(`Category "${categoryData.cat_name}" already exists`, 'error');
+                return false;
+            }
+
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/brands/${id}`, {
+            const response = await fetch(`http://localhost:3001/api/category/update/${id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(brandData),
+                body: JSON.stringify(categoryData),
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || 'Failed to update brand');
+                throw new Error(result.message || 'Failed to update category');
             }
 
-            showActionMessage('Brand updated successfully', 'success');
+            showActionMessage('Category updated successfully', 'success');
             return true;
         } catch (err) {
             showActionMessage(`Error: ${err.message}`, 'error');
-            console.error('Error updating brand:', err);
+            console.error('Error updating category:', err);
             return false;
         } finally {
             setActionLoading(false);
         }
     };
 
-    // Delete brand
-    const deleteBrand = async (id) => {
+    // Delete category
+    const deleteCategory = async (id) => {
         try {
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/brands/${id}`, {
+            const response = await fetch(`http://localhost:3001/api/category/delete/${id}`, {
                 method: 'DELETE',
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || 'Failed to delete brand');
+                throw new Error(result.message || 'Failed to delete category');
             }
 
-            showActionMessage('Brand deleted successfully', 'success');
+            showActionMessage('Category deleted successfully', 'success');
             return true;
         } catch (err) {
             showActionMessage(`Error: ${err.message}`, 'error');
-            console.error('Error deleting brand:', err);
+            console.error('Error deleting category:', err);
             return false;
         } finally {
             setActionLoading(false);
@@ -164,52 +184,52 @@ const Brand = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Extract only the name field for API request
-        const brandData = { name: newBrand.name };
+        // Extract only the cat_name field for API request
+        const categoryData = { cat_name: newCategory.cat_name };
         let success = false;
 
-        if (isEditing && currentBrand) {
-            // Update existing Brand
-            success = await updateBrand(currentBrand.id, brandData);
+        if (isEditing && currentCategory) {
+            // Update existing Category
+            success = await updateCategory(currentCategory.id, categoryData);
         } else {
-            // Add new brand
-            success = await addBrand(brandData);
+            // Add new category
+            success = await addCategory(categoryData);
         }
 
         if (success) {
-            // Refresh the brand list
-            fetchBrands();
+            // Refresh the category list
+            fetchCategories();
             // Reset form
             resetForm();
         }
     };
 
-    // Edit Brand
-    const handleEdit = (brand) => {
-        setCurrentBrand(brand);
-        setNewBrand({
-            name: brand.name
+    // Edit Category - FIX HERE
+    const handleEdit = (category) => {
+        setCurrentCategory(category);
+        setNewCategory({
+            cat_name: category.cat_name // Fixed to match the correct property name
         });
         setIsEditing(true);
         setFormOpen(true);
     };
 
-    // Delete Brand
+    // Delete Category
     const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this brand?')) {
-            const success = await deleteBrand(id);
+        if (window.confirm('Are you sure you want to delete this category?')) {
+            const success = await deleteCategory(id);
             if (success) {
-                fetchBrands();
+                fetchCategories();
             }
         }
     };
 
     // Reset form
     const resetForm = () => {
-        setNewBrand({
-            name: '',
+        setNewCategory({
+            cat_name: '',
         });
-        setCurrentBrand(null);
+        setCurrentCategory(null);
         setIsEditing(false);
         setFormOpen(false);
     };
@@ -225,7 +245,7 @@ const Brand = () => {
 
     return (
         <div>
-            <main className="container mx-auto px-5">
+            <main>
                 {/* Action Message */}
                 {actionMessage.text && (
                     <div className={`mb-4 p-3 rounded ${actionMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -239,7 +259,7 @@ const Brand = () => {
                         <Search className="absolute left-3 top-3 text-gray-400" size={20} />
                         <input
                             type="text"
-                            placeholder="Search brands..."
+                            placeholder="Search categories..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full px-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-800"
@@ -261,20 +281,23 @@ const Brand = () => {
                         disabled={actionLoading}
                     >
                         <PlusCircle className="mr-2" size={18} />
-                        Add Brand
+                        Add Category
                     </button>
                 </div>
 
                 {/* Loading and Error States */}
                 {loading && (
-                    <div className="flex justify-center items-center h-70">
-                        <DNA
+                    <div className="flex justify-center items-center h-80">
+                        <MutatingDots
                             visible={true}
-                            height="100"
-                            width="100"
-                            ariaLabel="dna-loading"
+                            height="80"
+                            width="80"
+                            color="#c42e57"
+                            secondaryColor="#D14D72"
+                            radius="12.5"
+                            ariaLabel="mutating-dots-loading"
                             wrapperStyle={{}}
-                            wrapperClass="dna-wrapper"
+                            wrapperClass=""
                         />
                     </div>
                 )}
@@ -285,40 +308,40 @@ const Brand = () => {
                     </div>
                 )}
 
-                {/* Brands Table */}
+                {/* Categories Table */}
                 {!loading && !error && (
                     <div className="bg-white rounded-lg shadow overflow-x-auto text-left">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead style={{ backgroundColor: '#D14D72' }}>
                             <tr>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Brand Name</th>
+                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Category Name</th>
                                 <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Product Count</th>
                                 <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Actions</th>
                             </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredBrands.length > 0 ? (
-                                filteredBrands.map(brand => (
-                                    <tr key={brand.id} className="hover:bg-gray-50">
+                            {filteredCategories.length > 0 ? (
+                                filteredCategories.map(category => (
+                                    <tr key={category.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="font-medium text-gray-900">{brand.name}</div>
+                                                <div className="font-medium text-gray-900">{category.cat_name}</div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {brand.numProducts}
+                                            {category.num_subcat}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
                                                 <button
-                                                    onClick={() => handleEdit(brand)}
+                                                    onClick={() => handleEdit(category)}
                                                     className="text-blue-600 hover:text-blue-900"
                                                     disabled={actionLoading}
                                                 >
                                                     <Edit size={18} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(brand.id)}
+                                                    onClick={() => handleDelete(category.id)}
                                                     className="text-red-600 hover:text-red-900"
                                                     disabled={actionLoading}
                                                 >
@@ -331,7 +354,7 @@ const Brand = () => {
                             ) : (
                                 <tr>
                                     <td colSpan="3" className="px-6 py-4 text-center text-gray-500">
-                                        No brands found.
+                                        No categories found.
                                     </td>
                                 </tr>
                             )}
@@ -362,13 +385,13 @@ const Brand = () => {
                 )}
             </main>
 
-            {/* Add/Edit Brand Form Modal */}
+            {/* Add/Edit Category Form Modal */}
             {formOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto px-2">
                         <div className="p-6">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-bold text-gray-800">{isEditing ? 'Edit Brand' : 'Add New Brand'}</h2>
+                                <h2 className="text-xl font-bold text-gray-800">{isEditing ? 'Edit Category' : 'Add New Category'}</h2>
                                 <button onClick={resetForm} className="text-gray-400 hover:text-gray-600" disabled={actionLoading}>
                                     <X size={24} />
                                 </button>
@@ -377,11 +400,11 @@ const Brand = () => {
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-5 text-left">
                                     <div>
-                                        <label className="block font-medium text-gray-700 mb-3">Brand Name</label>
+                                        <label className="block font-medium text-gray-700 mb-3">Category Name</label>
                                         <input
                                             type="text"
-                                            name="name"
-                                            value={newBrand.name}
+                                            name="cat_name" /* FIX: Changed from 'name' to 'cat_name' */
+                                            value={newCategory.cat_name}
                                             onChange={handleInputChange}
                                             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
                                             required
@@ -416,7 +439,7 @@ const Brand = () => {
                                         ) : (
                                             <>
                                                 <Save className="inline mr-2" size={16} />
-                                                {isEditing ? 'Update Brand' : 'Add Brand'}
+                                                {isEditing ? 'Update Category' : 'Add Category'}
                                             </>
                                         )}
                                     </button>
@@ -430,4 +453,4 @@ const Brand = () => {
     );
 };
 
-export default Brand;
+export default CategoryTable;
