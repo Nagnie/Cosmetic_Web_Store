@@ -8,10 +8,25 @@ class OrderItemDto {
     @IsNotEmpty({ message: "Product ID must not be empty" })
     id_pro: number;
 
+    @ApiProperty({ example: `/localhost`, description: `Product's image link` })
+    @IsOptional()
+    @IsString({ message: `Product's image link must be a string` })
+    pro_image: string;
+
+    @ApiProperty({ example: ``, description: `Product's name` })
+    @IsOptional()
+    @IsString({ message: `Product's name must be a string` })
+    pro_name: string;
+
     @ApiProperty({ example: 5, description: "Classification ID" })
     @IsNumber({}, { message: "Classification ID must be an number" })
     @IsNotEmpty({ message: "Classification ID must not be empty" })
     id_class: number;
+
+    @ApiProperty({ example: ``, description: `Classification's name` })
+    @IsOptional()
+    @IsString({ message: `Classification's name must be a string` })
+    class_name: string;
 
     @ApiProperty({ example: 2, description: "Quantity" })
     @IsNumber({}, { message: "Quantity must be an integer" })
