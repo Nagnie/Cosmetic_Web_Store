@@ -344,6 +344,8 @@ export class ProductService {
         category = null,
         subcate = null,
         brand = null,
+        minPrice = 0,
+        maxPrice = 99999,
         page = 1,
         limit = 5,
       } = req.query;
@@ -362,8 +364,9 @@ export class ProductService {
           ($1::TEXT IS NULL OR LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')) AND
           ($2::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $2::TEXT, '%')) AND 
           ($3::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $3::TEXT, '%')) AND
-          ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%'))  
-      `, [proName, cateName, subCateName, brandName]);
+          ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%')) AND
+          (p.price >= $5 AND p.price <= $6)
+      `, [proName, cateName, subCateName, brandName, minPrice, maxPrice]);
       const allPage = Math.ceil(allIteams.length / (limit as number));
       const products = await this.dataSource.query(`
         SELECT p.*,
@@ -385,9 +388,10 @@ export class ProductService {
           ($1::TEXT IS NULL OR LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')) AND
           ($2::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $2::TEXT, '%')) AND 
           ($3::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $3::TEXT, '%')) AND
-          ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%'))
-        LIMIT $5 OFFSET $6
-      `, [proName, cateName, subCateName, brandName, limit, (page as number - 1) * (limit as number)]);
+          ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%')) AND
+          (p.price >= $5 AND p.price <= $6)
+        LIMIT $7 OFFSET $8
+      `, [proName, cateName, subCateName, brandName, minPrice, maxPrice, limit, (page as number - 1) * (limit as number)]);
 
       return new ResponseDto(HttpStatus.OK, "Successfully", { 
         total_pages: allPage,
