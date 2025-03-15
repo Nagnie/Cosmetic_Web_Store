@@ -14,18 +14,17 @@ const subcategoriesApi = {
         return axios.get(`/subcategory/${id}`, { signal });
     },
 
-    updateSubcategoryDetail: async (id, { signal }) => {
-        return axios.patch(`/subcategory/${id}`, { signal });
+    updateSubcategoryDetail: async (id, data) => {
+        return axios.patch(`/subcategory/${id}`, data);
     },
 
     createSubcategory: async (data) => {
-        return axios.post(`/subcategory`, data);
+        return axios.post(`/subcategory/create`, data);
     },
 
     deleteSubcategory: async (id) => {
-        return axios.delete(`/subcategory/${id}`);
+        return axios.delete(`/subcategory/delete/${id}`);
     }
-
 };
 
 export default subcategoriesApi;

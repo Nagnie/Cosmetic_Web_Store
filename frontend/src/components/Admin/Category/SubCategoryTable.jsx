@@ -2,17 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
 import { MutatingDots } from 'react-loader-spinner';
 import subcategoriesApi from "@apis/subcategoriesApi.js";
-
-// This array is missing from your code
-const categories = [
-    { cat_name: "Skincare" },
-    { cat_name: "Makeup" },
-    { cat_name: "Haircare" }
-];
+import categoriesApi from "@apis/categoriesApi.js";
 
 const SubCategoryTable = () => {
     const [subcategories, setSubcategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [actionMessage, setActionMessage] = useState({ text: '', type: '' });
@@ -28,7 +24,7 @@ const SubCategoryTable = () => {
     const [currentSubcategory, setCurrentSubcategory] = useState(null);
     const [newSubcategory, setNewSubcategory] = useState({
         scat_name: '',
-        cat_name: ''
+        id_cat: ''
     });
     const [isEditing, setIsEditing] = useState(false);
 
@@ -52,6 +48,29 @@ const SubCategoryTable = () => {
         }
     };
 
+    // Fetch categories from API
+    const fetchCategories = async () => {
+        try {
+            setCategoriesLoading(true);
+            const response = await categoriesApi.getCategories({
+                page: 1,
+                limit: 100 // Fetch a large number to get all categories
+            });
+
+            if (response.status === 200) {
+                setCategories(response.data.data);
+            } else {
+                throw new Error(response.data.message || 'Failed to fetch categories');
+            }
+        } catch (err) {
+            console.error('Error fetching Categories:', err);
+            // Still show the form but with an error message
+            showActionMessage('Error loading categories. Please try again.', 'error');
+        } finally {
+            setCategoriesLoading(false);
+        }
+    };
+
     // Show action message
     const showActionMessage = (text, type) => {
         setActionMessage({ text, type });
@@ -64,6 +83,7 @@ const SubCategoryTable = () => {
     // Load data on component mount and when page changes
     useEffect(() => {
         fetchSubcategories();
+        fetchCategories();
     }, [page]);
 
     // Handle form input changes
@@ -81,30 +101,16 @@ const SubCategoryTable = () => {
         subcategory.cat_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Check if subcategory already exists
-    const subcategoryExists = (scatName, catName) => {
-        return subcategories.some(
-            scat => scat.scat_name.toLowerCase() === scatName.toLowerCase() &&
-                scat.cat_name.toLowerCase() === catName.toLowerCase() &&
-                (!isEditing || (isEditing && (scat.scat_name !== currentSubcategory.scat_name ||
-                    scat.cat_name !== currentSubcategory.cat_name)))
-        );
-    };
-
     // Add new subcategory
     const addSubcategory = async (subcategoryData) => {
         try {
-            // Check if subcategory exists before making API call
-            if (subcategoryExists(subcategoryData.scat_name, subcategoryData.cat_name)) {
-                showActionMessage(`Subcategory "${subcategoryData.scat_name}" already exists in "${subcategoryData.cat_name}" category`, 'error');
-                return false;
-            }
-
             setActionLoading(true);
             const response = await subcategoriesApi.createSubcategory(subcategoryData)
 
-            if (response.status !== 200) {
-                throw new Error(response.data.message || 'Failed to update category');
+            console.log(response);
+
+            if (response.status !== 201) {
+                throw new Error(response.data.message || 'Failed to add subcategory');
             }
 
             showActionMessage('Subcategory added successfully', 'success');
@@ -121,19 +127,12 @@ const SubCategoryTable = () => {
     // Update subcategory
     const updateSubcategory = async (id, oldScatName, oldCatName, subcategoryData) => {
         try {
-            // Check if updated name already exists
-            if (subcategoryExists(subcategoryData.scat_name, subcategoryData.cat_name)) {
-                showActionMessage(`Subcategory "${subcategoryData.scat_name}" already exists in "${subcategoryData.cat_name}" category`, 'error');
-                return false;
-            }
-
             setActionLoading(true);
-            const response = await subcategoriesApi.updateSubcategoryDetail(id, { oldScatName, oldCatName, subcategoryData })
+            // Use the API function instead of direct fetch
+            const response = await subcategoriesApi.updateSubcategoryDetail(id, subcategoryData);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to update subcategory');
+            if (response.status !== 200) {
+                throw new Error(response.data.message || 'Failed to update subcategory');
             }
 
             showActionMessage('Subcategory updated successfully', 'success');
@@ -148,24 +147,16 @@ const SubCategoryTable = () => {
     };
 
     // Delete subcategory
-    const deleteSubcategory = async (scatName, catName) => {
+    const deleteSubcategory = async (id) => {
         try {
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/subcategory/delete`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    scat_name: scatName,
-                    cat_name: catName
-                }),
-            });
+            // Use the API function
+            const response = await subcategoriesApi.deleteSubcategory(id);
 
-            const result = await response.json();
+            console.log(response);
 
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to delete subcategory');
+            if (response.status !== 200) {
+                throw new Error(response.data.message || 'Failed to delete subcategory');
             }
 
             showActionMessage('Subcategory deleted successfully', 'success');
@@ -207,19 +198,24 @@ const SubCategoryTable = () => {
 
     // Edit Subcategory
     const handleEdit = (subcategory) => {
+        // Make sure categories are loaded before editing
+        if (categories.length === 0) {
+            fetchCategories();
+        }
+
         setCurrentSubcategory(subcategory);
         setNewSubcategory({
-            scat_name: subcategory.scat_name,
-            cat_name: subcategory.cat_name
+            subcat_name: subcategory.scat_name,
+            id_cat: subcategory.id_cat  // Lấy id_cat từ subcategory
         });
         setIsEditing(true);
         setFormOpen(true);
     };
 
     // Delete Subcategory
-    const handleDelete = async (scatName, catName) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this subcategory?')) {
-            const success = await deleteSubcategory(scatName, catName);
+            const success = await deleteSubcategory(id);
             if (success) {
                 fetchSubcategories();
             }
@@ -348,7 +344,7 @@ const SubCategoryTable = () => {
                                                     <Edit size={18} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(subcategory.scat_name, subcategory.cat_name)}
+                                                    onClick={() => handleDelete(subcategory.id_subcat)}
                                                     className="text-red-600 hover:text-red-900"
                                                     disabled={actionLoading}
                                                 >
@@ -439,20 +435,25 @@ const SubCategoryTable = () => {
                                     <div>
                                         <label className="block font-medium text-gray-700 mb-3">Category</label>
                                         <select
-                                            name="cat_name"
-                                            value={newSubcategory.cat_name}
+                                            name="id_cat"
+                                            value={newSubcategory.id_cat}
                                             onChange={handleInputChange}
                                             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
                                             required
-                                            disabled={actionLoading}
+                                            disabled={actionLoading || categoriesLoading}
                                         >
                                             <option value="">Select a category</option>
-                                            {categories.map((category, index) => (
-                                                <option key={index} value={category.cat_name}>
+                                            {categories.map((category) => (
+                                                <option key={category.id} value={category.id}>
                                                     {category.cat_name}
                                                 </option>
                                             ))}
                                         </select>
+                                        {categoriesLoading && (
+                                            <div className="mt-2 text-sm text-gray-500">
+                                                Loading categories...
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

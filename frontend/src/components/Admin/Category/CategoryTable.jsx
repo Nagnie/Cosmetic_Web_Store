@@ -72,27 +72,14 @@ const CategoryTable = () => {
         category.cat_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Check if category already exists
-    const categoryExists = (categoryName) => {
-        return categories.some(cat =>
-            cat.cat_name.toLowerCase() === categoryName.toLowerCase() &&
-            (!isEditing || (isEditing && cat.id !== currentCategory.id))
-        );
-    };
-
     // Add new category
     const addCategory = async (categoryData) => {
         try {
-            // Check if category exists before making API call
-            if (categoryExists(categoryData.cat_name)) {
-                showActionMessage(`Category "${categoryData.cat_name}" already exists`, 'error');
-                return false;
-            }
-
             setActionLoading(true);
             const response = await categoriesApi.createCategory(categoryData);
 
-            if (response.status !== 200) {
+            console.log(response);
+            if (response.status === 200) {
                 throw new Error(response.data.message || 'Failed to update category');
             }
 
@@ -111,8 +98,9 @@ const CategoryTable = () => {
     const updateCategory = async (id, categoryData) => {
         try {
             setActionLoading(true);
-            const response = await categoriesApi.updateCategoryDetail(id, categoryData);
+            const response = await categoriesApi.updateCategoryDetail(id, categoryData );
 
+            console.log(response);
             if (response.status !== 200) {
                 throw new Error(response.data.message || 'Failed to update category');
             }
@@ -132,7 +120,7 @@ const CategoryTable = () => {
     const deleteCategory = async (id) => {
         try {
             setActionLoading(true);
-            const response = await categoriesApi.deleteCategory(id)
+            const response = await categoriesApi.deleteCategory(id);
 
             if (response.status !== 200) {
                 throw new Error(response.data.message || 'Failed to update category');
@@ -159,7 +147,7 @@ const CategoryTable = () => {
 
         if (isEditing && currentCategory) {
             // Update existing Category
-            success = await updateCategory(currentCategory.id, categoryData);
+            success = await updateCategory(currentCategory.cat_id, categoryData);
         } else {
             // Add new category
             success = await addCategory(categoryData);
@@ -291,7 +279,7 @@ const CategoryTable = () => {
                             <tbody className="bg-white divide-y divide-gray-200">
                             {filteredCategories.length > 0 ? (
                                 filteredCategories.map(category => (
-                                    <tr key={category.id} className="hover:bg-gray-50">
+                                    <tr key={category.cat_id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="font-medium text-gray-900">{category.cat_name}</div>
@@ -310,7 +298,7 @@ const CategoryTable = () => {
                                                     <Edit size={18} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(category.id)}
+                                                    onClick={() => handleDelete(category.cat_id)}
                                                     className="text-red-600 hover:text-red-900"
                                                     disabled={actionLoading}
                                                 >
@@ -390,7 +378,7 @@ const CategoryTable = () => {
                                         <label className="block font-medium text-gray-700 mb-3">Category Name</label>
                                         <input
                                             type="text"
-                                            name="cat_name" /* FIX: Changed from 'name' to 'cat_name' */
+                                            name="cat_name"
                                             value={newCategory.cat_name}
                                             onChange={handleInputChange}
                                             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"

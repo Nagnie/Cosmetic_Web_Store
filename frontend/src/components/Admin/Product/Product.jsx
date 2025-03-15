@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, Edit, Trash2, Search, X, Save, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Search, X, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Circles } from "react-loader-spinner";
 import productsApi from "@apis/productsApi.js";
 import brandsApi from "@apis/brandsApi.js";
 import subcategoriesApi from "@apis/subcategoriesApi.js";
 import ProductDetail from "./ProductDetail";
+import ProductModal from "./ProductModal.jsx"
 
 const Product = () => {
     const [products, setProducts] = useState([]);
@@ -15,9 +16,12 @@ const Product = () => {
     const [actionLoading, setActionLoading] = useState(false);
     const [actionMessage, setActionMessage] = useState({ text: '', type: '' });
     const [viewOpen, setViewOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
 
     // Thêm state để lưu ID của sản phẩm đang xem
     const [selectedProductId, setSelectedProductId] = useState(null);
+    const [currentProduct, setCurrentProduct] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
 
     // Pagination state
     const [page, setPage] = useState(1);
@@ -26,19 +30,6 @@ const Product = () => {
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
-    const [formOpen, setFormOpen] = useState(false);
-    const [currentProduct, setCurrentProduct] = useState(null);
-    const [newProduct, setNewProduct] = useState({
-        pro_name: '',
-        id_subcat: '',
-        id_bra: '',
-        price: '',
-        img_url: '', // Đổi tên từ images thành img_url
-        description: '',
-        classification: '',
-        status: 'Available'
-    });
-    const [isEditing, setIsEditing] = useState(false);
 
     // Fetch data from API
     const fetchProducts = async () => {
@@ -66,6 +57,9 @@ const Product = () => {
     const fetchSubcategories = async () => {
         try {
             const response = await subcategoriesApi.getSubcategories();
+
+            console.log(response);
+
             if (response.status === 200) {
                 setSubcategories(response.data.data);
             } else {
@@ -81,9 +75,9 @@ const Product = () => {
         try {
             const response = await brandsApi.getBrands();
             if (response.status === 200) {
-                setBrands(response.data.data);
+                setBrands(response.data.data.data);
             } else {
-                throw new Error(response.message);
+                throw new Error(response.data.message);
             }
         } catch (err) {
             console.error("Error fetching brands:", err);
@@ -95,7 +89,6 @@ const Product = () => {
         fetchSubcategories();
         fetchBrands();
     }, [page]);
-
 
     // Show action message
     const showActionMessage = (text, type) => {
@@ -110,15 +103,6 @@ const Product = () => {
     const filteredProducts = products.filter(product =>
         product.pro_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
-    // Handle form input changes
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewProduct({
-            ...newProduct,
-            [name]: name === 'price' ? parseFloat(value) || '' : value
-        });
-    };
 
     // Add new product
     const addProduct = async (productData) => {
@@ -172,60 +156,36 @@ const Product = () => {
         }
     }
 
-    // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // Open modal for adding new product
+    const handleAdd = () => {
+        setCurrentProduct(null);
+        setIsEditing(false);
+        setModalOpen(true);
+    };
 
-        const productData = {
-            pro_name: newProduct.pro_name,
-            id_subcat: parseInt(newProduct.id_subcat),
-            id_bra: parseInt(newProduct.id_bra),
-            price: parseFloat(newProduct.price),
-            status: newProduct.status || 'Available',
-            img_url: typeof newProduct.img_url === 'string' ?
-                newProduct.img_url.split(',').map(img => img.trim()) :
-                newProduct.img_url,
-            description: newProduct.description,
-            classification: typeof newProduct.classification === 'string' ?
-                newProduct.classification.split(',').map(cls => cls.trim()) :
-                newProduct.classification,
-        };
+    // Open modal for editing product
+    const handleEdit = (product) => {
+        setCurrentProduct(product);
+        setIsEditing(true);
+        setModalOpen(true);
+    };
 
+    // Handle form submission from modal
+    const handleSubmit = async (formData) => {
         let success = false;
 
         if (isEditing && currentProduct) {
-            success = await updateProduct(currentProduct.id_pro, productData);
+            success = await updateProduct(currentProduct.id_pro, formData);
         } else {
-            success = await addProduct(productData);
+            success = await addProduct(formData);
         }
 
         if (success) {
             fetchProducts();
-            resetForm();
+            closeModal();
         }
     };
 
-    // Edit Product
-    const handleEdit = (product) => {
-        // Lấy id_subcat và id_bra từ product
-        const subcategory = subcategories.find(subcat => subcat.scat_name === product.scat_name);
-        const brand = brands.find(brand => brand.bra_name === product.bra_name);
-
-        setCurrentProduct(product);
-        setNewProduct({
-            pro_name: product.pro_name,
-            id_subcat: subcategory ? subcategory.id_subcat : '',
-            id_bra: brand ? brand.id_bra : '',
-            price: product.price,
-            img_url: Array.isArray(product.images) ? product.images.join(', ') : product.images,
-            description: product.description || '',
-            classification: Array.isArray(product.classification) ?
-                product.classification.join(', ') : product.classification || '',
-            status: product.status || 'Available'
-        });
-        setIsEditing(true);
-        setFormOpen(true);
-    }
 
     // Delete product
     const handleDelete = async (id) => {
@@ -237,33 +197,22 @@ const Product = () => {
         }
     };
 
-    // Reset form
-    const resetForm = () => {
-        setNewProduct({
-            pro_name: '',
-            id_subcat: '',
-            id_bra: '',
-            price: '',
-            img_url: '',
-            description: '',
-            classification: '',
-            status: 'Available'
-        });
-        setCurrentProduct(null);
-        setIsEditing(false);
-        setFormOpen(false);
-        setViewOpen(false);
-    };
-
     // View product details
     const handleView = (product) => {
-        setViewOpen(true);
         setSelectedProductId(product.id_pro);
+        setViewOpen(true);
     };
 
+    // Close modal
+    const closeModal = () => {
+        setModalOpen(false);
+        setCurrentProduct(null);
+        setIsEditing(false);
+    };
 
-    // Thêm hàm handleCloseView
-    const handleCloseView = () => {
+    // Close view modal
+    const closeViewModal = () => {
+        setViewOpen(false);
         setSelectedProductId(null);
     };
 
@@ -310,7 +259,7 @@ const Product = () => {
                 </div>
                 <div className="flex justify-between items-center mb-6">
                     <button
-                        onClick={() => {setFormOpen(true); setIsEditing(false);}}
+                        onClick={handleAdd}
                         className="flex items-center bg-white text-pink-600 px-4 py-2 rounded-md shadow hover:bg-gray-100"
                         disabled={actionLoading}
                     >
@@ -460,152 +409,25 @@ const Product = () => {
             </main>
 
             {/* Add/Edit Product Form Modal */}
-            {/*{formOpen && (*/}
-            {/*    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">*/}
-            {/*        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">*/}
-            {/*            <div className="p-6">*/}
-            {/*                <div className="flex justify-between items-center mb-4">*/}
-            {/*                    <h2 className="text-xl font-bold text-gray-800">{isEditing ? 'Edit Product' : 'Add New Product'}</h2>*/}
-            {/*                    <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">*/}
-            {/*                        <X size={24} />*/}
-            {/*                    </button>*/}
-            {/*                </div>*/}
-
-            {/*                <form onSubmit={handleSubmit}>*/}
-            {/*                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-left">*/}
-            {/*                        <div>*/}
-            {/*                            <label className="block font-medium text-gray-700 mb-1">Product Name</label>*/}
-            {/*                            <input*/}
-            {/*                                type="text"*/}
-            {/*                                name="pro_name"*/}
-            {/*                                value={newProduct.pro_name}*/}
-            {/*                                onChange={handleInputChange}*/}
-            {/*                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"*/}
-            {/*                                required*/}
-            {/*                            />*/}
-            {/*                        </div>*/}
-
-            {/*                        <div>*/}
-            {/*                            <label className="block font-medium text-gray-700 mb-1">Price ($)</label>*/}
-            {/*                            <input*/}
-            {/*                                type="number"*/}
-            {/*                                name="price"*/}
-            {/*                                value={newProduct.price}*/}
-            {/*                                onChange={handleInputChange}*/}
-            {/*                                min="0"*/}
-            {/*                                step="0.01"*/}
-            {/*                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"*/}
-            {/*                                required*/}
-            {/*                            />*/}
-            {/*                        </div>*/}
-
-            {/*                        <div>*/}
-            {/*                            <label className="block font-medium text-gray-700 mb-1">Subcategory</label>*/}
-            {/*                            <select*/}
-            {/*                                name="id_subcat"*/}
-            {/*                                value={newProduct.id_subcat}*/}
-            {/*                                onChange={handleInputChange}*/}
-            {/*                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"*/}
-            {/*                                required*/}
-            {/*                            >*/}
-            {/*                                <option value="">Select a subcategory</option>*/}
-            {/*                                {subcategories.map(subcat => (*/}
-            {/*                                    <option key={subcat.id_subcat} value={subcat.id_subcat}>*/}
-            {/*                                        {subcat.scat_name} ({subcat.cat_name})*/}
-            {/*                                    </option>*/}
-            {/*                                ))}*/}
-            {/*                            </select>*/}
-            {/*                        </div>*/}
-
-            {/*                        <div>*/}
-            {/*                            <label className="block font-medium text-gray-700 mb-1">Brand</label>*/}
-            {/*                            <select*/}
-            {/*                                name="id_bra"*/}
-            {/*                                value={newProduct.id_bra}*/}
-            {/*                                onChange={handleInputChange}*/}
-            {/*                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"*/}
-            {/*                                required*/}
-            {/*                            >*/}
-            {/*                                <option value="">Select a brand</option>*/}
-            {/*                                {brands.map(brand => (*/}
-            {/*                                    <option key={brand.id_bra} value={brand.id_bra}>*/}
-            {/*                                        {brand.bra_name}*/}
-            {/*                                    </option>*/}
-            {/*                                ))}*/}
-            {/*                            </select>*/}
-            {/*                        </div>*/}
-
-            {/*                        <div>*/}
-            {/*                            <label className="block font-medium text-gray-700 mb-1">Classification</label>*/}
-            {/*                            <input*/}
-            {/*                                type="text"*/}
-            {/*                                name="classification"*/}
-            {/*                                value={newProduct.classification}*/}
-            {/*                                onChange={handleInputChange}*/}
-            {/*                                placeholder="Separate with commas"*/}
-            {/*                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"*/}
-            {/*                            />*/}
-            {/*                        </div>*/}
-            {/*                    </div>*/}
-
-            {/*                    <div className="mb-4 text-left">*/}
-            {/*                        <label className="block font-medium text-gray-700 mb-1">Images</label>*/}
-            {/*                        <textarea*/}
-            {/*                            name="img_url"*/}
-            {/*                            value={newProduct.img_url}*/}
-            {/*                            onChange={handleInputChange}*/}
-            {/*                            placeholder="Enter image URLs separated by commas"*/}
-            {/*                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"*/}
-            {/*                        />*/}
-            {/*                        <p className="text-sm text-gray-500 mt-1">Separate multiple image URLs with commas</p>*/}
-            {/*                    </div>*/}
-
-            {/*                    <div className="mb-4 text-left">*/}
-            {/*                        <label className="block font-medium text-gray-700 mb-1">Description</label>*/}
-            {/*                        <textarea*/}
-            {/*                            name="description"*/}
-            {/*                            value={newProduct.description}*/}
-            {/*                            onChange={handleInputChange}*/}
-            {/*                            rows="4"*/}
-            {/*                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"*/}
-            {/*                        ></textarea>*/}
-            {/*                    </div>*/}
-
-            {/*                    <div className="flex justify-end space-x-2">*/}
-            {/*                        <button*/}
-            {/*                            type="button"*/}
-            {/*                            onClick={resetForm}*/}
-            {/*                            className="px-4 py-2 border rounded hover:bg-gray-100"*/}
-            {/*                        >*/}
-            {/*                            Cancel*/}
-            {/*                        </button>*/}
-            {/*                        <button*/}
-            {/*                            type="submit"*/}
-            {/*                            className="px-4 py-2 text-white rounded hover:opacity-90 flex items-center"*/}
-            {/*                            style={{ background: '#D14D72' }}*/}
-            {/*                            disabled={actionLoading}*/}
-            {/*                        >*/}
-            {/*                            <Save className="mr-2" size={16} />*/}
-            {/*                            {isEditing ? 'Update Product' : 'Add Product'}*/}
-            {/*                        </button>*/}
-            {/*                    </div>*/}
-            {/*                </form>*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
-            {/*)}*/}
+            <ProductModal
+                isOpen={modalOpen}
+                onClose={closeModal}
+                product={currentProduct}
+                isEditing={isEditing}
+                onSubmit={handleSubmit}
+                subcategories={subcategories}
+                brands={brands}
+                isLoading={actionLoading}
+            />
 
             {/* View Product Details Modal */}
-            {/*{selectedProductId && (*/}
-            {/*    <ProductDetail*/}
-            {/*        productId={selectedProductId}*/}
-            {/*        onClose={handleCloseView}*/}
-            {/*        onEdit={(product) => {*/}
-            {/*            handleCloseView();*/}
-            {/*            handleEdit(product);*/}
-            {/*        }}*/}
-            {/*    />*/}
-            {/*)}*/}
+            {viewOpen && selectedProductId && (
+                <ProductDetail
+                    isOpen={viewOpen}
+                    onClose={closeViewModal}
+                    productId={selectedProductId}
+                />
+            )}
         </div>
     );
 };
