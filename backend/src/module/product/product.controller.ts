@@ -63,7 +63,7 @@ export class ProductController {
   @ApiOperation({ summary: 'Filter products', description: 'Filter product by name, cate name, subcate name, brand name, minPrice & maxPrice' })
   @ApiResponse({ status: 200, description: 'Filtered products' })
   @ApiResponse({ status: 500, description: 'Failed' })
-  @ApiQuery({name: "product", required: false, example: "Dưỡng"})
+  @ApiQuery({name: "product", required: false, example: "toner"})
   @ApiQuery({name: "category", required: false, example: ""})
   @ApiQuery({name: "subcate", required: false, example: ""})
   @ApiQuery({name: "brand", required: false, example: ""})

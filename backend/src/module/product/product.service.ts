@@ -390,6 +390,7 @@ export class ProductService {
           ($3::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $3::TEXT, '%')) AND
           ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%')) AND
           (p.price >= $5 AND p.price <= $6)
+        ORDER BY p.id_pro
         LIMIT $7 OFFSET $8
       `, [proName, cateName, subCateName, brandName, minPrice, maxPrice, limit, (page as number - 1) * (limit as number)]);
 
