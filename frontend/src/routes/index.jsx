@@ -23,7 +23,7 @@ const PublicRoutes = [
     layout: GuestLayout,
   },
   {
-    path: "/products/:name",
+    path: "/products/:name/:id",
     component: ProductDetail,
     layout: GuestLayout,
   },

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useScrollDirection } from "../../hooks/useScrollDirectionHook.jsx";
 import "./Header.css";
 import { useCartStore } from "@components/Cart";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const scrollDirection = useScrollDirection();
@@ -91,6 +92,7 @@ const Header = () => {
   ];
 
   const toggleCartDrawer = useCartStore((state) => state.toggleCartDrawer);
+  const cartItemsCount = useCartStore((state) => state.itemCount);
 
   const handleCartClick = (e) => {
     e.preventDefault();
@@ -102,12 +104,14 @@ const Header = () => {
       className={`${scrollDirection === "down" ? "opacity-0" : "opacity-100"} fixed top-0 right-0 left-0 z-50 transition-opacity duration-500`}
     >
       <header className="flex items-center justify-around bg-white py-6">
-        <h2
-          className="cursor-pointer text-4xl font-bold"
-          style={{ color: "#5d4e3e" }}
-        >
-          Nâu Cosmetic
-        </h2>
+        <Link to="/">
+          <h2
+            className="cursor-pointer text-4xl font-bold"
+            style={{ color: "#5d4e3e" }}
+          >
+            Nâu Cosmetic
+          </h2>
+        </Link>
         <div className="search-bar flex gap-2">
           <input
             type="text"
@@ -115,6 +119,7 @@ const Header = () => {
             className="rounded-3xl border px-5 py-2"
             style={{ width: "90%" }}
           />
+
           <button
             className="rounded-3xl px-4 text-white"
             style={{ backgroundColor: "#8D7B68" }}
@@ -126,9 +131,14 @@ const Header = () => {
           onClick={(e) => {
             handleCartClick(e);
           }}
-          className="cursor-pointer text-3xl select-none"
+          className="relative cursor-pointer text-3xl select-none"
         >
           🛒
+          {cartItemsCount > 0 && (
+            <div className="absolute -top-0.5 left-6 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-center align-top text-[12px] text-white">
+              {cartItemsCount}
+            </div>
+          )}
         </span>
       </header>
       <nav
