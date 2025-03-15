@@ -73,12 +73,19 @@ export class OrderService {
     try {
       const { page = 1, limit = 5, sortBy = "id", order = "ASC" } = req.query;
       const allItems = await this.orderRepository.count();
+      const allPage = Math.ceil(allItems / (limit as number));
       const orders = await this.orderRepository.find({
         order: { [(sortBy as string).toLowerCase()]: order },
         take: (limit as unknown as number),
         skip: ((page as unknown as number) - 1) * (limit as unknown as number)
       });
-      return new ResponseDto(HttpStatus.OK, "Successfully", { allPage: Math.ceil(allItems / (limit as number)), orders })
+      return new ResponseDto(HttpStatus.OK, "Successfully", { 
+        total_pages: allPage,
+        total_items: allItems,
+        page,
+        limit, 
+        orders 
+      })
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -92,25 +99,37 @@ export class OrderService {
           id: orderId
         }
       });
+      
+      if (!order) {
+        return new ResponseDto(HttpStatus.BAD_REQUEST, "Order not found", null);
+      }
+
       const allOrderDetails = await this.orderDetailRepository.find({
         where: {
           order
         },
         take: (limit as number),
         skip: ((page as number) - 1) * (limit as number),
-        relations: ["product"]
       });
-      const idPros = allOrderDetails.flatMap(item => item.product.id_pro);
-      const images = await this.imageRepository.find({
-        where: {
-          product: In(idPros)
-        },
-        relations: ["product"]
-      });
-      allOrderDetails.forEach(item => {
-        item.product.images = images.filter(image => image.product.id_pro === item.product.id_pro);
-      });
-      return new ResponseDto(HttpStatus.OK, "Successfully", { allPage: Math.ceil(allOrderDetails.length / (limit as number)), allOrderDetails })
+      const allPage = Math.ceil(allOrderDetails.length / (limit as number));
+      // console.log(allOrderDetails);
+      // const idPros = allOrderDetails.flatMap(item => item.product.id_pro);
+      // const images = await this.imageRepository.find({
+      //   where: {
+      //     product: In(idPros)
+      //   },
+      //   relations: ["product"]
+      // });
+      // allOrderDetails.forEach(item => {
+      //   item.product.images = images.filter(image => image.product.id_pro === item.product.id_pro);
+      // });
+      return new ResponseDto(HttpStatus.OK, "Successfully", { 
+        total_pages: allPage,
+        total_items: allOrderDetails.length,
+        page,
+        limit, 
+        allProducts: allOrderDetails 
+      })
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

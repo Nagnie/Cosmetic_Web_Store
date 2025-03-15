@@ -51,7 +51,13 @@ export class BrandService {
         skip,
         take
       });
-      return new ResponseDto(HttpStatus.OK, "Successfully", {allPage, data});
+      return new ResponseDto(HttpStatus.OK, "Successfully", {
+        total_pages: allPage,
+        total_items: totalItems,
+        page,
+        limit,
+        data
+      });
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
