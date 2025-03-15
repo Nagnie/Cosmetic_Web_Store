@@ -30,6 +30,15 @@ const productsApi = {
     });
   },
 
+  getProductAdmin: async ({ page = 1, limit = 9 }) => {
+    return axios.get(`/product`, {
+      params: {
+        page,
+        limit,
+      }
+    })
+  },
+
   getProductDetail: async (id, { signal }) => {
     return axios.get(`/product/${id}`, { signal });
   },

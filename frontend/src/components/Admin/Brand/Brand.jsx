@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, PlusCircle, Save, Search, Trash2, X } from "lucide-react";
+import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
 import { DNA } from 'react-loader-spinner';
+import brandsApi from "@apis/brandsApi.js";
 
 const Brand = () => {
     const [brands, setBrands] = useState([]);
@@ -27,19 +28,13 @@ const Brand = () => {
     const fetchBrands = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/brands?order=ASC&sortBy=id&limit=${limit}&page=${page}`);
+            const response = await brandsApi.getBrands({ page, limit });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch brands');
-            }
-
-            const result = await response.json();
-
-            if (result.statusCode === 200) {
-                setBrands(result.data.data);
-                setTotalPages(result.data.allPage);
+            if (response.data.statusCode === 200) {
+                setBrands(response.data.data.data);
+                setTotalPages(response.data.data.allPage);
             } else {
-                throw new Error(result.message || 'Failed to fetch brands');
+                throw new Error(response.data.message || 'Failed to fetch brands');
             }
         } catch (err) {
             setError(err.message);
@@ -81,18 +76,10 @@ const Brand = () => {
     const addBrand = async (brandData) => {
         try {
             setActionLoading(true);
-            const response = await fetch('http://localhost:3001/api/brands', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(brandData),
-            });
+            const response = await brandsApi.createBrandD(brandData);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to add brand');
+            if (response.data.statusCode !== 200 && response.data.statusCode !== 201) {
+                throw new Error(response.data.message || 'Failed to add brand');
             }
 
             showActionMessage('Brand added successfully', 'success');
@@ -110,18 +97,10 @@ const Brand = () => {
     const updateBrand = async (id, brandData) => {
         try {
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/brands/${id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(brandData),
-            });
+            const response = await brandsApi.updateBrandDDetail(id, { body: brandData });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to update brand');
+            if (response.data.statusCode !== 200) {
+                throw new Error(response.data.message || 'Failed to update brand');
             }
 
             showActionMessage('Brand updated successfully', 'success');
@@ -139,14 +118,10 @@ const Brand = () => {
     const deleteBrand = async (id) => {
         try {
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/brands/${id}`, {
-                method: 'DELETE',
-            });
+            const response = await brandsApi.deleteBrandD(id);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to delete brand');
+            if (response.data.statusCode !== 200) {
+                throw new Error(response.data.message || 'Failed to delete brand');
             }
 
             showActionMessage('Brand deleted successfully', 'success');
@@ -342,21 +317,39 @@ const Brand = () => {
 
                 {/* Pagination */}
                 {!loading && !error && totalPages > 1 && (
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex justify-center items-center mt-10 space-x-2">
+                        {/* First Page */}
                         <button
-                            onClick={handlePrevPage}
+                            onClick={() => handlePrevPage()}
                             disabled={page === 1 || actionLoading}
-                            className={`px-4 py-2 rounded ${page === 1 || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
+                            className={`p-2 me-5 rounded ${page === 1 || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
                         >
-                            Previous
+                            <ChevronLeft />
                         </button>
-                        <span>Page {page} of {totalPages}</span>
+
+                        {/* Page Numbers */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
+                            .map((p, index, arr) => (
+                                <React.Fragment key={p}>
+                                    {index > 0 && p !== arr[index - 1] + 1 && <span>...</span>}
+                                    <button
+                                        onClick={() => setPage(p)}
+                                        className={`px-3 py-2 rounded ${p === page ? 'bg-pink-800 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                                    >
+                                        {p}
+                                    </button>
+                                </React.Fragment>
+                            ))
+                        }
+
+                        {/* Last Page */}
                         <button
-                            onClick={handleNextPage}
+                            onClick={() => handleNextPage()}
                             disabled={page === totalPages || actionLoading}
-                            className={`px-4 py-2 rounded ${page === totalPages || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
+                            className={`p-2 ms-5 rounded ${page === totalPages || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
                         >
-                            Next
+                            <ChevronRight />
                         </button>
                     </div>
                 )}
