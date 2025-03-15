@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryString } from "@hooks/useQueryString.jsx";
@@ -10,9 +10,7 @@ import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx
 const LIMIT = 9;
 
 const ProductListingPage = () => {
-  // State để lưu trạng thái hiển thị filter trên mobile
   const [showFilter, setShowFilter] = useState(false);
-  // State cho bộ lọc
   const [filters, setFilters] = useState({
     category: "all",
     priceRange: "all",
@@ -20,22 +18,89 @@ const ProductListingPage = () => {
   });
 
   const queryString = useQueryString();
+  const brandName = queryString.brand;
+  const categoryParam = queryString.category;
   const [currentPage, setCurrentPage] = useState(+queryString.page || 1);
 
+  // Unified query function to handle all product fetching scenarios
+  const fetchProducts = async () => {
+    if (brandName) {
+      return productsApi.getProductsByBrandName(brandName, {
+        page: currentPage,
+      });
+    } else if (categoryParam) {
+      return productsApi.getProductsByCategoryName(categoryParam, {
+        pageParam: currentPage,
+      });
+    } else {
+      return productsApi.getProducts({ page: currentPage });
+    }
+  };
+
+  // Single query that adapts based on params
   const { data, isLoading } = useQuery({
-    queryKey: ["products", currentPage],
-    queryFn: () => productsApi.getProducts({ page: currentPage }),
+    queryKey: ["products", brandName, categoryParam, currentPage],
+    queryFn: fetchProducts,
   });
 
+  // Unified data extraction
   const products = data?.data?.data || [];
-
   const perPage = data?.data?.limit || LIMIT;
-
   const totalItems = data?.data?.total_items || 0;
 
-  console.log(">>> data", data);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
 
-  // Hàm xử lý khi thay đổi bộ lọc
+  // Apply client-side filtering
+  const applyFilters = (products) => {
+    return products
+      .filter((product) => {
+        // Category filter
+        if (
+          filters.category !== "all" &&
+          product.category !== filters.category
+        ) {
+          return false;
+        }
+
+        // Price range filter
+        if (filters.priceRange !== "all") {
+          const price = parseInt(product.price.replace(/\./g, ""));
+          if (filters.priceRange === "under300" && price >= 300000) {
+            return false;
+          } else if (
+            filters.priceRange === "300to700" &&
+            (price < 300000 || price > 700000)
+          ) {
+            return false;
+          } else if (filters.priceRange === "over700" && price <= 700000) {
+            return false;
+          }
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        // Sort by filter
+        if (filters.sortBy === "priceLow") {
+          return (
+            parseInt(a.price.replace(/\./g, "")) -
+            parseInt(b.price.replace(/\./g, ""))
+          );
+        } else if (filters.sortBy === "priceHigh") {
+          return (
+            parseInt(b.price.replace(/\./g, "")) -
+            parseInt(a.price.replace(/\./g, ""))
+          );
+        }
+        // Default sort by newest
+        return b.id - a.id;
+      });
+  };
+
+  const filteredProducts = applyFilters(products);
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prev) => ({
@@ -44,51 +109,18 @@ const ProductListingPage = () => {
     }));
   };
 
-  // Lọc và sắp xếp sản phẩm dựa trên bộ lọc
-  const filteredProducts = products
-    .filter((product) => {
-      // Lọc theo danh mục
-      if (filters.category !== "all" && product.category !== filters.category) {
-        return false;
-      }
-
-      // Lọc theo khoảng giá
-      if (filters.priceRange !== "all") {
-        const price = parseInt(product.price.replace(/\./g, ""));
-        if (filters.priceRange === "under300" && price >= 300000) {
-          return false;
-        } else if (
-          filters.priceRange === "300to700" &&
-          (price < 300000 || price > 700000)
-        ) {
-          return false;
-        } else if (filters.priceRange === "over700" && price <= 700000) {
-          return false;
-        }
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
-      // Sắp xếp theo bộ lọc
-      if (filters.sortBy === "priceLow") {
-        return (
-          parseInt(a.price.replace(/\./g, "")) -
-          parseInt(b.price.replace(/\./g, ""))
-        );
-      } else if (filters.sortBy === "priceHigh") {
-        return (
-          parseInt(b.price.replace(/\./g, "")) -
-          parseInt(a.price.replace(/\./g, ""))
-        );
-      }
-      // Mặc định sắp xếp theo mới nhất (theo id trong ví dụ này)
-      return b.id - a.id;
-    });
-
-  // Toggle hiển thị filter trên mobile
   const toggleFilter = () => {
     setShowFilter(!showFilter);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(+page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Update URL with page number and preserve other query parameters
+    const url = new URL(window.location);
+    url.searchParams.set("page", page);
+    window.history.pushState({}, "", url);
   };
 
   return (
@@ -100,7 +132,7 @@ const ProductListingPage = () => {
         Danh Sách Sản Phẩm
       </h1>
 
-      {/* Button hiển thị filter chỉ hiện trên mobile */}
+      {/* Filter toggle button for mobile */}
       <button
         className="mb-4 w-full rounded-lg bg-pink-100 px-4 py-2 font-semibold text-pink-800 lg:hidden"
         onClick={toggleFilter}
@@ -109,7 +141,7 @@ const ProductListingPage = () => {
       </button>
 
       <div className="flex flex-col gap-10 lg:flex-row">
-        {/* Cột filter - ẩn trên mobile trừ khi được toggle */}
+        {/* Filter column */}
         <div
           className={`lg:w-1/4 ${showFilter ? "block" : "hidden"} h-fit rounded-lg bg-pink-50 p-4 lg:block`}
         >
@@ -166,7 +198,7 @@ const ProductListingPage = () => {
           </div>
         </div>
 
-        {/* Cột danh sách sản phẩm */}
+        {/* Product listing column */}
         <div className="lg:w-3/4">
           {isLoading ? (
             <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
@@ -174,8 +206,7 @@ const ProductListingPage = () => {
                 <ProductCardSkeleton key={item} />
               ))}
             </div>
-          ) : null}
-          {filteredProducts.length === 0 && !isLoading ? (
+          ) : filteredProducts.length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-gray-600">
                 Không tìm thấy sản phẩm phù hợp với bộ lọc.
@@ -194,12 +225,7 @@ const ProductListingPage = () => {
                   current={currentPage}
                   total={totalItems}
                   pageSize={perPage}
-                  onChange={(page) => {
-                    setCurrentPage(+page);
-
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                    window.history.pushState({}, "", `?page=${page}`);
-                  }}
+                  onChange={handlePageChange}
                 />
               </div>
             </>

@@ -10,6 +10,26 @@ const productsApi = {
     });
   },
 
+  getProductsByBrandName: async (brandName, { page = 1, limit = 9 }) => {
+    return axios.get(`/product/brand`, {
+      params: {
+        brand: brandName,
+        page,
+        limit,
+      },
+    });
+  },
+
+  getProductsByCategoryName: async (categoryName, { page = 1, limit = 9 }) => {
+    return axios.get(`/product/category`, {
+      params: {
+        category: categoryName,
+        page,
+        limit,
+      },
+    });
+  },
+
   getProductAdmin: async ({ page = 1, limit = 9 }) => {
     return axios.get(`/product`, {
       params: {
@@ -50,24 +70,6 @@ const productsApi = {
       },
     });
   },
-
-  createProduct: async (product) => {
-    return axios.post(`/product`, {
-      product,
-    })
-  },
-
-  updateProduct: async (product) => {
-    return axios.put(`/product/${product.id}`, {
-      product,
-    })
-  },
-
-  deleteProduct: async (id) => {
-    return axios.delete(`/product/${id}`);
-  },
 };
-
-
 
 export default productsApi;
