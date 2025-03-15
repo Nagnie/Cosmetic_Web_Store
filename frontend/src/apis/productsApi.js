@@ -80,6 +80,16 @@ const productsApi = {
       },
     });
   },
+
+  getFilterProducts: async (filter, { page = 1, limit = 9 }) => {
+    return axios.get(`/product/filter`, {
+      params: {
+        ...filter,
+        page,
+        limit,
+      },
+    });
+  },
 };
 
 export default productsApi;

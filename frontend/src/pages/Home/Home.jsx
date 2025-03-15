@@ -4,7 +4,7 @@ import "swiper/css/navigation";
 import Header from "../../components/Header/Header.jsx";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
-import { useBrands } from "@hooks/useBrandQueries.js";
+// import { useBrands } from "@hooks/useBrandQueries.js";
 import { useProducts } from "@hooks/useProductQueries.js";
 import { numberToArray } from "@utils/utils.js";
 import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
