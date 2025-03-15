@@ -40,6 +40,7 @@ const ProductCard = ({ product }) => {
       style={{ backgroundColor: "#fff3e7" }}
     >
       <img
+        loading="lazy"
         src={
           product.images?.[0] ??
           product.image ??
