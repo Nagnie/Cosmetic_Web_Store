@@ -44,9 +44,10 @@ const ProductListingPage = () => {
   });
 
   // Unified data extraction
-  const products = data?.data?.data || [];
-  const perPage = data?.data?.limit || LIMIT;
-  const totalItems = data?.data?.total_items || 0;
+  const products = data?.data?.data?.products || data?.data?.data || [];
+  const perPage = data?.data?.limit || +data?.data?.data?.limit || LIMIT;
+  const totalItems =
+    data?.data?.total_items || +data?.data?.data?.total_items || 0;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -126,11 +127,23 @@ const ProductListingPage = () => {
   return (
     <div className="container mx-auto mt-40 mb-20 py-8">
       <h1
-        className="mb-15 text-center text-3xl font-bold"
+        className="mb-10 text-center text-3xl font-bold"
         style={{ color: "#911f3f" }}
       >
         Danh Sách Sản Phẩm
       </h1>
+
+      {!isLoading && (
+        <div className="mb-8 text-center">
+          <p className="text-gray-600">
+            Có{" "}
+            <span className="font-semibold text-gray-800">
+              {totalItems} sản phẩm
+            </span>{" "}
+            cho tìm kiếm
+          </p>
+        </div>
+      )}
 
       {/* Filter toggle button for mobile */}
       <button

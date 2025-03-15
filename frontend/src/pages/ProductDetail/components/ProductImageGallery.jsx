@@ -106,6 +106,12 @@ const ProductImageGallery = ({ images = [], maxVisibleThumbnails = 4 }) => {
     };
   }, [isDesktop, imageList.length]);
 
+  useEffect(() => {
+    if (imageList.length === 0) return;
+
+    setCurrentImage(imageList[0]);
+  }, [imageList]);
+
   const handleImageClick = (image) => {
     if (currentImage.id === image.id) return;
 
