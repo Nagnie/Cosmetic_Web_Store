@@ -74,7 +74,9 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
           color="red"
         >
           <span className="!text-2xl !font-bold">
-            {formatCurrency(product.price || 0) ?? "229.000 đ"}
+            {formatCurrency({
+              number: product.price ?? 229000,
+            }) ?? "229.000 đ"}
           </span>
         </Tag>
       </div>
