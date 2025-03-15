@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryString } from "@hooks/useQueryString.jsx";
@@ -20,6 +20,7 @@ const ProductListingPage = () => {
   const queryString = useQueryString();
   const brandName = queryString.brand;
   const categoryParam = queryString.category;
+  const searchParam = queryString.search;
   const [currentPage, setCurrentPage] = useState(+queryString.page || 1);
 
   // Unified query function to handle all product fetching scenarios
@@ -32,6 +33,8 @@ const ProductListingPage = () => {
       return productsApi.getProductsByCategoryName(categoryParam, {
         pageParam: currentPage,
       });
+    } else if (searchParam) {
+      return productsApi.searchProducts(searchParam, { page: currentPage });
     } else {
       return productsApi.getProducts({ page: currentPage });
     }
@@ -48,6 +51,31 @@ const ProductListingPage = () => {
   const perPage = data?.data?.limit || +data?.data?.data?.limit || LIMIT;
   const totalItems =
     data?.data?.total_items || +data?.data?.data?.total_items || 0;
+
+  const resultText = useMemo(() => {
+    if (brandName) {
+      return (
+        <p>
+          Kết quả tìm kiếm cho thương hiệu{" "}
+          <span className="font-semibold">&quot;{brandName}&quot;</span>.
+        </p>
+      );
+    } else if (categoryParam) {
+      return (
+        <p>
+          Kết quả tìm kiếm cho danh mục{" "}
+          <span className="font-semibold">&quot;{categoryParam}&quot;</span>.
+        </p>
+      );
+    } else if (searchParam) {
+      return (
+        <p>
+          Kết quả tìm kiếm cho{" "}
+          <span className="font-semibold">&quot;{searchParam}&quot;</span>.
+        </p>
+      );
+    }
+  }, [brandName, categoryParam, searchParam]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -134,15 +162,21 @@ const ProductListingPage = () => {
       </h1>
 
       {!isLoading && (
-        <div className="mb-8 text-center">
-          <p className="text-gray-600">
+        <div className="mb-8 text-center text-gray-600">
+          <p className="">
             Có{" "}
             <span className="font-semibold text-gray-800">
               {totalItems} sản phẩm
             </span>{" "}
             cho tìm kiếm
           </p>
+
+          <div className="mx-auto mt-4 w-20 border-4 border-b border-gray-300"></div>
         </div>
+      )}
+
+      {!isLoading && resultText && (
+        <div className="mb-4 text-left text-gray-600">{resultText}</div>
       )}
 
       {/* Filter toggle button for mobile */}

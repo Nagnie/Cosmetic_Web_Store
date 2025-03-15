@@ -111,15 +111,15 @@ const CategoryCard = ({ category }) => {
 const Homepage = () => {
   const navigate = useNavigate();
 
-  const brandsQuery = useBrands();
+  // const brandsQuery = useBrands();
 
   const productsQuery = useProducts({ page: 1, limit: 10 });
 
-  const brands = brandsQuery.data;
+  // const brands = brandsQuery.data;
 
   const products = productsQuery.data?.data || [];
 
-  console.log(">>> brands", brands);
+  // console.log(">>> brands", brands);
 
   return (
     <div className="font-sans">
