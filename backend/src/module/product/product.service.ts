@@ -151,7 +151,7 @@ export class ProductService {
         SELECT p.*
         FROM product p
         JOIN brand b ON p.id_bra = b.id_bra
-        WHERE LOWER(b.name) = $1
+        WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
       `, [brandName]);
       const allPage = Math.ceil(allItems.length / (limit as number));
       const products = await this.dataSource.query(`
@@ -168,7 +168,7 @@ export class ProductService {
         ) AS classification
         FROM product p
         JOIN brand b ON p.id_bra = b.id_bra
-        WHERE LOWER(b.name) = $1
+        WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
         LIMIT $2 OFFSET $3
       `, [brandName, limit, (page as number - 1) * (limit as number)]);
       return new ResponseDto(HttpStatus.OK, "Successfully", { 
@@ -200,7 +200,7 @@ export class ProductService {
         FROM product p
         JOIN sub_category sc ON p.id_subcat = sc.id_subcat
         JOIN category c ON sc.id_cat = c.id_cat
-        WHERE ($1::TEXT IS NULL OR LOWER(c.name) =  $1) AND ($2::TEXT IS NULL OR LOWER(sc.name) = $2)
+        WHERE ($1::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $1::TEXT, '%')) AND ($2::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $2::TEXT, '%'))
       `, [cateName, subCateName]);
       const allPage = Math.ceil(allItems.length / (limit as number));
       const products = await this.dataSource.query(`
@@ -218,7 +218,7 @@ export class ProductService {
         FROM product p
         JOIN sub_category sc ON p.id_subcat = sc.id_subcat
         JOIN category c ON sc.id_cat = c.id_cat
-        WHERE ($1::TEXT IS NULL OR LOWER(c.name) =  $1) AND ($2::TEXT IS NULL OR LOWER(sc.name) = $2)
+        WHERE ($1::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $1::TEXT, '%')) AND ($2::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $2::TEXT, '%'))
         LIMIT $3 OFFSET $4
       `, [cateName, subCateName, limit, (page as number - 1) * (limit as number)]);
       return new ResponseDto(HttpStatus.OK, "Successfully", { 
@@ -233,7 +233,111 @@ export class ProductService {
     }
   }
 
-  async searchProduct(req: Request) {
+  async search(req: Request) {
+    try {
+      const {
+        key,
+        page = 1,
+        limit = 5,
+      } = req.query;
+
+      const keyword = (key as unknown as string)?.toLowerCase();
+      const products = await this.dataSource.query(`
+        WITH combined_products AS (
+          SELECT p.*,
+            COALESCE((
+              SELECT json_agg(img.link)::TEXT  -- Ép kiểu JSON thành TEXT
+              FROM product_image AS img
+              WHERE img.id_pro = p.id_pro
+            ), '[]') AS images,
+            COALESCE((
+              SELECT json_agg(DISTINCT class.name)::TEXT  -- Ép kiểu JSON thành TEXT
+              FROM classification AS class
+              WHERE class.id_pro = p.id_pro
+            ), '[]') AS classification
+          FROM product p
+          WHERE LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')
+
+          UNION
+
+          SELECT p.*,
+            COALESCE((
+              SELECT json_agg(img.link)::TEXT
+              FROM product_image AS img
+              WHERE img.id_pro = p.id_pro
+            ), '[]') AS images,
+            COALESCE((
+              SELECT json_agg(DISTINCT class.name)::TEXT
+              FROM classification AS class
+              WHERE class.id_pro = p.id_pro
+            ), '[]') AS classification
+          FROM product p
+          JOIN brand b ON p.id_bra = b.id_bra
+          WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
+
+          UNION
+
+          SELECT p.*,
+            COALESCE((
+              SELECT json_agg(img.link)::TEXT
+              FROM product_image AS img
+              WHERE img.id_pro = p.id_pro
+            ), '[]') AS images,
+            COALESCE((
+              SELECT json_agg(DISTINCT class.name)::TEXT
+              FROM classification AS class
+              WHERE class.id_pro = p.id_pro
+            ), '[]') AS classification
+          FROM product p
+          JOIN sub_category sc ON p.id_subcat = sc.id_subcat
+          JOIN category c ON sc.id_cat = c.id_cat
+          WHERE LOWER(c.name) LIKE CONCAT('%', $1::TEXT, '%') 
+            OR LOWER(sc.name) LIKE CONCAT('%', $1::TEXT, '%')
+        )
+        SELECT * FROM combined_products
+        ORDER BY id_pro
+        LIMIT $2 OFFSET $3;
+      `, [keyword, limit, (page as number - 1) * (limit as number)]);
+
+      const totalItems = await this.dataSource.query(`
+        SELECT COUNT(*) AS total FROM (
+          WITH combined_products AS (
+            SELECT p.id_pro
+            FROM product p
+            WHERE LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')
+            UNION
+            SELECT p.id_pro
+            FROM product p
+            JOIN brand b ON p.id_bra = b.id_bra
+            WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
+            UNION
+            SELECT p.id_pro
+            FROM product p
+            JOIN sub_category sc ON p.id_subcat = sc.id_subcat
+            JOIN category c ON sc.id_cat = c.id_cat
+            WHERE LOWER(c.name) LIKE CONCAT('%', $1::TEXT, '%') 
+               OR LOWER(sc.name) LIKE CONCAT('%', $1::TEXT, '%')
+          )
+          SELECT * FROM combined_products
+        ) AS count_table
+      `, [keyword]);
+
+      const allPage = Math.ceil(totalItems[0].total / (limit as number));
+
+      return new ResponseDto(200, "Successfully", {
+        total_pages: allPage,
+        total_items: totalItems[0].total,
+        page,
+        limit,
+        products
+      });
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException("Failed to search product");
+    }
+  }
+
+  async filter(req: Request) {
     try {
       const {
         product = null,
@@ -255,10 +359,10 @@ export class ProductService {
         JOIN category c ON sc.id_cat = c.id_cat
         JOIN brand b ON p.id_bra = b.id_bra
         WHERE
-          ($1::TEXT IS NULL OR LOWER(p.name) LIKE $1) AND
-          ($2::TEXT IS NULL OR LOWER(c.name) =  $2) AND 
-          ($3::TEXT IS NULL OR LOWER(sc.name) = $3) AND
-          ($4::TEXT IS NULL OR LOWER(b.name) = $4)  
+          ($1::TEXT IS NULL OR LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')) AND
+          ($2::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $2::TEXT, '%')) AND 
+          ($3::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $3::TEXT, '%')) AND
+          ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%'))  
       `, [proName, cateName, subCateName, brandName]);
       const allPage = Math.ceil(allIteams.length / (limit as number));
       const products = await this.dataSource.query(`
@@ -278,10 +382,10 @@ export class ProductService {
         JOIN category c ON sc.id_cat = c.id_cat
         JOIN brand b ON p.id_bra = b.id_bra
         WHERE
-          ($1::TEXT IS NULL OR LOWER(p.name) LIKE $1) AND
-          ($2::TEXT IS NULL OR LOWER(c.name) =  $2) AND 
-          ($3::TEXT IS NULL OR LOWER(sc.name) = $3) AND
-          ($4::TEXT IS NULL OR LOWER(b.name) = $4)
+          ($1::TEXT IS NULL OR LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')) AND
+          ($2::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $2::TEXT, '%')) AND 
+          ($3::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $3::TEXT, '%')) AND
+          ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%'))
         LIMIT $5 OFFSET $6
       `, [proName, cateName, subCateName, brandName, limit, (page as number - 1) * (limit as number)]);
 
@@ -293,7 +397,7 @@ export class ProductService {
         products
       });
     } catch (error) {
-      throw new InternalServerErrorException("Failed to search products");
+      throw new InternalServerErrorException("Failed to filter");
     }
   }
 
