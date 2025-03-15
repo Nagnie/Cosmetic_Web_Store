@@ -35,8 +35,8 @@ const productsApi = {
       params: {
         page,
         limit,
-      }
-    })
+      },
+    });
   },
 
   getProductDetail: async (id, { signal }) => {
@@ -67,6 +67,26 @@ const productsApi = {
         scat_name: categoryName,
         limit: limit,
         page: pageParam,
+      },
+    });
+  },
+
+  searchProducts: async (search, { page = 1, limit = 9 }) => {
+    return axios.get(`/product/search`, {
+      params: {
+        key: search,
+        page,
+        limit,
+      },
+    });
+  },
+
+  getFilterProducts: async (filter, { page = 1, limit = 9 }) => {
+    return axios.get(`/product/filter`, {
+      params: {
+        ...filter,
+        page,
+        limit,
       },
     });
   },

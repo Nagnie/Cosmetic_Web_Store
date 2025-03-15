@@ -12,6 +12,8 @@ const Header = () => {
   const scrollDirection = useScrollDirection();
   const [activeCategory, setActiveCategory] = useState(null);
 
+  const [search, setSearch] = useState("");
+
   const categories = [
     {
       name: "Skin Care",
@@ -114,18 +116,21 @@ const Header = () => {
         </Link>
         <div className="search-bar flex gap-2">
           <input
+            value={search}
             type="text"
             placeholder="Tìm kiếm"
             className="rounded-3xl border px-5 py-2"
             style={{ width: "90%" }}
+            onChange={(e) => setSearch(e.target.value)}
           />
 
-          <button
-            className="rounded-3xl px-4 text-white"
+          <Link
+            to={`/all_products?search=${search}`}
+            className="flex items-center justify-center rounded-3xl px-4 text-white"
             style={{ backgroundColor: "#8D7B68" }}
           >
             <FaSearch />
-          </button>
+          </Link>
         </div>
         <span
           onClick={(e) => {

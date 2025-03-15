@@ -25,4 +25,13 @@ export class OrderDetail {
 
     @Column({ name: "price" })
     price: number;
+
+    @Column({name: "pro_image"})
+    pro_image: string;
+
+    @Column({name: "pro_name"})
+    pro_name: string;
+
+    @Column({name: "class_name"})
+    class_name: string;
 }

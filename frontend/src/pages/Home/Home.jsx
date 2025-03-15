@@ -4,7 +4,7 @@ import "swiper/css/navigation";
 import Header from "../../components/Header/Header.jsx";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
-import { useBrands } from "@hooks/useBrandQueries.js";
+// import { useBrands } from "@hooks/useBrandQueries.js";
 import { useProducts } from "@hooks/useProductQueries.js";
 import { numberToArray } from "@utils/utils.js";
 import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
@@ -111,15 +111,15 @@ const CategoryCard = ({ category }) => {
 const Homepage = () => {
   const navigate = useNavigate();
 
-  const brandsQuery = useBrands();
+  // const brandsQuery = useBrands();
 
   const productsQuery = useProducts({ page: 1, limit: 10 });
 
-  const brands = brandsQuery.data;
+  // const brands = brandsQuery.data;
 
   const products = productsQuery.data?.data || [];
 
-  console.log(">>> brands", brands);
+  // console.log(">>> brands", brands);
 
   return (
     <div className="font-sans">
