@@ -9,37 +9,6 @@ import { useProducts } from "@hooks/useProductQueries.js";
 import { numberToArray } from "@utils/utils.js";
 import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
 
-// New BrandCard component
-const BrandCard = ({ brand, image }) => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate(`/brands/${brand.id}`);
-  };
-
-  return (
-      <div
-          className="relative mb-4 h-66 w-55 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
-          onClick={handleClick}
-      >
-        {/* Image */}
-        <img
-            src={image}
-            alt={brand.name}
-            className="h-full w-full object-cover"
-        />
-
-        {/* Gradient overlay and text */}
-        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-orange-950/50 to-transparent p-3 sm:p-4 md:p-5 lg:p-6">
-          <h3 className="text-lg font-semibold text-white hover:underline sm:text-xl md:text-2xl">
-            {brand.name}
-          </h3>
-          <p className="text-sm text-white mt-1">{brand.numProducts} sản phẩm</p>
-        </div>
-      </div>
-  );
-};
-
 const Homepage = () => {
   const navigate = useNavigate();
 
@@ -126,7 +95,7 @@ const Homepage = () => {
         <div className="mx-10 mb-6 flex items-center justify-between">
           <h2 className="text-3xl font-semibold text-black">Thương hiệu nổi tiếng<  /h2>
           <button
-              className="text-sm font-medium hover:underline"
+              className="text-sm font-medium cursor-pointer z-100 hover:underline"
               style={{ color: "#91775e" }}
               onClick={() => navigate('/brands')}
           >
@@ -207,6 +176,36 @@ const Homepage = () => {
         </button>
       </div>
     </div>
+  );
+};
+
+const BrandCard = ({ brand, image }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/brands/${brand.id}`);
+  };
+
+  return (
+      <div
+          className="relative mb-4 h-66 w-55 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
+          onClick={handleClick}
+      >
+        {/* Image */}
+        <img
+            src={image}
+            alt={brand.name}
+            className="h-full w-full object-cover"
+        />
+
+        {/* Gradient overlay and text */}
+        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-orange-950/50 to-transparent p-3 sm:p-4 md:p-5 lg:p-6">
+          <h3 className="text-lg font-semibold text-white hover:underline sm:text-xl md:text-2xl">
+            {brand.name}
+          </h3>
+          <p className="text-sm text-white mt-1">{brand.numProducts} product{brand.numProducts !== 1 ? 's' : ''}</p>
+        </div>
+      </div>
   );
 };
 

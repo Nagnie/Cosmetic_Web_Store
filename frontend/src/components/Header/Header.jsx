@@ -2,94 +2,75 @@ import { FaSearch } from "react-icons/fa";
 import { GiLipstick, GiMedicines, GiAmpleDress } from "react-icons/gi";
 import { BsClipboard2HeartFill } from "react-icons/bs";
 import { PiHairDryerFill } from "react-icons/pi";
-import { useState } from "react";
-import { useScrollDirection } from "../../hooks/useScrollDirectionHook.jsx";
+import { useState, useEffect } from "react";
+import { useScrollDirection } from "@hooks/useScrollDirectionHook.jsx";
 import "./Header.css";
 import { useCartStore } from "@components/Cart";
 import { Link } from "react-router-dom";
+import categoriesApi from "@apis/categoriesApi.js";
+import subcategoriesApi from "@apis/subcategoriesApi";
 
 const Header = () => {
   const scrollDirection = useScrollDirection();
   const [activeCategory, setActiveCategory] = useState(null);
+  const [search, setSearch] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = [
-    {
-      name: "Skin Care",
-      icon: <BsClipboard2HeartFill className="me-2 mt-1" />,
+  // Map of category icons
+  const categoryIcons = {
+    "Chăm sóc da": <BsClipboard2HeartFill className="me-2 mt-1" />,
+    "Chăm sóc tóc": <GiAmpleDress className="me-2 mt-1" />,
+    "Chăm sóc cơ thể": <PiHairDryerFill className="me-2 mt-1" />,
+    "Thực phẩm chức năng": <GiMedicines className="me-2 mt-1" />,
+    "Đồ trang điểm": <GiLipstick className="me-2 mt-1" />
+  };
+
+  // Default icon if category name doesn't match any in our map
+  const defaultIcon = <BsClipboard2HeartFill className="me-2 mt-1" />;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch categories
+        const categoryResponse = await categoriesApi.getCategories({ page: 1, limit: 100 });
+
+        // Fetch subcategories
+        const subcategoryResponse = await subcategoriesApi.getSubcategories({ page: 1, limit: 500 });
+
+        setCategories(categoryResponse.data.data || []);
+        setSubcategories(subcategoryResponse.data.data || []);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Group subcategories by their parent category
+  const groupedSubcategories = categories.map(category => {
+    const categorySubcategories = subcategories.filter(sub => sub.cat_name === category.cat_name);
+
+    return {
+      cat_id: category.cat_id,
+      cat_name: category.cat_name,
+      icon: categoryIcons[category.cat_name] || defaultIcon,
       menu: [
         {
-          items: [
-            "Tẩy Trang",
-            "Sữa Rửa Mặt",
-            "Mặt Nạ",
-            "Tẩy Tế Bào Chết",
-            "Toner/Lotion",
-            "Serum/Essence",
-            "Chống Nắng",
-            "Xịt khoáng",
-            "Kem Dưỡng",
-            "Dưỡng Mắt/Mi",
-            "Dưỡng Môi",
-          ],
-        },
-      ],
-    },
-    {
-      name: "Body Care",
-      icon: <GiAmpleDress className="me-2 mt-1" />,
-      menu: [
-        {
-          items: [
-            "Sữa Tắm",
-            "Dưỡng Thể",
-            "Tẩy Da Chết Body",
-            "Khử Mùi/Nước Hoa",
-            "Dưỡng Da Tay/Chân",
-            "Chăm Sóc Vùng Kín",
-          ],
-        },
-      ],
-    },
-    {
-      name: "Hair Care",
-      icon: <PiHairDryerFill className="me-2 mt-1" />,
-      menu: [
-        {
-          items: ["Dầu gội/xả", "Dưỡng tóc"],
-        },
-      ],
-    },
-    {
-      name: "Dietary Supplement",
-      icon: <GiMedicines className="me-2 mt-1" />,
-      menu: [
-        {
-          items: ["Băng Vệ Sinh", "Dung Dịch Vệ Sinh Phụ Nữ", "Bao Cao Su"],
-        },
-      ],
-    },
-    {
-      name: "Make Up",
-      icon: <GiLipstick className="me-2 mt-1" />,
-      menu: [
-        {
-          items: [
-            "Son",
-            "Kem nền/Cushion",
-            "Kem lót",
-            "Che khuyết điểm",
-            "Tạo khối/Highlight",
-            "Phấn Phủ",
-            "Phấn mắt",
-            "Mascara",
-            "Kẻ Mắt",
-            "Xịt khóa nền",
-            "Má hồng",
-          ],
-        },
-      ],
-    },
-  ];
+          items: categorySubcategories.map(sub => ({
+            id_subcat: sub.id_subcat,
+            scat_name: sub.scat_name
+          }))
+        }
+      ]
+    };
+  });
 
   const toggleCartDrawer = useCartStore((state) => state.toggleCartDrawer);
   const cartItemsCount = useCartStore((state) => state.itemCount);
@@ -100,89 +81,98 @@ const Header = () => {
   };
 
   return (
-    <div
-      className={`${scrollDirection === "down" ? "opacity-0" : "opacity-100"} fixed top-0 right-0 left-0 z-50 transition-opacity duration-500`}
-    >
-      <header className="flex items-center justify-around bg-white py-6">
-        <Link to="/">
-          <h2
-            className="cursor-pointer text-4xl font-bold"
-            style={{ color: "#5d4e3e" }}
-          >
-            Nâu Cosmetic
-          </h2>
-        </Link>
-        <div className="search-bar flex gap-2">
-          <input
-            type="text"
-            placeholder="Tìm kiếm"
-            className="rounded-3xl border px-5 py-2"
-            style={{ width: "90%" }}
-          />
-
-          <button
-            className="rounded-3xl px-4 text-white"
-            style={{ backgroundColor: "#8D7B68" }}
-          >
-            <FaSearch />
-          </button>
-        </div>
-        <span
-          onClick={(e) => {
-            handleCartClick(e);
-          }}
-          className="relative cursor-pointer text-3xl select-none"
-        >
-          🛒
-          {cartItemsCount > 0 && (
-            <div className="absolute -top-0.5 left-6 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-center align-top text-[12px] text-white">
-              {cartItemsCount}
-            </div>
-          )}
-        </span>
-      </header>
-      <nav
-        className="relative flex items-center justify-center py-3 text-start shadow-md"
-        style={{ backgroundColor: "#f6eadc" }}
+      <div
+          className={`${scrollDirection === "down" ? "opacity-0" : "opacity-100"} fixed top-0 right-0 left-0 z-50 transition-opacity duration-500`}
       >
-        {categories.map((category, index) => (
-          <div
-            key={index}
-            className="category relative"
-            onMouseEnter={() => setActiveCategory(index)}
-            onMouseLeave={() => setActiveCategory(null)}
-          >
-            <p className="flex cursor-pointer items-center transition-colors duration-300 hover:text-orange-800">
-              {category.icon}
-              {category.name}
-            </p>
-
-            <div
-              className={`dropdown-menu absolute top-6.5 z-50 mt-3 flex w-full min-w-max origin-top gap-12 bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${activeCategory === index ? "visible scale-y-100 opacity-100" : "invisible scale-y-0 opacity-0"}`}
+        <header className="flex items-center justify-around bg-white py-6">
+          <Link to="/">
+            <h2
+                className="cursor-pointer text-4xl font-bold"
+                style={{ color: "#5d4e3e" }}
             >
-              {category.menu.map((section, idx) => (
-                <div
-                  key={idx}
-                  className="dropdown-section min-w-64"
-                  style={{ color: "#41392f" }}
-                >
-                  <ul>
-                    {section.items.map((item, itemIdx) => (
-                      <li
-                        key={itemIdx}
-                        className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
-                      >
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+              Nâu Cosmetic
+            </h2>
+          </Link>
+          <div className="search-bar flex gap-2">
+            <input
+                value={search}
+                type="text"
+                placeholder="Tìm kiếm"
+                className="rounded-3xl border px-5 py-2"
+                style={{ width: "90%" }}
+                onChange={(e) => setSearch(e.target.value)}
+            />
+
+            <Link
+                to={`/all_products?search=${search}`}
+                className="flex items-center justify-center rounded-3xl px-4 text-white"
+                style={{ backgroundColor: "#8D7B68" }}
+            >
+              <FaSearch />
+            </Link>
           </div>
-        ))}
-      </nav>
-    </div>
+          <span
+              onClick={(e) => {
+                handleCartClick(e);
+              }}
+              className="relative cursor-pointer text-3xl select-none"
+          >
+          🛒
+            {cartItemsCount > 0 && (
+                <div className="absolute -top-0.5 left-6 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-center align-top text-[12px] text-white">
+                  {cartItemsCount}
+                </div>
+            )}
+        </span>
+        </header>
+        <nav
+            className="relative flex items-center justify-center py-3 text-start shadow-md"
+            style={{ backgroundColor: "#f6eadc" }}
+        >
+          {loading ? (
+              <div>Đang tải danh mục...</div>
+          ) : (
+              groupedSubcategories.map((category, index) => (
+                  <div
+                      key={category.cat_id}
+                      className="category relative mx-4"
+                      onMouseEnter={() => setActiveCategory(index)}
+                      onMouseLeave={() => setActiveCategory(null)}
+                  >
+                    <Link to={`/products/category/${category.cat_id}`} className="flex cursor-pointer items-center transition-colors duration-300 hover:text-orange-800">
+                      {category.icon}
+                      {category.cat_name}
+                    </Link>
+
+                    <div
+                        className={`dropdown-menu absolute top-6.5 z-50 mt-3 flex w-full min-w-max origin-top bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${activeCategory === index ? "visible scale-y-100 opacity-100" : "invisible scale-y-0 opacity-0"}`}
+                    >
+                      {category.menu.map((section, idx) => (
+                          <div
+                              key={idx}
+                              className="dropdown-section min-w-64"
+                              style={{ color: "#41392f" }}
+                          >
+                            <ul>
+                              {section.items.map((item) => (
+                                  <li
+                                      key={item.id_subcat}
+                                      className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
+                                  >
+                                    <Link to={`/products/subcategory/${item.cat_id}`}>
+                                      {item.scat_name}
+                                    </Link>
+                                  </li>
+                              ))}
+                            </ul>
+                          </div>
+                      ))}
+                    </div>
+                  </div>
+              ))
+          )}
+        </nav>
+      </div>
   );
 };
 

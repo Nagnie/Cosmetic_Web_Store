@@ -1,136 +1,247 @@
 import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 import { useQuery } from "@tanstack/react-query";
+import { Pagination } from "antd";
+
 import { useQueryString } from "@hooks/useQueryString.jsx";
 import productsApi from "@apis/productsApi.js";
-import { Pagination } from "antd";
-import { numberToArray } from "@utils/utils.js";
-import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
+import { useAllCategories } from "@hooks/useCategoryQueries.js";
+import FilterPanel from "./components/FilterPanel.jsx";
+import ProductGrid from "./components/ProductGrid.jsx";
 
 const LIMIT = 9;
+const MIN_MAX_PRICE = [0, 10000000];
 
 const ProductListingPage = () => {
-  const [showFilter, setShowFilter] = useState(false);
-  const [filters, setFilters] = useState({
-    category: "all",
-    priceRange: "all",
-    sortBy: "newest",
-  });
-
   const queryString = useQueryString();
-  const brandName = queryString.brand;
-  const categoryParam = queryString.category;
-  const [currentPage, setCurrentPage] = useState(+queryString.page || 1);
+  const {
+    brand: brandName,
+    category: categoryParam,
+    search: searchParam,
+    page,
+  } = queryString;
+  const [currentPage, setCurrentPage] = useState(+page || 1);
+  const [showFilter, setShowFilter] = useState(false);
 
-  // Unified query function to handle all product fetching scenarios
-  const fetchProducts = async () => {
-    if (brandName) {
-      return productsApi.getProductsByBrandName(brandName, {
-        page: currentPage,
-      });
-    } else if (categoryParam) {
-      return productsApi.getProductsByCategoryName(categoryParam, {
-        pageParam: currentPage,
-      });
-    } else {
-      return productsApi.getProducts({ page: currentPage });
+  // Thêm state để theo dõi nếu người dùng đã tương tác với bộ lọc
+  const [userInteractedWithFilters, setUserInteractedWithFilters] =
+    useState(false);
+
+  // Kiểm tra xem có tham số URL nào được set không
+  const hasUrlParams = Boolean(brandName || categoryParam || searchParam);
+
+  // Sử dụng callback trong useState để tránh tính toán lại khi re-render
+  const [filters, setFilters] = useState(() => ({
+    category: categoryParam || "all",
+    priceRange: [0, 1000000],
+    sortBy: "newest",
+  }));
+
+  // Cập nhật lại state filters khi URL params thay đổi
+  useEffect(() => {
+    if (hasUrlParams && !userInteractedWithFilters) {
+      setFilters((prev) => ({
+        ...prev,
+        category: categoryParam || "all",
+      }));
     }
-  };
+  }, [categoryParam, hasUrlParams, userInteractedWithFilters]);
 
-  // Single query that adapts based on params
+  // Xóa URL params khi người dùng tương tác với bộ lọc
+  useEffect(() => {
+    if (userInteractedWithFilters && hasUrlParams) {
+      const url = new URL(window.location);
+      if (brandName) url.searchParams.delete("brand");
+      if (categoryParam) url.searchParams.delete("category");
+      if (searchParam) url.searchParams.delete("search");
+      window.history.pushState({}, "", url);
+    }
+  }, [
+    userInteractedWithFilters,
+    hasUrlParams,
+    brandName,
+    categoryParam,
+    searchParam,
+  ]);
+
+  // Tối ưu hóa hàm fetchProducts thành useMemo để tránh tái tạo hàm không cần thiết
+  const fetchProducts = useMemo(
+    () => async () => {
+      // Sử dụng URL params nếu chúng tồn tại và người dùng chưa tương tác với bộ lọc
+      if (!userInteractedWithFilters) {
+        if (brandName) {
+          return productsApi.getProductsByBrandName(brandName, {
+            page: currentPage,
+          });
+        }
+
+        if (categoryParam) {
+          return productsApi.getProductsByCategoryName(categoryParam, {
+            pageParam: currentPage,
+          });
+        }
+
+        if (searchParam) {
+          return productsApi.searchProducts(searchParam, { page: currentPage });
+        }
+      }
+
+      // Nếu không có URL params hoặc người dùng đã tương tác với bộ lọc
+      const isFiltered =
+        filters.category !== "all" ||
+        filters.priceRange[0] !== 0 ||
+        filters.priceRange[1] !== 1000000 ||
+        filters.sortBy !== "newest";
+
+      if (isFiltered) {
+        const [minPrice, maxPrice] = filters.priceRange;
+
+        return productsApi.getFilterProducts(
+          {
+            category: filters.category === "all" ? "" : filters.category,
+            minPrice,
+            maxPrice,
+          },
+          { pageParam: currentPage },
+        );
+      }
+
+      return productsApi.getProducts({ page: currentPage });
+    },
+    [
+      brandName,
+      categoryParam,
+      searchParam,
+      currentPage,
+      filters,
+      userInteractedWithFilters,
+    ],
+  );
+
+  // Sử dụng alias để làm rõ cấu trúc dữ liệu
   const { data, isLoading } = useQuery({
-    queryKey: ["products", brandName, categoryParam, currentPage],
+    queryKey: [
+      "products",
+      brandName,
+      categoryParam,
+      searchParam,
+      currentPage,
+      filters,
+      userInteractedWithFilters,
+    ],
     queryFn: fetchProducts,
   });
 
-  // Unified data extraction
-  const products = data?.data?.data || [];
-  const perPage = data?.data?.limit || LIMIT;
-  const totalItems = data?.data?.total_items || 0;
+  // Cải thiện trích xuất dữ liệu với destructuring và nullish coalescing
+  const products = useMemo(
+    () => data?.data?.data?.products ?? data?.data?.data ?? [],
+    [data],
+  );
+  const perPage = data?.data?.limit ?? data?.data?.data?.limit ?? LIMIT;
+  const totalItems =
+    data?.data?.total_items ?? data?.data?.data?.total_items ?? 0;
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [currentPage]);
+  // Tách ResultText thành một hàm riêng để làm rõ mục đích
+  const resultText = useMemo(() => {
+    // Không hiển thị nếu đang sử dụng bộ lọc tùy chỉnh
+    if (
+      userInteractedWithFilters ||
+      (!brandName && !categoryParam && !searchParam)
+    )
+      return null;
 
-  // Apply client-side filtering
-  const applyFilters = (products) => {
-    return products
-      .filter((product) => {
-        // Category filter
-        if (
-          filters.category !== "all" &&
-          product.category !== filters.category
-        ) {
-          return false;
-        }
+    let searchType, searchValue;
 
-        // Price range filter
-        if (filters.priceRange !== "all") {
-          const price = parseInt(product.price.replace(/\./g, ""));
-          if (filters.priceRange === "under300" && price >= 300000) {
-            return false;
-          } else if (
-            filters.priceRange === "300to700" &&
-            (price < 300000 || price > 700000)
-          ) {
-            return false;
-          } else if (filters.priceRange === "over700" && price <= 700000) {
-            return false;
-          }
-        }
+    if (brandName) {
+      searchType = "thương hiệu";
+      searchValue = brandName;
+    } else if (categoryParam) {
+      searchType = "danh mục";
+      searchValue = categoryParam;
+    } else {
+      searchType = "";
+      searchValue = searchParam;
+    }
 
-        return true;
-      })
-      .sort((a, b) => {
-        // Sort by filter
-        if (filters.sortBy === "priceLow") {
-          return (
-            parseInt(a.price.replace(/\./g, "")) -
-            parseInt(b.price.replace(/\./g, ""))
-          );
-        } else if (filters.sortBy === "priceHigh") {
-          return (
-            parseInt(b.price.replace(/\./g, "")) -
-            parseInt(a.price.replace(/\./g, ""))
-          );
-        }
-        // Default sort by newest
-        return b.id - a.id;
-      });
-  };
+    return (
+      <p>
+        Kết quả tìm kiếm {searchType && `cho ${searchType}`}{" "}
+        <span className="font-semibold">&quot;{searchValue}&quot;</span>.
+      </p>
+    );
+  }, [brandName, categoryParam, searchParam, userInteractedWithFilters]);
 
-  const filteredProducts = applyFilters(products);
+  // Hooks categories
+  const {
+    data: categories,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = useAllCategories();
 
+  // Tối ưu hóa event handlers
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    // Đánh dấu rằng người dùng đã tương tác với bộ lọc
+    if (!userInteractedWithFilters) {
+      setUserInteractedWithFilters(true);
+    }
+
+    setFilters((prev) => ({ ...prev, [name]: value }));
+
+    // Reset về trang 1 khi thay đổi bộ lọc
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+      updatePageInUrl(1);
+    }
   };
 
-  const toggleFilter = () => {
-    setShowFilter(!showFilter);
-  };
+  const toggleFilter = () => setShowFilter((prev) => !prev);
 
   const handlePageChange = (page) => {
     setCurrentPage(+page);
+    updatePageInUrl(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-    // Update URL with page number and preserve other query parameters
+  // Tách thành hàm riêng để tái sử dụng
+  const updatePageInUrl = (page) => {
     const url = new URL(window.location);
     url.searchParams.set("page", page);
     window.history.pushState({}, "", url);
   };
 
+  // Scroll to top khi thay đổi trang
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage, products]);
+
   return (
     <div className="container mx-auto mt-40 mb-20 py-8">
       <h1
-        className="mb-15 text-center text-3xl font-bold"
+        className="mb-10 text-center text-3xl font-bold"
         style={{ color: "#911f3f" }}
       >
         Danh Sách Sản Phẩm
       </h1>
+
+      {!isLoading && (
+        <div className="mb-8 text-center text-gray-600">
+          <p>
+            Có{" "}
+            <span className="font-semibold text-gray-800">
+              {totalItems} sản phẩm
+            </span>{" "}
+            cho tìm kiếm
+          </p>
+          <div className="mx-auto mt-4 w-20 border-4 border-b border-gray-300"></div>
+        </div>
+      )}
+
+      {!isLoading && resultText && (
+        <div className="mb-4 text-left text-gray-600">{resultText}</div>
+      )}
 
       {/* Filter toggle button for mobile */}
       <button
@@ -142,93 +253,31 @@ const ProductListingPage = () => {
 
       <div className="flex flex-col gap-10 lg:flex-row">
         {/* Filter column */}
-        <div
-          className={`lg:w-1/4 ${showFilter ? "block" : "hidden"} h-fit rounded-lg p-4 lg:block`} style={{ backgroundColor: "#fff3e7" }}
-        >
-          <h2 className="mb-4 text-xl font-semibold">Bộ lọc</h2>
-
-          <div className="mb-4">
-            <label className="mb-2 block font-medium text-gray-700">
-              Danh mục
-            </label>
-            <select
-              name="category"
-              value={filters.category}
-              onChange={handleFilterChange}
-              className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none"
-            >
-              <option value="all">Tất cả</option>
-              <option value="clothing">Quần áo</option>
-              <option value="shoes">Giày dép</option>
-              <option value="accessories">Phụ kiện</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label className="mb-2 block font-medium text-gray-700">
-              Khoảng giá
-            </label>
-            <select
-              name="priceRange"
-              value={filters.priceRange}
-              onChange={handleFilterChange}
-              className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none"
-            >
-              <option value="all">Tất cả</option>
-              <option value="under300">Dưới 300.000 VNĐ</option>
-              <option value="300to700">300.000 - 700.000 VNĐ</option>
-              <option value="over700">Trên 700.000 VNĐ</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label className="mb-2 block font-medium text-gray-700">
-              Sắp xếp theo
-            </label>
-            <select
-              name="sortBy"
-              value={filters.sortBy}
-              onChange={handleFilterChange}
-              className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="priceLow">Giá thấp đến cao</option>
-              <option value="priceHigh">Giá cao đến thấp</option>
-            </select>
-          </div>
+        <div className={`lg:w-1/4 ${showFilter ? "block" : "hidden"} lg:block`}>
+          <FilterPanel
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            categories={categories}
+            isLoading={categoriesLoading}
+            error={categoriesError}
+            minMaxPrice={MIN_MAX_PRICE}
+          />
         </div>
 
         {/* Product listing column */}
         <div className="lg:w-3/4">
-          {isLoading ? (
-            <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
-              {numberToArray(LIMIT).map((item) => (
-                <ProductCardSkeleton key={item} />
-              ))}
+          <ProductGrid products={products} isLoading={isLoading} />
+
+          {!isLoading && products.length > 0 && (
+            <div className="mt-8 flex justify-center">
+              <Pagination
+                showQuickJumper
+                current={currentPage}
+                total={totalItems}
+                pageSize={perPage}
+                onChange={handlePageChange}
+              />
             </div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="py-8 text-center">
-              <p className="text-gray-600">
-                Không tìm thấy sản phẩm phù hợp với bộ lọc.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id_pro} product={product} />
-                ))}
-              </div>
-              <div className="mt-8 flex justify-center">
-                <Pagination
-                  showQuickJumper
-                  current={currentPage}
-                  total={totalItems}
-                  pageSize={perPage}
-                  onChange={handlePageChange}
-                />
-              </div>
-            </>
           )}
         </div>
       </div>

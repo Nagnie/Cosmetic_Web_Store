@@ -1,0 +1,9 @@
+/* slider-custom.css */
+.ant-slider .ant-slider-handle::after {
+  box-shadow: 0 0 0 2px #91775e !important;
+}
+.ant-slider .ant-slider-handle:hover::after,
+.ant-slider .ant-slider-handle:focus::after,
+.ant-slider .ant-slider-handle:active::after {
+  box-shadow: 0 0 0 3px #675746 !important;
+}

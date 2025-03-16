@@ -18,6 +18,7 @@ const ProductDetail = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["product", id],
     queryFn: ({ signal }) => productsApi.getProductDetail(id, { signal }),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   const product = (data?.data || [])?.[0] || {};

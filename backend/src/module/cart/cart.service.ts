@@ -80,7 +80,7 @@ export class CartService {
         ) AS images
         FROM cart_items AS ci
         JOIN product AS pro ON pro.id_pro = ci.id_pro
-        JOIN classification AS class ON class.id_class = ci.id_class
+        LEFT JOIN classification AS class ON class.id_class = ci.id_class
         LIMIT $2 OFFSET $3
       `, [cartItemsJson, limit, offset])
 
