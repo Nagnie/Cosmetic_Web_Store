@@ -1,6 +1,10 @@
+import { useCartStore } from "@components/Cart";
 import { CustomCollapse } from ".";
+import { formatCurrency } from "@utils/utils";
 
 const CheckoutPriceInfo = () => {
+  const totalCartPrice = useCartStore((state) => state.totalPrice);
+
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
       <div>
@@ -12,7 +16,9 @@ const CheckoutPriceInfo = () => {
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold">Tạm tính</span>
-          <span className="text-sm font-semibold">687.000đ</span>
+          <span className="text-sm font-semibold">
+            {formatCurrency({ number: +totalCartPrice || 0 })}
+          </span>
         </div>
 
         <div className="flex items-center justify-between">
@@ -26,7 +32,7 @@ const CheckoutPriceInfo = () => {
 
       <div className="text-secondary-deep flex items-center justify-between text-xl font-semibold">
         <span>Tổng cộng</span>
-        <span>687.000đ</span>
+        <span>{formatCurrency({ number: +totalCartPrice || 0 })}</span>
       </div>
     </div>
   );

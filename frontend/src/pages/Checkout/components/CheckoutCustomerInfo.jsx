@@ -210,7 +210,18 @@ const CheckoutCustomerInfo = () => {
           "N/A",
       };
 
-      console.log("Submitting form data:", formattedAddress);
+      // console.log("Submitting form data:", formattedAddress);
+
+      const persistData = {
+        name: formattedAddress.name,
+        email: formattedAddress.email,
+        phone: formattedAddress.phone,
+        address: `${formattedAddress.address}, ${formattedAddress.wardName}, ${formattedAddress.districtName}, ${formattedAddress.cityName}`,
+        note: formattedAddress.note,
+        order_items: JSON.parse(localStorage.getItem("cartItems")),
+      };
+
+      console.log("Persisting data:", persistData);
 
       // Navigate to next step
       navigate("/payment-confirmation");

@@ -42,6 +42,8 @@ const CartDrawer = () => {
     if (data) {
       const totalItems = data.pages[0].total_items || 0;
       setItemCount(totalItems);
+    } else {
+      setItemCount(0);
     }
   }, [data, setItemCount]);
 
@@ -52,6 +54,8 @@ const CartDrawer = () => {
   useEffect(() => {
     if (totalPrice) {
       setTotalPrice(totalPrice);
+    } else {
+      setTotalPrice(0);
     }
   }, [totalPrice, setTotalPrice]);
 
