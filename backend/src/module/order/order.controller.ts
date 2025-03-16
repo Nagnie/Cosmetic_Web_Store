@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, Query } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Public } from '@/helpers/decorator/public';
-import { Request } from 'express';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { Response, Request } from 'express';
+import axios from 'axios';
 
 @Controller('order')
 export class OrderController {
@@ -17,6 +18,23 @@ export class OrderController {
   @ApiBody({ type: CreateOrderDto })
   async create(@Req() req: Request & { session: any }, @Body() createOrderDto: CreateOrderDto) {
     return await this.orderService.create(req, createOrderDto);
+  }
+
+  @Get('download-invoice')
+  @Public()
+  async downloadInvoice(
+    @Res() res: Response,
+    @Query('url') url: string,
+    @Query('publicId') publicId: string,
+  ) {
+    try {
+      const response = await axios.get(url, { responseType: 'arraybuffer' });
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Content-Disposition', `attachment; filename="${publicId}.png"`);
+      res.send(response.data);
+    } catch (error) {
+      res.status(500).json({ message: 'Download failed' });
+    }
   }
 
   @Get()
