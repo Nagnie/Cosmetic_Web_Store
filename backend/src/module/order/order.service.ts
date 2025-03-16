@@ -69,6 +69,14 @@ export class OrderService {
 
       // COMMIT
       await queryRunner.commitTransaction();
+
+      // Delete session 
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Lỗi khi xóa session:', err);
+        }
+      });
+
       return {
         statusCode: 201,
         message: `Order "${id_order}" and order detail created successfully`,
@@ -133,60 +141,60 @@ export class OrderService {
   }
 
   private async generateInvoiceImage(createOrderDto: CreateOrderDto): Promise<string> {
-    const { name, email, phone, address, note, order_items, total_price } = createOrderDto;
+    const { name, phone, address, order_items, total_price } = createOrderDto;
 
-    const width = 800, height = 500;
+    const width = 800, height = 550;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
     // Background
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = '#f8f9fa'; // Màu nền nhạt
     ctx.fillRect(0, 0, width, height);
 
-    // Tiêu đề (căn giữa, font Roboto, màu xanh)
-    ctx.fillStyle = '#007BFF';
-    ctx.font = 'bold 28px Roboto';
-    const title = 'ĐẶT HÀNG THÀNH CÔNG!';
+    // Tiêu đề (Màu đen, căn giữa, font to)
+    ctx.fillStyle = '#222';
+    ctx.font = 'bold 32px Arial';
+    const title = 'HÓA ĐƠN ĐẶT HÀNG';
     const titleWidth = ctx.measureText(title).width;
-    ctx.fillText(title, (width - titleWidth) / 2, 50);
-
-    // Khung chứa thông tin đơn hàng (bo góc)
-    ctx.strokeStyle = '#999';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(40, 80, width - 80, height - 160, 10);
-    ctx.stroke();
+    ctx.fillText(title, (width - titleWidth) / 2, 60);
 
     // Thông tin khách hàng
     ctx.fillStyle = '#333';
-    ctx.font = 'bold 20px Roboto';
-    ctx.fillText('Thông tin đơn hàng:', 60, 110);
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('Thông tin khách hàng:', 50, 110);
 
-    ctx.fillStyle = '#666';
-    ctx.font = '16px Roboto';
-    ctx.fillText(`Họ và tên: ${name}`, 60, 140);
-    ctx.fillText(`Số điện thoại: ${phone}`, 60, 170);
-    ctx.fillText(`Địa chỉ: ${address}`, 60, 200);
+    ctx.fillStyle = '#555';
+    ctx.font = '22px Arial';
+    ctx.fillText(`Họ và tên: ${name}`, 50, 150);
+    ctx.fillText(`Số điện thoại: ${phone}`, 50, 180);
+    ctx.fillText(`Địa chỉ: ${address}`, 50, 210);
 
     // Danh sách sản phẩm
     ctx.fillStyle = '#333';
-    ctx.font = 'bold 20px Roboto';
-    ctx.fillText('Sản phẩm đã đặt:', 60, 240);
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText('Sản phẩm:', 50, 250);
 
-    ctx.fillStyle = '#666';
-    ctx.font = '16px Roboto';
-    let y = 270;
+    ctx.fillStyle = '#555';
+    ctx.font = '22px Arial';
+    let y = 290;
     order_items.forEach((item, index) => {
-      ctx.fillText(`${index + 1}. ${item.pro_name} (x${item.quantity})`, 60, y);
+      ctx.fillText(`${index + 1}. ${item.pro_name} (x${item.quantity})`, 50, y);
       ctx.fillText(`${item.price}đ`, width - 160, y);
-      y += 30;
+      y += 35;
     });
 
-    // Tổng tiền (in đậm)
-    ctx.fillStyle = '#333';
-    ctx.font = 'bold 22px Roboto';
-    ctx.fillText('Tổng cộng:', 60, y + 10);
-    ctx.fillText(`${total_price}đ`, width - 160, y + 10);
+    // Dòng kẻ ngang ngăn cách
+    ctx.strokeStyle = '#bbb';
+    ctx.beginPath();
+    ctx.moveTo(50, y + 10);
+    ctx.lineTo(width - 50, y + 10);
+    ctx.stroke();
+
+    // Tổng tiền (nổi bật)
+    ctx.fillStyle = '#222';
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText('Tổng cộng:', 50, y + 50);
+    ctx.fillText(`${total_price}đ`, width - 160, y + 50);
 
     // Lưu ảnh vào file tạm
     const filePath = `invoice_${Date.now()}.png`;
