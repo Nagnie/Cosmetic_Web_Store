@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 import { useQuery } from "@tanstack/react-query";
 import { Pagination } from "antd";
 

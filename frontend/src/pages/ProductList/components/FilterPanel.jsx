@@ -24,6 +24,9 @@ const theme = {
     DEFAULT: "#FAF5F0",
     light: "#FFFAF3",
   },
+  card: {
+    bg: "#fff3e7",
+  }
 };
 
 const FilterPanel = ({
@@ -79,7 +82,7 @@ const FilterPanel = ({
         },
       }}
     >
-      <div className="h-fit rounded-lg bg-pink-50 p-4">
+      <div className="h-fit rounded-lg  p-4" style={{ backgroundColor: theme.card.bg }}>
         <h2 className="mb-4 text-xl font-semibold">Bộ lọc</h2>
 
         <div className="mb-4">
@@ -155,11 +158,11 @@ const FilterPanel = ({
             Danh mục
           </label>
           {isLoading ? (
-            <select className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none">
+            <select className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none">
               <option>Đang tải danh mục...</option>
             </select>
           ) : error ? (
-            <select className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none">
+            <select className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none">
               <option>Không thể tải danh mục</option>
             </select>
           ) : (
@@ -167,7 +170,7 @@ const FilterPanel = ({
               name="category"
               value={filters.category}
               onChange={onFilterChange}
-              className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none"
             >
               <option value="all">Tất cả</option>
               {categories?.map((category) => (
@@ -187,7 +190,7 @@ const FilterPanel = ({
             name="sortBy"
             value={filters.sortBy}
             onChange={onFilterChange}
-            className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none"
+            className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none"
           >
             <option value="newest">Mới nhất</option>
             <option value="priceLow">Giá thấp đến cao</option>

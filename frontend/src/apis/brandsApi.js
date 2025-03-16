@@ -1,7 +1,7 @@
 import axios from "@utils/axios";
 
 const brandsApi = {
-    getBrands: async ({ page = 1, limit = 9 }) => {
+    getBrands: async ({ page, limit}) => {
         return axios.get(`/brands`, {
             params: {
                 page,

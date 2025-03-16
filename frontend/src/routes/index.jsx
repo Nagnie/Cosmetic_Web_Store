@@ -9,6 +9,7 @@ import Admin from "../pages/Admin/Admin.jsx";
 import CartPage from "@pages/Cart/CartPage.jsx";
 import CheckoutPage from "@pages/Checkout/CheckoutPage.jsx";
 import PaymentSuccess from "@pages/PaymentSuccess/PaymentSuccess.jsx";
+import AllBrands from "@pages/AllBrand/AllBrands.jsx";
 
 import ProtectedRoute from "@components/ProtectedRoute.jsx";
 
@@ -52,6 +53,11 @@ const PublicRoutes = [
   {
     path: "/payment-confirmation",
     component: PaymentSuccess,
+    layout: GuestLayout,
+  },
+  {
+    path: "/brands",
+    component: AllBrands,
     layout: GuestLayout,
   }
 ];
