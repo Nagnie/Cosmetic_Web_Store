@@ -10,6 +10,7 @@ export const useAllCategories = () => {
         page: 1,
         limit: 100,
       });
+
       const { total_pages, data } = firstPageResponse.data;
 
       if (total_pages <= 1) {

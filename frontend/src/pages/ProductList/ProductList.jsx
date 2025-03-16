@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import { useMemo } from "react";
-import ProductCard from "../../components/ProductCard/ProductCard.jsx";
+import { useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Pagination } from "antd";
 
@@ -10,6 +8,9 @@ import { useAllCategories } from "@hooks/useCategoryQueries.js";
 import FilterPanel from "./components/FilterPanel.jsx";
 import ProductGrid from "./components/ProductGrid.jsx";
 
+import "./ProductList.css";
+import { useAllBrands } from "@hooks/useBrandQueries.js";
+
 const LIMIT = 9;
 const MIN_MAX_PRICE = [0, 10000000];
 
@@ -18,204 +19,261 @@ const ProductListingPage = () => {
   const {
     brand: brandName,
     category: categoryParam,
+    subcate: subcateParam,
     search: searchParam,
     page,
+    minPrice: minPriceParam,
+    maxPrice: maxPriceParam,
+    orderBy: orderByParam,
+    sortBy: sortByParam,
   } = queryString;
+
   const [currentPage, setCurrentPage] = useState(+page || 1);
   const [showFilter, setShowFilter] = useState(false);
+  const [userInteractedWithFilters] = useState(false);
 
-  // Thêm state để theo dõi nếu người dùng đã tương tác với bộ lọc
-  const [userInteractedWithFilters, setUserInteractedWithFilters] =
-    useState(false);
-
-  // Kiểm tra xem có tham số URL nào được set không
-  const hasUrlParams = Boolean(brandName || categoryParam || searchParam);
-
-  // Sử dụng callback trong useState để tránh tính toán lại khi re-render
+  // Initialize filters with URL parameters or defaults
   const [filters, setFilters] = useState(() => ({
-    category: categoryParam || "all",
-    priceRange: [0, 1000000],
-    sortBy: "newest",
+    category: categoryParam || "",
+    subcate: subcateParam || "",
+    brand: brandName || "",
+    priceRange: [
+      minPriceParam ? parseInt(minPriceParam) : MIN_MAX_PRICE[0],
+      maxPriceParam ? parseInt(maxPriceParam) : MIN_MAX_PRICE[1],
+    ],
+    sortBy: sortByParam || "",
+    orderBy: orderByParam || "",
+    key: searchParam || "",
   }));
 
-  // Cập nhật lại state filters khi URL params thay đổi
-  useEffect(() => {
-    if (hasUrlParams && !userInteractedWithFilters) {
-      setFilters((prev) => ({
-        ...prev,
-        category: categoryParam || "all",
-      }));
-    }
-  }, [categoryParam, hasUrlParams, userInteractedWithFilters]);
-
-  // Xóa URL params khi người dùng tương tác với bộ lọc
-  useEffect(() => {
-    if (userInteractedWithFilters && hasUrlParams) {
-      const url = new URL(window.location);
-      if (brandName) url.searchParams.delete("brand");
-      if (categoryParam) url.searchParams.delete("category");
-      if (searchParam) url.searchParams.delete("search");
-      window.history.pushState({}, "", url);
-    }
+  // Check if URL has any search parameters
+  const hasUrlParams = useMemo(() => {
+    return Boolean(
+      brandName ||
+        categoryParam ||
+        subcateParam ||
+        searchParam ||
+        minPriceParam ||
+        maxPriceParam ||
+        orderByParam ||
+        sortByParam,
+    );
   }, [
-    userInteractedWithFilters,
-    hasUrlParams,
     brandName,
     categoryParam,
+    subcateParam,
+    searchParam,
+    minPriceParam,
+    maxPriceParam,
+    orderByParam,
+    sortByParam,
+  ]);
+
+  // Update filters when URL params change and user hasn't interacted with filters
+  useEffect(() => {
+    if (hasUrlParams && !userInteractedWithFilters) {
+      setFilters({
+        category: categoryParam || "",
+        subcate: subcateParam || "",
+        brand: brandName || "",
+        priceRange: [
+          minPriceParam ? parseInt(minPriceParam) : MIN_MAX_PRICE[0],
+          maxPriceParam ? parseInt(maxPriceParam) : MIN_MAX_PRICE[1],
+        ],
+        sortBy: sortByParam || "",
+        orderBy: orderByParam || "",
+        key: searchParam || "",
+      });
+    }
+  }, [
+    hasUrlParams,
+    userInteractedWithFilters,
+    categoryParam,
+    subcateParam,
+    brandName,
+    minPriceParam,
+    maxPriceParam,
+    sortByParam,
+    orderByParam,
     searchParam,
   ]);
 
-  // Tối ưu hóa hàm fetchProducts thành useMemo để tránh tái tạo hàm không cần thiết
-  const fetchProducts = useMemo(
-    () => async () => {
-      // Sử dụng URL params nếu chúng tồn tại và người dùng chưa tương tác với bộ lọc
-      if (!userInteractedWithFilters) {
-        if (brandName) {
-          return productsApi.getProductsByBrandName(brandName, {
-            page: currentPage,
-          });
-        }
+  useEffect(() => {
+    if (userInteractedWithFilters) {
+      const url = new URL(window.location);
 
-        if (categoryParam) {
-          return productsApi.getProductsByCategoryName(categoryParam, {
-            pageParam: currentPage,
-          });
-        }
-
-        if (searchParam) {
-          return productsApi.searchProducts(searchParam, { page: currentPage });
-        }
+      // Cập nhật URL với giá trị filter hiện tại
+      if (filters.category && filters.category !== "") {
+        url.searchParams.set("category", filters.category);
+      } else {
+        url.searchParams.delete("category");
       }
 
-      // Nếu không có URL params hoặc người dùng đã tương tác với bộ lọc
-      const isFiltered =
-        filters.category !== "all" ||
-        filters.priceRange[0] !== 0 ||
-        filters.priceRange[1] !== 1000000 ||
-        filters.sortBy !== "newest";
-
-      if (isFiltered) {
-        const [minPrice, maxPrice] = filters.priceRange;
-
-        return productsApi.getFilterProducts(
-          {
-            category: filters.category === "all" ? "" : filters.category,
-            minPrice,
-            maxPrice,
-          },
-          { pageParam: currentPage },
-        );
+      if (filters.subcate) {
+        url.searchParams.set("subcate", filters.subcate);
+      } else {
+        url.searchParams.delete("subcate");
       }
 
-      return productsApi.getProducts({ page: currentPage });
-    },
-    [
-      brandName,
-      categoryParam,
-      searchParam,
-      currentPage,
-      filters,
-      userInteractedWithFilters,
-    ],
-  );
+      if (filters.brand) {
+        url.searchParams.set("brand", filters.brand);
+      } else {
+        url.searchParams.delete("brand");
+      }
 
-  // Sử dụng alias để làm rõ cấu trúc dữ liệu
+      const [minPrice, maxPrice] = filters.priceRange;
+      if (minPrice > MIN_MAX_PRICE[0]) {
+        url.searchParams.set("minPrice", minPrice);
+      } else {
+        url.searchParams.delete("minPrice");
+      }
+
+      if (maxPrice < MIN_MAX_PRICE[1]) {
+        url.searchParams.set("maxPrice", maxPrice);
+      } else {
+        url.searchParams.delete("maxPrice");
+      }
+
+      if (filters.sortBy) {
+        url.searchParams.set("sortBy", filters.sortBy);
+      } else {
+        url.searchParams.delete("sortBy");
+      }
+
+      if (filters.orderBy) {
+        url.searchParams.set("orderBy", filters.orderBy);
+      } else {
+        url.searchParams.delete("orderBy");
+      }
+
+      if (filters.key) {
+        url.searchParams.set("search", filters.key);
+      } else {
+        url.searchParams.delete("search");
+      }
+
+      url.searchParams.set("page", currentPage);
+
+      window.history.pushState({}, "", url);
+    }
+  }, [filters, currentPage, userInteractedWithFilters]);
+
+  // Prepare query parameters for API call
+  const queryParams = useMemo(() => {
+    const [minPrice, maxPrice] = filters.priceRange;
+
+    return {
+      orderBy: filters.orderBy,
+      sortBy: filters.sortBy,
+      minPrice,
+      maxPrice,
+      brand: filters.brand || "",
+      subcate: filters.subcate || "",
+      category: filters.category === "" ? "" : filters.category,
+      key: filters.key || "",
+    };
+  }, [filters]);
+
+  // console.log(queryParams);
+
+  // Fetch products with consolidated API
+  const fetchProducts = async () => {
+    return productsApi.findProducts(queryParams, {
+      page: currentPage,
+      limit: LIMIT,
+    });
+  };
+
   const { data, isLoading } = useQuery({
-    queryKey: [
-      "products",
-      brandName,
-      categoryParam,
-      searchParam,
-      currentPage,
-      filters,
-      userInteractedWithFilters,
-    ],
+    queryKey: ["products", currentPage, queryParams],
     queryFn: fetchProducts,
   });
 
-  // Cải thiện trích xuất dữ liệu với destructuring và nullish coalescing
+  // Extract product data
   const products = useMemo(
     () => data?.data?.data?.products ?? data?.data?.data ?? [],
     [data],
   );
+
   const perPage = data?.data?.limit ?? data?.data?.data?.limit ?? LIMIT;
   const totalItems =
     data?.data?.total_items ?? data?.data?.data?.total_items ?? 0;
 
-  // Tách ResultText thành một hàm riêng để làm rõ mục đích
+  // Build result text message
   const resultText = useMemo(() => {
-    // Không hiển thị nếu đang sử dụng bộ lọc tùy chỉnh
-    if (
-      userInteractedWithFilters ||
-      (!brandName && !categoryParam && !searchParam)
-    )
-      return null;
+    if (userInteractedWithFilters) return null;
 
-    let searchType, searchValue;
+    let searchTerms = [];
 
-    if (brandName) {
-      searchType = "thương hiệu";
-      searchValue = brandName;
-    } else if (categoryParam) {
-      searchType = "danh mục";
-      searchValue = categoryParam;
-    } else {
-      searchType = "";
-      searchValue = searchParam;
-    }
+    if (brandName) searchTerms.push(`thương hiệu "${brandName}"`);
+    if (categoryParam) searchTerms.push(`danh mục "${categoryParam}"`);
+    if (subcateParam) searchTerms.push(`danh mục con "${subcateParam}"`);
+    if (searchParam) searchTerms.push(`từ khóa "${searchParam}"`);
+    // if (minPriceParam || maxPriceParam) {
+    //   const priceRange = [];
+    //   if (minPriceParam)
+    //     priceRange.push(
+    //       `từ ${parseInt(minPriceParam).toLocaleString("vi-VN")}đ`,
+    //     );
+    //   if (maxPriceParam)
+    //     priceRange.push(
+    //       `đến ${parseInt(maxPriceParam).toLocaleString("vi-VN")}đ`,
+    //     );
+    //   searchTerms.push(`giá ${priceRange.join(" ")}`);
+    // }
 
-    return (
-      <p>
-        Kết quả tìm kiếm {searchType && `cho ${searchType}`}{" "}
-        <span className="font-semibold">&quot;{searchValue}&quot;</span>.
-      </p>
-    );
-  }, [brandName, categoryParam, searchParam, userInteractedWithFilters]);
+    if (searchTerms.length === 0) return null;
 
-  // Hooks categories
+    return <p>Kết quả tìm kiếm cho {searchTerms.join(", ")}.</p>;
+  }, [
+    brandName,
+    categoryParam,
+    subcateParam,
+    searchParam,
+    userInteractedWithFilters,
+  ]);
+
+  // Get categories for filter panel
   const {
     data: categories,
     isLoading: categoriesLoading,
     error: categoriesError,
   } = useAllCategories();
 
-  // Tối ưu hóa event handlers
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
+  const {
+    data: brands,
+    isLoading: brandsLoading,
+    error: brandsError,
+  } = useAllBrands();
 
-    // Đánh dấu rằng người dùng đã tương tác với bộ lọc
-    if (!userInteractedWithFilters) {
-      setUserInteractedWithFilters(true);
-    }
-
+  // Handle filter changes
+  const handleFilterChange = ({ target: { name, value } }) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
 
-    // Reset về trang 1 khi thay đổi bộ lọc
+    // Reset page khi filter thay đổi
     if (currentPage !== 1) {
       setCurrentPage(1);
-      updatePageInUrl(1);
     }
   };
 
   const toggleFilter = () => setShowFilter((prev) => !prev);
 
   const handlePageChange = (page) => {
-    setCurrentPage(+page);
+    setCurrentPage(page);
     updatePageInUrl(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Tách thành hàm riêng để tái sử dụng
   const updatePageInUrl = (page) => {
     const url = new URL(window.location);
     url.searchParams.set("page", page);
     window.history.pushState({}, "", url);
   };
 
-  // Scroll to top khi thay đổi trang
+  // Scroll to top when page changes
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [currentPage, products]);
+  }, [currentPage]);
 
   return (
     <div className="container mx-auto mt-40 mb-20 py-8">
@@ -261,6 +319,9 @@ const ProductListingPage = () => {
             isLoading={categoriesLoading}
             error={categoriesError}
             minMaxPrice={MIN_MAX_PRICE}
+            brands={brands}
+            brandsLoading={brandsLoading}
+            brandsError={brandsError}
           />
         </div>
 
@@ -271,6 +332,7 @@ const ProductListingPage = () => {
           {!isLoading && products.length > 0 && (
             <div className="mt-8 flex justify-center">
               <Pagination
+                className="custom-pagination"
                 showQuickJumper
                 current={currentPage}
                 total={totalItems}

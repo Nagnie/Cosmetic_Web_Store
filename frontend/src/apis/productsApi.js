@@ -81,6 +81,41 @@ const productsApi = {
     });
   },
 
+  findProducts: async (
+    { orderBy, sortBy, minPrice, maxPrice, brand, subcate, category, key },
+    { page = 1, limit = 9 },
+  ) => {
+    // Tạo đối tượng params ban đầu
+    const params = {
+      orderBy,
+      sortBy,
+      minPrice,
+      maxPrice,
+      brand,
+      subcate,
+      category,
+      key,
+      page,
+      limit,
+    };
+
+    // Loại bỏ các tham số rỗng, null hoặc undefined
+    const cleanParams = {};
+    Object.entries(params).forEach(([paramName, paramValue]) => {
+      if (
+        paramValue !== "" &&
+        paramValue !== null &&
+        paramValue !== undefined
+      ) {
+        cleanParams[paramName] = paramValue;
+      }
+    });
+
+    return axios.get(`/product/search`, {
+      params: cleanParams,
+    });
+  },
+
   getFilterProducts: async (filter, { page = 1, limit = 9 }) => {
     return axios.get(`/product/filter`, {
       params: {

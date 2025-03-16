@@ -26,7 +26,7 @@ const theme = {
   },
   card: {
     bg: "#fff3e7",
-  }
+  },
 };
 
 const FilterPanel = ({
@@ -36,6 +36,9 @@ const FilterPanel = ({
   categories,
   isLoading,
   error,
+  brands,
+  brandsLoading,
+  brandsError,
 }) => {
   const [range, setRange] = useState(minMaxPrice);
   const [inputMin, setInputMin] = useState(minMaxPrice[0]);
@@ -82,7 +85,10 @@ const FilterPanel = ({
         },
       }}
     >
-      <div className="h-fit rounded-lg  p-4" style={{ backgroundColor: theme.card.bg }}>
+      <div
+        className="h-fit rounded-lg p-4"
+        style={{ backgroundColor: theme.card.bg }}
+      >
         <h2 className="mb-4 text-xl font-semibold">Bộ lọc</h2>
 
         <div className="mb-4">
@@ -172,10 +178,39 @@ const FilterPanel = ({
               onChange={onFilterChange}
               className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none"
             >
-              <option value="all">Tất cả</option>
+              <option value="">Tất cả</option>
               {categories?.map((category) => (
                 <option key={category.cat_id} value={category.cat_name}>
                   {category.cat_name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        <div className="mb-4">
+          <label className="mb-2 block font-medium text-gray-700">
+            Thương hiệu
+          </label>
+          {brandsLoading ? (
+            <select className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none">
+              <option>Đang tải thương hiệu...</option>
+            </select>
+          ) : brandsError ? (
+            <select className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none">
+              <option>Không thể tải thương hiệu</option>
+            </select>
+          ) : (
+            <select
+              name="brand"
+              value={filters.brand}
+              onChange={onFilterChange}
+              className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none"
+            >
+              <option value="">Tất cả</option>
+              {brands?.map((brand) => (
+                <option key={brand.id} value={brand.name}>
+                  {brand.name}
                 </option>
               ))}
             </select>
@@ -209,6 +244,9 @@ FilterPanel.propTypes = {
   isLoading: PropTypes.bool,
   error: PropTypes.object,
   minMaxPrice: PropTypes.array,
+  brands: PropTypes.array,
+  brandsLoading: PropTypes.bool,
+  brandsError: PropTypes.object,
 };
 
 export default FilterPanel;
