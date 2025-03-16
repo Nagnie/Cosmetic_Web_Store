@@ -233,128 +233,27 @@ export class ProductService {
     }
   }
 
-  async search(req: Request) {
+  async searchAndFilter(req: Request) {
     try {
       const {
         key,
-        page = 1,
-        limit = 5,
-      } = req.query;
-
-      const keyword = (key as unknown as string)?.toLowerCase();
-      const products = await this.dataSource.query(`
-        WITH combined_products AS (
-          SELECT p.*,
-            COALESCE((
-              SELECT json_agg(img.link)::TEXT  -- Ép kiểu JSON thành TEXT
-              FROM product_image AS img
-              WHERE img.id_pro = p.id_pro
-            ), '[]') AS images,
-            COALESCE((
-              SELECT json_agg(DISTINCT class.name)::TEXT  -- Ép kiểu JSON thành TEXT
-              FROM classification AS class
-              WHERE class.id_pro = p.id_pro
-            ), '[]') AS classification
-          FROM product p
-          WHERE LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')
-
-          UNION
-
-          SELECT p.*,
-            COALESCE((
-              SELECT json_agg(img.link)::TEXT
-              FROM product_image AS img
-              WHERE img.id_pro = p.id_pro
-            ), '[]') AS images,
-            COALESCE((
-              SELECT json_agg(DISTINCT class.name)::TEXT
-              FROM classification AS class
-              WHERE class.id_pro = p.id_pro
-            ), '[]') AS classification
-          FROM product p
-          JOIN brand b ON p.id_bra = b.id_bra
-          WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
-
-          UNION
-
-          SELECT p.*,
-            COALESCE((
-              SELECT json_agg(img.link)::TEXT
-              FROM product_image AS img
-              WHERE img.id_pro = p.id_pro
-            ), '[]') AS images,
-            COALESCE((
-              SELECT json_agg(DISTINCT class.name)::TEXT
-              FROM classification AS class
-              WHERE class.id_pro = p.id_pro
-            ), '[]') AS classification
-          FROM product p
-          JOIN sub_category sc ON p.id_subcat = sc.id_subcat
-          JOIN category c ON sc.id_cat = c.id_cat
-          WHERE LOWER(c.name) LIKE CONCAT('%', $1::TEXT, '%') 
-            OR LOWER(sc.name) LIKE CONCAT('%', $1::TEXT, '%')
-        )
-        SELECT * FROM combined_products
-        ORDER BY id_pro
-        LIMIT $2 OFFSET $3;
-      `, [keyword, limit, (page as number - 1) * (limit as number)]);
-
-      const totalItems = await this.dataSource.query(`
-        SELECT COUNT(*) AS total FROM (
-          WITH combined_products AS (
-            SELECT p.id_pro
-            FROM product p
-            WHERE LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')
-            UNION
-            SELECT p.id_pro
-            FROM product p
-            JOIN brand b ON p.id_bra = b.id_bra
-            WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
-            UNION
-            SELECT p.id_pro
-            FROM product p
-            JOIN sub_category sc ON p.id_subcat = sc.id_subcat
-            JOIN category c ON sc.id_cat = c.id_cat
-            WHERE LOWER(c.name) LIKE CONCAT('%', $1::TEXT, '%') 
-               OR LOWER(sc.name) LIKE CONCAT('%', $1::TEXT, '%')
-          )
-          SELECT * FROM combined_products
-        ) AS count_table
-      `, [keyword]);
-
-      const allPage = Math.ceil(totalItems[0].total / (limit as number));
-
-      return new ResponseDto(200, "Successfully", {
-        total_pages: allPage,
-        total_items: totalItems[0].total,
-        page,
-        limit,
-        products
-      });
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException("Failed to search product");
-    }
-  }
-
-  async filter(req: Request) {
-    try {
-      const {
-        product = null,
         category = null,
-        subcate = null,
-        brand = null,
-        minPrice = 0,
-        maxPrice = 99999,
-        page = 1,
+        subcate = null, 
+        brand = null, 
+        minPrice = 0, 
+        maxPrice = 9999999, 
+        sortBy = "price",
+        orderBy = "ASC",
+        page = 1, 
         limit = 5,
       } = req.query;
-
-      const proName = product ? (product as string).toLowerCase().trim() : null;
+  
+      const keyword = (key as unknown as string)?.toLowerCase();
       const cateName = category ? (category as string).toLowerCase().trim() : null;
       const subCateName = subcate ? (subcate as string).toLowerCase().trim() : null;
       const brandName = brand ? (brand as string).toLowerCase().trim() : null;
-      const allIteams = await this.dataSource.query(`
+  
+      const allItems = await this.dataSource.query(`
         SELECT p.*
         FROM product p
         JOIN sub_category sc ON p.id_subcat = sc.id_subcat
@@ -362,49 +261,57 @@ export class ProductService {
         JOIN brand b ON p.id_bra = b.id_bra
         WHERE
           ($1::TEXT IS NULL OR LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')) AND
-          ($2::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $2::TEXT, '%')) AND 
+          ($2::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $2::TEXT, '%')) AND
           ($3::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $3::TEXT, '%')) AND
           ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%')) AND
           (p.price >= $5 AND p.price <= $6)
-      `, [proName, cateName, subCateName, brandName, minPrice, maxPrice]);
-      const allPage = Math.ceil(allIteams.length / (limit as number));
+      `, [keyword, cateName, subCateName, brandName, minPrice, maxPrice]);
+
+
+      const validSortBy = `p.${sortBy}`;
+      const totalItems = allItems.length;
+      const totalPages = Math.ceil(totalItems / (limit as number));
+  
       const products = await this.dataSource.query(`
         SELECT p.*,
-        COALESCE((
-          SELECT json_agg(img.link)
-          FROM product_image AS img
-          WHERE img.id_pro = p.id_pro), '[]'::json
-        ) AS images,
-        COALESCE(
-          (SELECT json_agg(DISTINCT class.name) 
-          FROM classification AS class 
-          WHERE class.id_pro = p.id_pro), '[]'::json
-        ) AS classification
+          COALESCE((
+            SELECT json_agg(img.link)
+            FROM product_image AS img
+            WHERE img.id_pro = p.id_pro), '[]'::json
+          ) AS images,
+          COALESCE((
+            SELECT json_agg(DISTINCT class.name)
+            FROM classification AS class
+            WHERE class.id_pro = p.id_pro), '[]'::json
+          ) AS classification
         FROM product p
         JOIN sub_category sc ON p.id_subcat = sc.id_subcat
         JOIN category c ON sc.id_cat = c.id_cat
         JOIN brand b ON p.id_bra = b.id_bra
         WHERE
           ($1::TEXT IS NULL OR LOWER(p.name) LIKE CONCAT('%', $1::TEXT, '%')) AND
-          ($2::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $2::TEXT, '%')) AND 
+          ($2::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $2::TEXT, '%')) AND
           ($3::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $3::TEXT, '%')) AND
           ($4::TEXT IS NULL OR LOWER(b.name) LIKE CONCAT('%', $4::TEXT, '%')) AND
           (p.price >= $5 AND p.price <= $6)
-        ORDER BY p.id_pro
+        ORDER BY ${validSortBy} ${orderBy}
         LIMIT $7 OFFSET $8
-      `, [proName, cateName, subCateName, brandName, minPrice, maxPrice, limit, (page as number - 1) * (limit as number)]);
-
-      return new ResponseDto(HttpStatus.OK, "Successfully", { 
-        total_pages: allPage,
-        total_items: allIteams.length,
+      `, [keyword, cateName, subCateName, brandName, minPrice, maxPrice, limit, (page as number - 1) * (limit as number)]);
+  
+      return new ResponseDto(HttpStatus.OK, "Successfully", {
+        total_pages: totalPages,
+        total_items: totalItems,
         page,
-        limit, 
+        limit,
         products
       });
+  
     } catch (error) {
-      throw new InternalServerErrorException("Failed to filter");
+      console.log(error);
+      throw new InternalServerErrorException("Failed to search and filter products");
     }
   }
+  
 
   async findSameBrand(bra_name: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
