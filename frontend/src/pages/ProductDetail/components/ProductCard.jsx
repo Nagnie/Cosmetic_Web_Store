@@ -34,7 +34,7 @@ const ProductCard = ({ product }) => {
       <div className="product-info p-2 text-left">
         <div>
           <div className="text-[10px] font-bold uppercase">
-            {product.brand || SAMPLE_PRODUCT.brand}
+            {product.brand || product.bra_name || SAMPLE_PRODUCT.brand}
           </div>
         </div>
         <h3
@@ -50,7 +50,9 @@ const ProductCard = ({ product }) => {
         <div>
           <span className="text-primary-dark font-bold">
             {formatCurrency({
-              number: Number(product.price) || SAMPLE_PRODUCT.price,
+              number:
+                Number(product.price || product.pro_price) ||
+                SAMPLE_PRODUCT.price,
             })}
           </span>
         </div>

@@ -210,7 +210,18 @@ const CheckoutCustomerInfo = () => {
           "N/A",
       };
 
-      console.log("Submitting form data:", formattedAddress);
+      // console.log("Submitting form data:", formattedAddress);
+
+      const persistData = {
+        name: formattedAddress.name,
+        email: formattedAddress.email,
+        phone: formattedAddress.phone,
+        address: `${formattedAddress.address}, ${formattedAddress.wardName}, ${formattedAddress.districtName}, ${formattedAddress.cityName}`,
+        note: formattedAddress.note,
+        order_items: JSON.parse(localStorage.getItem("cartItems")),
+      };
+
+      console.log("Persisting data:", persistData);
 
       // Navigate to next step
       navigate("/payment-confirmation");
@@ -334,66 +345,95 @@ const CheckoutCustomerInfo = () => {
             </Form.Item>
 
             <Form.Item
-              label="Quận/Huyện"
-              name="district"
-              rules={[{ required: true, message: "Vui lòng chọn quận/huyện!" }]}
+              shouldUpdate={(prevValues, currentValues) => {
+                return prevValues.city !== currentValues.city;
+              }}
             >
-              <Select
-                placeholder="Chọn quận/huyện"
-                onChange={handleDistrictChange}
-                disabled={!form.getFieldValue("city") || loading.districts}
-                className="w-full rounded-md"
-                showSearch
-                filterOption={(input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase())
-                }
-                loading={loading.districts}
-                notFoundContent={
-                  loading.districts ? <Spin size="small" /> : null
-                }
-              >
-                {locationAvailability.hasDistricts ? (
-                  locationData.districts.map((district) => (
-                    <Select.Option key={district.id} value={district.id}>
-                      {district.name}
-                    </Select.Option>
-                  ))
-                ) : (
-                  <Select.Option value="N/A">N/A</Select.Option>
-                )}
-              </Select>
+              {({ getFieldValue }) => (
+                <Form.Item
+                  label="Quận/Huyện"
+                  name="district"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn quận/huyện!" },
+                  ]}
+                >
+                  <Select
+                    placeholder="Chọn quận/huyện"
+                    onChange={handleDistrictChange}
+                    disabled={!getFieldValue("city") || loading.districts}
+                    className="w-full rounded-md"
+                    showSearch
+                    filterOption={(input, option) =>
+                      option.children
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    loading={loading.districts}
+                    notFoundContent={
+                      loading.districts ? <Spin size="small" /> : null
+                    }
+                  >
+                    {locationAvailability.hasDistricts ? (
+                      locationData.districts.map((district) => (
+                        <Select.Option key={district.id} value={district.id}>
+                          {district.name}
+                        </Select.Option>
+                      ))
+                    ) : (
+                      <Select.Option value="N/A">N/A</Select.Option>
+                    )}
+                  </Select>
+                </Form.Item>
+              )}
             </Form.Item>
 
             <Form.Item
-              label="Phường/Xã"
-              name="ward"
-              rules={[{ required: true, message: "Vui lòng chọn phường/xã!" }]}
+              shouldUpdate={(prevValues, currentValues) => {
+                return (
+                  prevValues.district !== currentValues.district ||
+                  prevValues.city !== currentValues.city
+                );
+              }}
             >
-              <Select
-                placeholder="Chọn phường/xã"
-                disabled={
-                  !form.getFieldValue("district") ||
-                  !locationAvailability.hasDistricts ||
-                  loading.wards
-                }
-                className="w-full rounded-md"
-                showSearch
-                filterOption={(input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase())
-                }
-                loading={loading.wards}
-                notFoundContent={loading.wards ? <Spin size="small" /> : null}
-              >
-                {locationAvailability.hasWards ? (
-                  locationData.wards.map((ward) => (
-                    <Select.Option key={ward.id} value={ward.id}>
-                      {ward.name}
-                    </Select.Option>
-                  ))
-                ) : (
-                  <Select.Option value="N/A">N/A</Select.Option>
-                )}
-              </Select>
+              {({ getFieldValue }) => (
+                <Form.Item
+                  label="Phường/Xã"
+                  name="ward"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn phường/xã!" },
+                  ]}
+                >
+                  <Select
+                    placeholder="Chọn phường/xã"
+                    disabled={
+                      !getFieldValue("district") ||
+                      !locationAvailability.hasDistricts ||
+                      loading.wards
+                    }
+                    className="w-full rounded-md"
+                    showSearch
+                    filterOption={(input, option) =>
+                      option.children
+                        .toLowerCase()
+                        .includes(input.toLowerCase())
+                    }
+                    loading={loading.wards}
+                    notFoundContent={
+                      loading.wards ? <Spin size="small" /> : null
+                    }
+                  >
+                    {locationAvailability.hasWards ? (
+                      locationData.wards.map((ward) => (
+                        <Select.Option key={ward.id} value={ward.id}>
+                          {ward.name}
+                        </Select.Option>
+                      ))
+                    ) : (
+                      <Select.Option value="N/A">N/A</Select.Option>
+                    )}
+                  </Select>
+                </Form.Item>
+              )}
             </Form.Item>
           </div>
 

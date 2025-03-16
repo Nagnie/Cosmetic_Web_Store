@@ -8,21 +8,19 @@ const QuantitySelector = ({
   onChange,
   width = 180,
   height = 40,
+  value,
 }) => {
   const [quantity, setQuantity] = useState(initialValue);
-  const [inputValue, setInputValue] = useState(initialValue.toString());
+  const [inputValue, setInputValue] = useState(() => initialValue.toString());
 
-  const validateAndUpdate = (value) => {
+  const validateValue = (value) => {
     const numValue =
       value === "" || value === null ? min : parseInt(value) || min;
-    const validValue = Math.max(min, Math.min(max, numValue));
-    setQuantity(validValue);
-    onChange && onChange(validValue);
-    return validValue;
+    return Math.max(min, Math.min(max, numValue));
   };
 
   const handleDecrease = () => {
-    const currentValid = validateAndUpdate(inputValue);
+    const currentValid = validateValue(inputValue);
 
     if (currentValid > min) {
       const newValue = currentValid - 1;
@@ -33,7 +31,7 @@ const QuantitySelector = ({
   };
 
   const handleIncrease = () => {
-    const currentValid = validateAndUpdate(inputValue);
+    const currentValid = validateValue(inputValue);
 
     if (currentValid < max) {
       const newValue = currentValid + 1;
@@ -50,7 +48,7 @@ const QuantitySelector = ({
     if (value !== "") {
       const numValue = parseInt(value.replace(/[^\d]/g, ""));
       if (!isNaN(numValue)) {
-        const validValue = Math.max(min, Math.min(max, numValue));
+        const validValue = validateValue(value);
         setQuantity(validValue);
         onChange && onChange(validValue);
       }
@@ -58,8 +56,10 @@ const QuantitySelector = ({
   };
 
   const handleBlur = () => {
-    const validValue = validateAndUpdate(inputValue);
+    const validValue = validateValue(inputValue);
+    setQuantity(validValue);
     setInputValue(validValue.toString());
+    onChange && onChange(validValue);
   };
 
   return (
@@ -85,7 +85,7 @@ const QuantitySelector = ({
       <input
         type="text"
         className={`!border-secondary-deep h-full !border !text-center outline-none`}
-        value={inputValue}
+        value={value || inputValue}
         onChange={handleInputChange}
         onBlur={handleBlur}
         style={{ width: (2 * width) / 4 }}
@@ -113,6 +113,7 @@ QuantitySelector.propTypes = {
   onChange: PropTypes.func,
   width: PropTypes.number,
   height: PropTypes.number,
+  value: PropTypes.number,
 };
 
 export default QuantitySelector;

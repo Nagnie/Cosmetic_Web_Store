@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 
 import useCartStore from "../ZustandCartStore";
+import { formatCurrency } from "@utils/utils";
 
-const CartDrawerFooter = () => {
+const CartDrawerFooter = ({ totalPrice }) => {
   const { closeCartDrawer } = useCartStore();
 
   return (
@@ -13,7 +15,9 @@ const CartDrawerFooter = () => {
         </span>
 
         <span className={`text-primary-dark text-lg font-semibold`}>
-          1.000.000đ
+          {formatCurrency({
+            number: totalPrice,
+          })}
         </span>
       </div>
       <div>
@@ -35,4 +39,9 @@ const CartDrawerFooter = () => {
     </div>
   );
 };
+
+CartDrawerFooter.propTypes = {
+  totalPrice: PropTypes.number,
+};
+
 export default CartDrawerFooter;

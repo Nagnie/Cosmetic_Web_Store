@@ -2,8 +2,11 @@ import { Breadcrumb } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 
 import { CheckoutCustomerInfo, CheckoutPriceInfo } from "./components";
+import { useCartStore } from "@components/Cart";
 
 const CheckoutPage = () => {
+  const cartItemCount = useCartStore((state) => state.itemCount);
+
   const routes = [
     {
       title: (
@@ -15,7 +18,7 @@ const CheckoutPage = () => {
       href: "/",
     },
     {
-      title: "Giỏ hàng (11)",
+      title: `Giỏ hàng (${cartItemCount})`,
       href: "/cart",
     },
     {
