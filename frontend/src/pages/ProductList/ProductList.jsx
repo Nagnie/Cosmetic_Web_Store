@@ -1,116 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useQueryString } from "@hooks/useQueryString.jsx";
 import { Pagination } from "antd";
 
-import ProductCard from "../../components/ProductCard/ProductCard.jsx";
-import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
+import { useQueryString } from "@hooks/useQueryString.jsx";
 import productsApi from "@apis/productsApi.js";
-import { numberToArray } from "@utils/utils.js";
 import { useAllCategories } from "@hooks/useCategoryQueries.js";
+import FilterPanel from "./components/FilterPanel.jsx";
+import ProductGrid from "./components/ProductGrid.jsx";
 
 const LIMIT = 9;
-
-// Tách các component con để cải thiện tính mô-đun và khả năng tái sử dụng
-const FilterPanel = ({
-  filters,
-  onFilterChange,
-  categories,
-  isLoading,
-  error,
-}) => (
-  <div className="h-fit rounded-lg bg-pink-50 p-4">
-    <h2 className="mb-4 text-xl font-semibold">Bộ lọc</h2>
-
-    <div className="mb-4">
-      <label className="mb-2 block font-medium text-gray-700">Danh mục</label>
-      {isLoading ? (
-        <select className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none">
-          <option>Đang tải danh mục...</option>
-        </select>
-      ) : error ? (
-        <select className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none">
-          <option>Không thể tải danh mục</option>
-        </select>
-      ) : (
-        <select
-          name="category"
-          value={filters.category}
-          onChange={onFilterChange}
-          className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none"
-        >
-          <option value="all">Tất cả</option>
-          {categories?.map((category) => (
-            <option key={category.cat_id} value={category.cat_name}>
-              {category.cat_name}
-            </option>
-          ))}
-        </select>
-      )}
-    </div>
-
-    <div className="mb-4">
-      <label className="mb-2 block font-medium text-gray-700">Khoảng giá</label>
-      <select
-        name="priceRange"
-        value={filters.priceRange}
-        onChange={onFilterChange}
-        className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none"
-      >
-        <option value="all">Tất cả</option>
-        <option value="under300">Dưới 300.000 VNĐ</option>
-        <option value="300to700">300.000 - 700.000 VNĐ</option>
-        <option value="over700">Trên 700.000 VNĐ</option>
-      </select>
-    </div>
-
-    <div className="mb-4">
-      <label className="mb-2 block font-medium text-gray-700">
-        Sắp xếp theo
-      </label>
-      <select
-        name="sortBy"
-        value={filters.sortBy}
-        onChange={onFilterChange}
-        className="w-full rounded-lg border border-gray-300 p-2 focus:border-pink-500 focus:outline-none"
-      >
-        <option value="newest">Mới nhất</option>
-        <option value="priceLow">Giá thấp đến cao</option>
-        <option value="priceHigh">Giá cao đến thấp</option>
-      </select>
-    </div>
-  </div>
-);
-
-const ProductGrid = ({ products, isLoading }) => {
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
-        {numberToArray(LIMIT).map((item) => (
-          <ProductCardSkeleton key={item} />
-        ))}
-      </div>
-    );
-  }
-
-  if (products.length === 0) {
-    return (
-      <div className="py-8 text-center">
-        <p className="text-gray-600">
-          Không tìm thấy sản phẩm phù hợp với bộ lọc.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
-      {products.map((product) => (
-        <ProductCard key={product.id_pro} product={product} />
-      ))}
-    </div>
-  );
-};
+const MIN_MAX_PRICE = [0, 10000000];
 
 const ProductListingPage = () => {
   const queryString = useQueryString();
@@ -133,7 +32,7 @@ const ProductListingPage = () => {
   // Sử dụng callback trong useState để tránh tính toán lại khi re-render
   const [filters, setFilters] = useState(() => ({
     category: categoryParam || "all",
-    priceRange: "all",
+    priceRange: [0, 1000000],
     sortBy: "newest",
   }));
 
@@ -189,20 +88,12 @@ const ProductListingPage = () => {
       // Nếu không có URL params hoặc người dùng đã tương tác với bộ lọc
       const isFiltered =
         filters.category !== "all" ||
-        filters.priceRange !== "all" ||
+        filters.priceRange[0] !== 0 ||
+        filters.priceRange[1] !== 1000000 ||
         filters.sortBy !== "newest";
 
       if (isFiltered) {
-        const priceRanges = {
-          under300: { min: 0, max: 300000 },
-          "300to700": { min: 300000, max: 700000 },
-          over700: { min: 700000, max: 100000000 },
-        };
-
-        const { min: minPrice, max: maxPrice } =
-          filters.priceRange !== "all"
-            ? priceRanges[filters.priceRange]
-            : { min: 0, max: 100000000 };
+        const [minPrice, maxPrice] = filters.priceRange;
 
         return productsApi.getFilterProducts(
           {
@@ -241,7 +132,10 @@ const ProductListingPage = () => {
   });
 
   // Cải thiện trích xuất dữ liệu với destructuring và nullish coalescing
-  const products = data?.data?.data?.products ?? data?.data?.data ?? [];
+  const products = useMemo(
+    () => data?.data?.data?.products ?? data?.data?.data ?? [],
+    [data],
+  );
   const perPage = data?.data?.limit ?? data?.data?.data?.limit ?? LIMIT;
   const totalItems =
     data?.data?.total_items ?? data?.data?.data?.total_items ?? 0;
@@ -319,7 +213,7 @@ const ProductListingPage = () => {
   // Scroll to top khi thay đổi trang
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [currentPage]);
+  }, [currentPage, products]);
 
   return (
     <div className="container mx-auto mt-40 mb-20 py-8">
@@ -364,6 +258,7 @@ const ProductListingPage = () => {
             categories={categories}
             isLoading={categoriesLoading}
             error={categoriesError}
+            minMaxPrice={MIN_MAX_PRICE}
           />
         </div>
 
