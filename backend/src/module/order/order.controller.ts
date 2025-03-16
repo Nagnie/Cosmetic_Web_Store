@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, Query } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Public } from '@/helpers/decorator/public';
-import { Request } from 'express';
+import { Response, Request } from 'express';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import axios from 'axios';
 
 @Controller('order')
 export class OrderController {
@@ -19,6 +20,26 @@ export class OrderController {
     return await this.orderService.create(req, createOrderDto);
   }
 
+  @Get('download-invoice')
+  @Public()
+  async downloadInvoice(
+    @Res() res: Response,
+    @Query('url') url: string,
+    @Query('publicId') publicId: string,
+  ) {
+    try {
+      // Fetch ảnh từ Cloudinary
+      const response = await axios.get(url, { responseType: 'arraybuffer' });
+
+      // Set header để tải file
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Content-Disposition', `attachment; filename="${publicId}.png"`);
+      res.send(response.data);
+    } catch (error) {
+      res.status(500).json({ message: 'Download failed' });
+    }
+  }
+
   @Get()
   @Public()
   async findAll(@Req() req: Request) {
@@ -28,15 +49,5 @@ export class OrderController {
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: Request) {
     return this.orderService.findOne(+id, req);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
   }
 }

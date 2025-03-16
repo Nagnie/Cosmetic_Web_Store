@@ -8,6 +8,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseDto } from '@/helpers/utils';
 import { Request } from 'express';
 
+import { cloudinary, setupCloudinary } from '@/config/cloudinary.config';
+import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
+import { createCanvas } from 'canvas';
+import * as QRCode from 'qrcode';
+
 @Injectable()
 export class OrderService {
   constructor(
@@ -15,9 +21,10 @@ export class OrderService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(OrderDetail)
     private readonly orderDetailRepository: Repository<OrderDetail>,
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
+    private readonly configService: ConfigService
   ) {
-
+    setupCloudinary(this.configService);
   }
 
   async create(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
@@ -48,11 +55,25 @@ export class OrderService {
           `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price]);
       }
 
+      // Create invoice's image
+      const invoiceImagePath = await this.generateInvoiceImage(createOrderDto);
+
+      // Create invoice's url
+      const invoiceUrl = await this.uploadImageToCloudinary(invoiceImagePath);
+
+      // Create QR code
+      const qrCodePath = await this.generateQRCode(invoiceUrl.url, invoiceUrl.publicId);
+
+      // Upload QR code
+      const qrCodeUrl = await this.uploadImageToCloudinary(qrCodePath);
+
       // COMMIT
       await queryRunner.commitTransaction();
       return {
         statusCode: 201,
         message: `Order "${id_order}" and order detail created successfully`,
+        invoice_url: invoiceUrl,
+        qr_code_url: qrCodeUrl,
       }
     } catch (error) {
       // ROLL BACK
@@ -98,11 +119,88 @@ export class OrderService {
     }
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  private async uploadImageToCloudinary(filePath: string): Promise<{ url: string, publicId: string }> {
+    const deleteAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: 'invoices',
+      use_filename: true,
+      unique_filename: false,
+      invalidate: true,
+      expires_at: deleteAt,
+    });
+    fs.unlinkSync(filePath);
+    return { url: result.secure_url, publicId: result.public_id };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  private async generateInvoiceImage(createOrderDto: CreateOrderDto): Promise<string> {
+    const { name, email, phone, address, note, order_items, total_price } = createOrderDto;
+
+    const width = 800, height = 500;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, width, height);
+
+    // Tiêu đề (căn giữa, font Roboto, màu xanh)
+    ctx.fillStyle = '#007BFF';
+    ctx.font = 'bold 28px Roboto';
+    const title = 'ĐẶT HÀNG THÀNH CÔNG!';
+    const titleWidth = ctx.measureText(title).width;
+    ctx.fillText(title, (width - titleWidth) / 2, 50);
+
+    // Khung chứa thông tin đơn hàng (bo góc)
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(40, 80, width - 80, height - 160, 10);
+    ctx.stroke();
+
+    // Thông tin khách hàng
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 20px Roboto';
+    ctx.fillText('Thông tin đơn hàng:', 60, 110);
+
+    ctx.fillStyle = '#666';
+    ctx.font = '16px Roboto';
+    ctx.fillText(`Họ và tên: ${name}`, 60, 140);
+    ctx.fillText(`Số điện thoại: ${phone}`, 60, 170);
+    ctx.fillText(`Địa chỉ: ${address}`, 60, 200);
+
+    // Danh sách sản phẩm
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 20px Roboto';
+    ctx.fillText('Sản phẩm đã đặt:', 60, 240);
+
+    ctx.fillStyle = '#666';
+    ctx.font = '16px Roboto';
+    let y = 270;
+    order_items.forEach((item, index) => {
+      ctx.fillText(`${index + 1}. ${item.pro_name} (x${item.quantity})`, 60, y);
+      ctx.fillText(`${item.price}đ`, width - 160, y);
+      y += 30;
+    });
+
+    // Tổng tiền (in đậm)
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 22px Roboto';
+    ctx.fillText('Tổng cộng:', 60, y + 10);
+    ctx.fillText(`${total_price}đ`, width - 160, y + 10);
+
+    // Lưu ảnh vào file tạm
+    const filePath = `invoice_${Date.now()}.png`;
+    const buffer = canvas.toBuffer('image/png');
+    fs.writeFileSync(filePath, buffer);
+
+    return filePath;
+  }
+
+
+  private async generateQRCode(url: string, publicId: string): Promise<string> {
+    const downloadUrl = `http://localhost:3001/api/order/download-invoice?url=${url}&publicId=${publicId}`;
+    const qrPath = `qrcode_${Date.now()}.png`;
+    await QRCode.toFile(qrPath, downloadUrl, { width: 300 });
+    return qrPath;
   }
 }
