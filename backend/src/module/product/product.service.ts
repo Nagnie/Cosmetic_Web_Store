@@ -282,7 +282,8 @@ export class ProductService {
   async findSameBrand(bra_name: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
 
-    return await this.dataSource.query(`
+
+    const data = await this.dataSource.query(`
         SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name,
         COALESCE((
           SELECT json_agg(img.link)
@@ -294,12 +295,25 @@ export class ProductService {
         WHERE bra.name = $1
         LIMIT $2 OFFSET $3
       `, [bra_name, limit, offset])
+
+    // console.log("DATA: ", data);
+    const total_items = data.length;
+    const total_pages = Math.ceil(total_items / limit);
+
+    return {
+      message: "All same brand products",
+      page: page,
+      limit: limit,
+      total_pages: total_pages,
+      total_items: total_items,
+      data: data
+    }
   }
 
   async findSameSubcategory(scat_name: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
 
-    return await this.dataSource.query(`
+    const data = await this.dataSource.query(`
         SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price,
         COALESCE((
           SELECT json_agg(img.link)
@@ -311,6 +325,19 @@ export class ProductService {
         WHERE scat.name = $1
         LIMIT $2 OFFSET $3
       `, [scat_name, limit, offset])
+
+    // console.log("DATA: ", data);
+    const total_items = data.length;
+    const total_pages = Math.ceil(total_items / limit);
+
+    return {
+      message: "All same subcategory products",
+      page: page,
+      limit: limit,
+      total_pages: total_pages,
+      total_items: total_items,
+      data: data
+    }
   }
 
   async update(id_pro: number, updateProductDto: UpdateProductDto) {
