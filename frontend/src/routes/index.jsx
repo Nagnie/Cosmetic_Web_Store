@@ -8,6 +8,7 @@ import AdminLogin from "../pages/Admin/AdminLogin.jsx";
 import Admin from "../pages/Admin/Admin.jsx";
 import CartPage from "@pages/Cart/CartPage.jsx";
 import CheckoutPage from "@pages/Checkout/CheckoutPage.jsx";
+import PaymentSuccess from "@pages/PaymentSuccess/PaymentSuccess.jsx";
 
 import ProtectedRoute from "@components/ProtectedRoute.jsx";
 
@@ -23,7 +24,7 @@ const PublicRoutes = [
     layout: GuestLayout,
   },
   {
-    path: "/products/:name",
+    path: "/products/:name/:id",
     component: ProductDetail,
     layout: GuestLayout,
   },
@@ -48,6 +49,11 @@ const PublicRoutes = [
     layout: AdminLayout,
     protected: true,
   },
+  {
+    path: "/payment-confirmation",
+    component: PaymentSuccess,
+    layout: GuestLayout,
+  }
 ];
 
 export { PublicRoutes };

@@ -283,6 +283,7 @@ const CheckoutCustomerInfo = () => {
             </Form.Item>
 
             <Form.Item
+              required
               label="Số điện thoại"
               name="phone"
               rules={[{ validator: validatePhoneNumber }]}

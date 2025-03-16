@@ -46,10 +46,10 @@ export class OrderService {
       // INSERT ORDER DETAIL
       for (const item of order_items) {
         await queryRunner.query(`
-          INSERT INTO order_detail(order_id, pro_id, class_id, quantity, price)
-          VALUES($1, $2, $3, $4, $5)
+          INSERT INTO order_detail(order_id, pro_id, pro_name, pro_image, class_id, class_name, quantity, price)
+          VALUES($1, $2, $3, $4, $5, $6, $7, $8)
           RETURNING *;
-          `, [id_order, item.id_pro, item.id_class, item.quantity, item.price]);
+          `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price]);
       }
 
       // COMMIT

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, PlusCircle, Save, Search, Trash2, X } from "lucide-react";
+import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
 import { MutatingDots } from 'react-loader-spinner';
+import categoriesApi from "@apis/categoriesApi.js";
 
 const CategoryTable = () => {
     const [categories, setCategories] = useState([]);
@@ -27,19 +28,13 @@ const CategoryTable = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/category?page=${page}&limit=${limit}`);
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch categories');
-            }
-
-            const result = await response.json();
+            const response = await categoriesApi.getCategories({ page, limit });
 
             if (response.status === 200) {
-                setCategories(result);
-                setTotalPages(1);
+                setCategories(response.data.data);
+                setTotalPages(response.data.total_pages);
             } else {
-                throw new Error(result.message || 'Failed to fetch categories');
+                throw new Error(response.data.message || 'Failed to fetch categories');
             }
         } catch (err) {
             setError(err.message);
@@ -77,36 +72,15 @@ const CategoryTable = () => {
         category.cat_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Check if category already exists
-    const categoryExists = (categoryName) => {
-        return categories.some(cat =>
-            cat.cat_name.toLowerCase() === categoryName.toLowerCase() &&
-            (!isEditing || (isEditing && cat.id !== currentCategory.id))
-        );
-    };
-
     // Add new category
     const addCategory = async (categoryData) => {
         try {
-            // Check if category exists before making API call
-            if (categoryExists(categoryData.cat_name)) {
-                showActionMessage(`Category "${categoryData.cat_name}" already exists`, 'error');
-                return false;
-            }
-
             setActionLoading(true);
-            const response = await fetch('http://localhost:3001/api/category/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(categoryData),
-            });
+            const response = await categoriesApi.createCategory(categoryData);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to add category');
+            console.log(response);
+            if (response.status === 200) {
+                throw new Error(response.data.message || 'Failed to update category');
             }
 
             showActionMessage('Category added successfully', 'success');
@@ -123,25 +97,12 @@ const CategoryTable = () => {
     // Update category
     const updateCategory = async (id, categoryData) => {
         try {
-            // Check if updated name already exists
-            if (categoryExists(categoryData.cat_name)) {
-                showActionMessage(`Category "${categoryData.cat_name}" already exists`, 'error');
-                return false;
-            }
-
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/category/update/${id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(categoryData),
-            });
+            const response = await categoriesApi.updateCategoryDetail(id, categoryData );
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to update category');
+            console.log(response);
+            if (response.status !== 200) {
+                throw new Error(response.data.message || 'Failed to update category');
             }
 
             showActionMessage('Category updated successfully', 'success');
@@ -159,14 +120,10 @@ const CategoryTable = () => {
     const deleteCategory = async (id) => {
         try {
             setActionLoading(true);
-            const response = await fetch(`http://localhost:3001/api/category/delete/${id}`, {
-                method: 'DELETE',
-            });
+            const response = await categoriesApi.deleteCategory(id);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Failed to delete category');
+            if (response.status !== 200) {
+                throw new Error(response.data.message || 'Failed to update category');
             }
 
             showActionMessage('Category deleted successfully', 'success');
@@ -190,7 +147,7 @@ const CategoryTable = () => {
 
         if (isEditing && currentCategory) {
             // Update existing Category
-            success = await updateCategory(currentCategory.id, categoryData);
+            success = await updateCategory(currentCategory.cat_id, categoryData);
         } else {
             // Add new category
             success = await addCategory(categoryData);
@@ -204,11 +161,11 @@ const CategoryTable = () => {
         }
     };
 
-    // Edit Category - FIX HERE
+    // Edit Category
     const handleEdit = (category) => {
         setCurrentCategory(category);
         setNewCategory({
-            cat_name: category.cat_name // Fixed to match the correct property name
+            cat_name: category.cat_name,
         });
         setIsEditing(true);
         setFormOpen(true);
@@ -322,7 +279,7 @@ const CategoryTable = () => {
                             <tbody className="bg-white divide-y divide-gray-200">
                             {filteredCategories.length > 0 ? (
                                 filteredCategories.map(category => (
-                                    <tr key={category.id} className="hover:bg-gray-50">
+                                    <tr key={category.cat_id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="font-medium text-gray-900">{category.cat_name}</div>
@@ -341,7 +298,7 @@ const CategoryTable = () => {
                                                     <Edit size={18} />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(category.id)}
+                                                    onClick={() => handleDelete(category.cat_id)}
                                                     className="text-red-600 hover:text-red-900"
                                                     disabled={actionLoading}
                                                 >
@@ -365,21 +322,39 @@ const CategoryTable = () => {
 
                 {/* Pagination */}
                 {!loading && !error && totalPages > 1 && (
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex justify-center items-center mt-10 space-x-2">
+                        {/* First Page */}
                         <button
-                            onClick={handlePrevPage}
+                            onClick={() => handlePrevPage()}
                             disabled={page === 1 || actionLoading}
-                            className={`px-4 py-2 rounded ${page === 1 || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
+                            className={`p-2 me-5 rounded ${page === 1 || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
                         >
-                            Previous
+                            <ChevronLeft />
                         </button>
-                        <span>Page {page} of {totalPages}</span>
+
+                        {/* Page Numbers */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
+                            .map((p, index, arr) => (
+                                <React.Fragment key={p}>
+                                    {index > 0 && p !== arr[index - 1] + 1 && <span>...</span>}
+                                    <button
+                                        onClick={() => setPage(p)}
+                                        className={`px-3 py-2 rounded ${p === page ? 'bg-pink-800 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                                    >
+                                        {p}
+                                    </button>
+                                </React.Fragment>
+                            ))
+                        }
+
+                        {/* Last Page */}
                         <button
-                            onClick={handleNextPage}
+                            onClick={() => handleNextPage()}
                             disabled={page === totalPages || actionLoading}
-                            className={`px-4 py-2 rounded ${page === totalPages || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
+                            className={`p-2 ms-5 rounded ${page === totalPages || actionLoading ? 'bg-gray-200 cursor-not-allowed' : 'bg-pink-700 text-white hover:bg-pink-800'}`}
                         >
-                            Next
+                            <ChevronRight />
                         </button>
                     </div>
                 )}
@@ -403,7 +378,7 @@ const CategoryTable = () => {
                                         <label className="block font-medium text-gray-700 mb-3">Category Name</label>
                                         <input
                                             type="text"
-                                            name="cat_name" /* FIX: Changed from 'name' to 'cat_name' */
+                                            name="cat_name"
                                             value={newCategory.cat_name}
                                             onChange={handleInputChange}
                                             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
