@@ -24,7 +24,7 @@ const CartDrawerCart = ({ item }) => {
   const handleRemoveItem = () => {
     removeCartItemMutation.mutate({
       id_pro: item.id_pro,
-      id_class: item.id_class,
+      id_class: item.id_class ?? 0,
       quantity: item.quantity,
     });
   };
@@ -34,7 +34,7 @@ const CartDrawerCart = ({ item }) => {
   const handleUpdateItem = (quantity) => {
     updateCartItemMutation.mutate({
       id_pro: item.id_pro,
-      id_class: item.id_class,
+      id_class: item.id_class ?? item.old_id_class ?? 0,
       quantity,
       old_id_class: item.id_class,
     });
