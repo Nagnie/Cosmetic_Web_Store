@@ -44,8 +44,8 @@ const CustomCarousel = ({
     queryFn: ({ pageParam = 1 }) => queryFn({ pageParam, limit: itemsPerPage }),
     getNextPageParam: (lastPage) => {
       // Sử dụng cấu trúc API mới
-      const totalPages = lastPage.total_pages || 0;
-      const currentPage = lastPage.page || 0;
+      const totalPages = lastPage?.data?.total_pages || 0;
+      const currentPage = lastPage?.data?.page || 0;
 
       // Nếu còn trang tiếp theo thì trả về số trang kế
       return currentPage < totalPages ? currentPage + 1 : undefined;
@@ -54,7 +54,7 @@ const CustomCarousel = ({
   });
 
   // Làm phẳng mảng các trang sản phẩm thành một mảng duy nhất
-  const products = data?.pages.flatMap((page) => page.data || []) || [];
+  const products = data?.pages.flatMap((page) => page?.data?.data || []) || [];
 
   const getItemsPerView = () => {
     if (typeof window !== "undefined") {

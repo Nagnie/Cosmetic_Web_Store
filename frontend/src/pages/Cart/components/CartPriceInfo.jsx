@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 
-const CartPriceInfo = () => {
+import { formatCurrency } from "@utils/utils";
+
+const CartPriceInfo = ({ totalPrice = 0 }) => {
   return (
     <>
       <p className="border-b-5 border-gray-300 pb-4 text-lg font-semibold">
@@ -11,20 +14,20 @@ const CartPriceInfo = () => {
           <div className="flex flex-wrap justify-between">
             <span className="font-semibold sm:text-lg">Tạm tính:</span>
             <span className="!text-primary-deepest font-bold sm:text-lg">
-              1.000.000đ
+              {formatCurrency({ number: totalPrice })}
             </span>
           </div>
-          <div className="mt-2 flex flex-wrap justify-between">
+          {/* <div className="mt-2 flex flex-wrap justify-between">
             <span className="font-semibold sm:text-lg">Giảm giá:</span>
             <span className="!text-primary-deepest font-bold sm:text-lg">
               -100.000đ
             </span>
-          </div>
+          </div> */}
         </div>
         <div className="mt-2 flex flex-wrap justify-between">
           <span className="text-xl font-semibold sm:text-2xl">Tổng cộng:</span>
           <span className="!text-primary-deepest text-xl font-bold sm:text-2xl">
-            930.000đ
+            {formatCurrency({ number: totalPrice })}
           </span>
         </div>
 
@@ -79,4 +82,9 @@ const CartPriceInfo = () => {
     </>
   );
 };
+
+CartPriceInfo.propTypes = {
+  totalPrice: PropTypes.number,
+};
+
 export default CartPriceInfo;

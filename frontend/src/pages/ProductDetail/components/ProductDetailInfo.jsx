@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Button, Tag } from "antd";
+import { useEffect, useState } from "react";
+import { Button, message, Tag } from "antd";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
@@ -9,7 +9,7 @@ import { formatCurrency } from "@utils/utils";
 import { useAddCartItem } from "@hooks/useCartQueries";
 
 const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
-  const selected = true;
+  const [selectedClassification, setSelectedClassification] = useState(null);
 
   const classification = product.classification ?? [];
   const [quantity, setQuantity] = useState(1);
@@ -19,12 +19,23 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
   const handleAddToCart = () => {
     const item = {
       id_pro: product.id_pro,
-      id_class: classification[0]?.id_class ?? "",
+      id_class:
+        selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
       quantity: quantity,
     };
 
     addCartItemMutation.mutate(item);
   };
+
+  useEffect(() => {
+    if (addCartItemMutation.isSuccess) {
+      message.success("Thêm vào giỏ hàng thành công");
+    }
+
+    if (addCartItemMutation.isError) {
+      message.error("Thêm vào giỏ hàng thất bại");
+    }
+  }, [addCartItemMutation.isSuccess, addCartItemMutation.isError]);
 
   return (
     <div className="text-left">
@@ -100,8 +111,9 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
               <Tag
                 key={index}
                 title={item.name ?? item}
+                onClick={() => setSelectedClassification(item)}
                 className={`${
-                  selected
+                  selectedClassification?.id_class === item.id_class
                     ? "!-translate-y-[1px] !shadow-[0_4px_10px_rgba(87,74,58,0.2),0_0_2px_rgba(87,74,58,0.3)]"
                     : ""
                 } !border-primary-dark !text-primary-dark !flex !h-[35px] !w-fit cursor-pointer !items-center !justify-between bg-white !px-4 !font-bold !transition-all !duration-200`}
