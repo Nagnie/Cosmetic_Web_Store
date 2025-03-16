@@ -84,7 +84,7 @@ export class ProductService {
         WHERE img.id_pro = pro.id_pro), '[]'::json
       ) AS images,
       COALESCE(
-        (SELECT json_agg(DISTINCT class.name) 
+        (SELECT json_agg(DISTINCT jsonb_build_object('id_class', class.id_class, 'name', class.name)) 
          FROM classification AS class 
          WHERE class.id_pro = pro.id_pro), '[]'::json
       ) AS classification
@@ -125,7 +125,7 @@ export class ProductService {
         WHERE img.id_pro = pro.id_pro), '[]'::json
       ) AS images,
       COALESCE(
-        (SELECT json_agg(DISTINCT class.name) 
+        (SELECT json_agg(DISTINCT jsonb_build_object('id_class', class.id_class, 'name', class.name)) 
          FROM classification AS class 
          WHERE class.id_pro = pro.id_pro), '[]'::json
       ) AS classification
