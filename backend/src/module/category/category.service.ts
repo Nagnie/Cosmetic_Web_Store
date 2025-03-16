@@ -41,7 +41,12 @@ export class CategoryService {
     const offset = (page - 1) * limit;
 
     const data = await this.dataSource.query(`
-        SELECT cat.id_cat AS cat_id, cat.name AS cat_name, COUNT(scat.id_subcat) AS num_subcat
+        SELECT cat.id_cat AS cat_id, cat.name AS cat_name, COUNT(scat.id_subcat) AS num_subcat,
+        COALESCE((
+          SELECT json_agg(jsonb_build_object('id_scat', scat.id_subcat, 'scat_name', scat.name))
+          FROM sub_category AS scat
+          WHERE scat.id_cat = cat.id_cat), '[]'::json
+        ) AS sub_category
         FROM category AS cat
         LEFT JOIN sub_category AS scat ON cat.id_cat = scat.id_cat
         GROUP BY cat.id_cat, cat.name
