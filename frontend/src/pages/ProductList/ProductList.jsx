@@ -143,7 +143,7 @@ const ProductListingPage = () => {
       <div className="flex flex-col gap-10 lg:flex-row">
         {/* Filter column */}
         <div
-          className={`lg:w-1/4 ${showFilter ? "block" : "hidden"} h-fit rounded-lg bg-pink-50 p-4 lg:block`}
+          className={`lg:w-1/4 ${showFilter ? "block" : "hidden"} h-fit rounded-lg p-4 lg:block`} style={{ backgroundColor: "#fff3e7" }}
         >
           <h2 className="mb-4 text-xl font-semibold">Bộ lọc</h2>
 

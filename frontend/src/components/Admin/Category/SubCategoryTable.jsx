@@ -125,11 +125,14 @@ const SubCategoryTable = () => {
     };
 
     // Update subcategory
-    const updateSubcategory = async (id, oldScatName, oldCatName, subcategoryData) => {
+    const updateSubcategory = async (id, subcategoryData) => {
         try {
             setActionLoading(true);
             // Use the API function instead of direct fetch
-            const response = await subcategoriesApi.updateSubcategoryDetail(id, subcategoryData);
+            // When editing, only send the subcategory name
+            const response = await subcategoriesApi.updateSubcategoryDetail(id, {
+                scat_name: subcategoryData.scat_name
+            });
 
             if (response.status !== 200) {
                 throw new Error(response.data.message || 'Failed to update subcategory');
@@ -177,10 +180,9 @@ const SubCategoryTable = () => {
         let success = false;
 
         if (isEditing && currentSubcategory) {
-            // Update existing Subcategory
+            // Update existing Subcategory - only update the name
             success = await updateSubcategory(
-                currentSubcategory.scat_name,
-                currentSubcategory.cat_name,
+                currentSubcategory.id_subcat,
                 newSubcategory
             );
         } else {
@@ -205,8 +207,8 @@ const SubCategoryTable = () => {
 
         setCurrentSubcategory(subcategory);
         setNewSubcategory({
-            subcat_name: subcategory.scat_name,
-            id_cat: subcategory.id_cat  // Lấy id_cat từ subcategory
+            scat_name: subcategory.scat_name,
+            id_cat: subcategory.id_cat  // Keep category ID but won't use it when updating
         });
         setIsEditing(true);
         setFormOpen(true);
@@ -226,7 +228,7 @@ const SubCategoryTable = () => {
     const resetForm = () => {
         setNewSubcategory({
             scat_name: '',
-            cat_name: ''
+            id_cat: ''
         });
         setCurrentSubcategory(null);
         setIsEditing(false);
@@ -387,7 +389,7 @@ const SubCategoryTable = () => {
                                     <button
                                         onClick={() => setPage(p)}
                                         className={`px-3 py-2 rounded ${p === page ? 'bg-pink-800 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-                                    >
+                                >
                                         {p}
                                     </button>
                                 </React.Fragment>
@@ -432,29 +434,42 @@ const SubCategoryTable = () => {
                                             disabled={actionLoading}
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block font-medium text-gray-700 mb-3">Category</label>
-                                        <select
-                                            name="id_cat"
-                                            value={newSubcategory.id_cat}
-                                            onChange={handleInputChange}
-                                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
-                                            required
-                                            disabled={actionLoading || categoriesLoading}
-                                        >
-                                            <option value="">Select a category</option>
-                                            {categories.map((category) => (
-                                                <option key={category.id} value={category.id}>
-                                                    {category.cat_name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {categoriesLoading && (
-                                            <div className="mt-2 text-sm text-gray-500">
-                                                Loading categories...
+                                    {!isEditing && (
+                                        <div>
+                                            <label className="block font-medium text-gray-700 mb-3">Category</label>
+                                            <select
+                                                name="id_cat"
+                                                value={newSubcategory.id_cat}
+                                                onChange={handleInputChange}
+                                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                                required
+                                                disabled={actionLoading || categoriesLoading}
+                                            >
+                                                <option value="">Select a category</option>
+                                                {categories.map((category) => (
+                                                    <option key={category.id} value={category.id}>
+                                                        {category.cat_name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {categoriesLoading && (
+                                                <div className="mt-2 text-sm text-gray-500">
+                                                    Loading categories...
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {isEditing && currentSubcategory && (
+                                        <div>
+                                            <label className="block font-medium text-gray-700 mb-3">Category</label>
+                                            <div className="w-full p-2 border rounded bg-gray-100 text-gray-700">
+                                                {currentSubcategory.cat_name}
                                             </div>
-                                        )}
-                                    </div>
+                                            <div className="mt-2 text-sm text-gray-500">
+                                                Category cannot be changed when editing a subcategory
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="flex justify-end space-x-2">
