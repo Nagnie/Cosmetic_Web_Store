@@ -171,12 +171,12 @@ export class ProductService {
         WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
         LIMIT $2 OFFSET $3
       `, [brandName, limit, (page as number - 1) * (limit as number)]);
-      return new ResponseDto(HttpStatus.OK, "Successfully", { 
+      return new ResponseDto(HttpStatus.OK, "Successfully", {
         total_pages: allPage,
         total_items: allItems.length,
         page,
         limit,
-        products 
+        products
       });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -221,12 +221,12 @@ export class ProductService {
         WHERE ($1::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $1::TEXT, '%')) AND ($2::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $2::TEXT, '%'))
         LIMIT $3 OFFSET $4
       `, [cateName, subCateName, limit, (page as number - 1) * (limit as number)]);
-      return new ResponseDto(HttpStatus.OK, "Successfully", { 
+      return new ResponseDto(HttpStatus.OK, "Successfully", {
         total_pages: allPage,
         total_items: allItems.length,
         page,
         limit,
-        products 
+        products
       });
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -393,11 +393,11 @@ export class ProductService {
         LIMIT $7 OFFSET $8
       `, [proName, cateName, subCateName, brandName, minPrice, maxPrice, limit, (page as number - 1) * (limit as number)]);
 
-      return new ResponseDto(HttpStatus.OK, "Successfully", { 
+      return new ResponseDto(HttpStatus.OK, "Successfully", {
         total_pages: allPage,
         total_items: allIteams.length,
         page,
-        limit, 
+        limit,
         products
       });
     } catch (error) {
@@ -422,8 +422,14 @@ export class ProductService {
         LIMIT $2 OFFSET $3
       `, [bra_name, limit, offset])
 
-    // console.log("DATA: ", data);
-    const total_items = data.length;
+    const totalQuery = await this.dataSource.query(`
+        SELECT COUNT(pro.id_pro) AS total_items
+        FROM product AS pro
+        JOIN brand AS bra ON pro.id_bra = bra.id_bra 
+        WHERE bra.name = $1
+      `, [bra_name]);
+    const total_items = Number(totalQuery[0]?.total_items || 0);
+    // console.log('TOTAL ITEMS: ', total_items);
     const total_pages = Math.ceil(total_items / limit);
 
     return {
@@ -452,8 +458,15 @@ export class ProductService {
         LIMIT $2 OFFSET $3
       `, [scat_name, limit, offset])
 
-    // console.log("DATA: ", data);
-    const total_items = data.length;
+    const totalQuery = await this.dataSource.query(`
+      SELECT COUNT(pro.id_pro) AS total_items
+      FROM product AS pro
+      JOIN sub_category AS scat ON scat.id_subcat = pro.id_subcat 
+      WHERE scat.name = $1
+    `, [scat_name]);
+
+    const total_items = Number(totalQuery[0]?.total_items || 0);
+    // console.log('TOTAL ITEMS: ', total_items);
     const total_pages = Math.ceil(total_items / limit);
 
     return {
