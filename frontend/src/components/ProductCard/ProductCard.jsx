@@ -20,7 +20,7 @@ const ProductCard = ({ product }) => {
 
     const item = {
       id_pro: product.id_pro,
-      id_class: product.classification[0]?.id_class ?? "",
+      id_class: product.classification[0]?.id_class ?? 0,
       quantity: 1,
     };
 

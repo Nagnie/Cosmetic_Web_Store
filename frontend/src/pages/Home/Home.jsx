@@ -20,13 +20,17 @@ const Homepage = () => {
 
   // Mảng chứa các link ảnh cho brands
   const brandImages = {
-    "TheOrdinary": "https://i.pinimg.com/736x/a7/fb/aa/a7fbaa5d55752b8b8b7741555f06c835.jpg",
-    "MediAnswer": "https://i.pinimg.com/736x/e9/9d/8b/e99d8b7049f7412efbb187929c1c8a35.jpg",
-    "CNP": "https://i.pinimg.com/736x/80/28/22/8028224e3cdb67631d7c432b935c6243.jpg",
-    "Abib": "https://i.pinimg.com/736x/6a/e3/ad/6ae3ad1b6c91186d693d44f6156f2b54.jpg",
-    "Mise En Scene": "https://i.pinimg.com/736x/6a/ed/d7/6aedd76bd4ca37cd6c7ead1a63dc2747.jpg",
+    TheOrdinary:
+      "https://i.pinimg.com/736x/a7/fb/aa/a7fbaa5d55752b8b8b7741555f06c835.jpg",
+    MediAnswer:
+      "https://i.pinimg.com/736x/e9/9d/8b/e99d8b7049f7412efbb187929c1c8a35.jpg",
+    CNP: "https://i.pinimg.com/736x/80/28/22/8028224e3cdb67631d7c432b935c6243.jpg",
+    Abib: "https://i.pinimg.com/736x/6a/e3/ad/6ae3ad1b6c91186d693d44f6156f2b54.jpg",
+    "Mise En Scene":
+      "https://i.pinimg.com/736x/6a/ed/d7/6aedd76bd4ca37cd6c7ead1a63dc2747.jpg",
     // Thêm ảnh mặc định cho các brand khác nếu cần
-    "default": "https://i.pinimg.com/736x/dc/51/61/dc5161dd5e36744d184e0b98e97b9d17.jpg"
+    default:
+      "https://i.pinimg.com/736x/dc/51/61/dc5161dd5e36744d184e0b98e97b9d17.jpg",
   };
 
   // Lấy 5 brands đầu tiên
@@ -93,26 +97,28 @@ const Homepage = () => {
       {/* Brands Section */}
       <section className="mx-auto py-3">
         <div className="mx-10 mb-6 flex items-center justify-between">
-          <h2 className="text-3xl font-semibold text-black">Thương hiệu nổi tiếng<  /h2>
+          <h2 className="text-3xl font-semibold text-black">
+            Thương hiệu nổi tiếng
+          </h2>
           <button
-              className="text-sm font-medium cursor-pointer z-100 hover:underline"
-              style={{ color: "#91775e" }}
-              onClick={() => navigate('/brands')}
+            className="z-100 cursor-pointer text-sm font-medium hover:underline"
+            style={{ color: "#91775e" }}
+            onClick={() => navigate("/brands")}
           >
             Xem tất cả →
           </button>
         </div>
         <div className="flex cursor-pointer flex-wrap justify-center gap-6">
           {brandsQuery.isLoading ? (
-              <div className="text-center w-full py-10">Loading brands...</div>
+            <div className="w-full py-10 text-center">Loading brands...</div>
           ) : (
-              topBrands.map((brand) => (
-                  <BrandCard
-                      key={brand.id}
-                      brand={brand}
-                      image={brandImages[brand.name] || brandImages.default}
-                  />
-              ))
+            topBrands.map((brand) => (
+              <BrandCard
+                key={brand.id}
+                brand={brand}
+                image={brandImages[brand.name] || brandImages.default}
+              />
+            ))
           )}
         </div>
       </section>
@@ -128,7 +134,8 @@ const Homepage = () => {
           >
             <h3 className="mb-4 text-xl font-semibold">Chất Lượng Chuẩn Hàn</h3>
             <p className="text-gray-600">
-              Chúng tôi tuyển chọn mỹ phẩm xách tay chính hãng từ Hàn Quốc, cam kết mang đến sản phẩm an toàn, chất lượng cao cho bạn.
+              Chúng tôi tuyển chọn mỹ phẩm xách tay chính hãng từ Hàn Quốc, cam
+              kết mang đến sản phẩm an toàn, chất lượng cao cho bạn.
             </p>
           </div>
 
@@ -136,9 +143,12 @@ const Homepage = () => {
             className="rounded-2xl px-7 py-10 text-center shadow-xl"
             style={{ backgroundColor: "#e0cdbc" }}
           >
-            <h3 className="mb-4 text-xl font-semibold">Khách Hàng Là Thượng Đế</h3>
+            <h3 className="mb-4 text-xl font-semibold">
+              Khách Hàng Là Thượng Đế
+            </h3>
             <p className="text-gray-600">
-              Chúng tôi luôn lắng nghe và đồng hành cùng bạn, mang đến trải nghiệm mua sắm dễ dàng, dịch vụ tận tâm và hỗ trợ nhanh chóng.
+              Chúng tôi luôn lắng nghe và đồng hành cùng bạn, mang đến trải
+              nghiệm mua sắm dễ dàng, dịch vụ tận tâm và hỗ trợ nhanh chóng.
             </p>
           </div>
 
@@ -146,9 +156,12 @@ const Homepage = () => {
             className="rounded-2xl px-7 py-10 text-center shadow-xl"
             style={{ backgroundColor: "#cbb7a4" }}
           >
-            <h3 className="mb-4 text-xl font-semibold">Vẻ Đẹp Chuẩn Xu Hướng</h3>
+            <h3 className="mb-4 text-xl font-semibold">
+              Vẻ Đẹp Chuẩn Xu Hướng
+            </h3>
             <p className="text-gray-600">
-              Khám phá những sản phẩm hot hit từ Hàn Quốc, kết hợp xu hướng làm đẹp hiện đại với sự tinh tế, giúp bạn luôn rạng rỡ và tự tin.
+              Khám phá những sản phẩm hot hit từ Hàn Quốc, kết hợp xu hướng làm
+              đẹp hiện đại với sự tinh tế, giúp bạn luôn rạng rỡ và tự tin.
             </p>
           </div>
         </div>
@@ -166,6 +179,11 @@ const Homepage = () => {
             products.map((product) => (
               <ProductCard key={product.id_pro} product={product} />
             ))}
+          {!productsQuery.isLoading && products.length === 0 && (
+            <div className="w-full py-10 text-center">
+              Không có sản phẩm nào
+            </div>
+          )}
         </div>
         <button
           className="mx-auto my-10 block rounded-lg px-4 py-2 text-white"
@@ -187,25 +205,27 @@ const BrandCard = ({ brand, image }) => {
   };
 
   return (
-      <div
-          className="relative mb-4 h-66 w-55 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
-          onClick={handleClick}
-      >
-        {/* Image */}
-        <img
-            src={image}
-            alt={brand.name}
-            className="h-full w-full object-cover"
-        />
+    <div
+      className="relative mb-4 h-66 w-55 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
+      onClick={handleClick}
+    >
+      {/* Image */}
+      <img
+        src={image}
+        alt={brand.name}
+        className="h-full w-full object-cover"
+      />
 
-        {/* Gradient overlay and text */}
-        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-orange-950/50 to-transparent p-3 sm:p-4 md:p-5 lg:p-6">
-          <h3 className="text-lg font-semibold text-white hover:underline sm:text-xl md:text-2xl">
-            {brand.name}
-          </h3>
-          <p className="text-sm text-white mt-1">{brand.numProducts} product{brand.numProducts !== 1 ? 's' : ''}</p>
-        </div>
+      {/* Gradient overlay and text */}
+      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-orange-950/50 to-transparent p-3 sm:p-4 md:p-5 lg:p-6">
+        <h3 className="text-lg font-semibold text-white hover:underline sm:text-xl md:text-2xl">
+          {brand.name}
+        </h3>
+        <p className="mt-1 text-sm text-white">
+          {brand.numProducts} product{brand.numProducts !== 1 ? "s" : ""}
+        </p>
       </div>
+    </div>
   );
 };
 

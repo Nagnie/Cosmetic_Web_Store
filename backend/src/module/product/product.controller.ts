@@ -51,28 +51,18 @@ export class ProductController {
   @ApiOperation({ summary: 'Search products', description: 'Search product by name, cate name, subcate name & brand name' })
   @ApiResponse({ status: 200, description: 'List products' })
   @ApiResponse({ status: 500, description: 'Failed to search products' })
-  @ApiQuery({name: "key", required: false, example: "Dưỡng"})
-  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, example: 5, description: 'Number of records per page' })
-  async searchProdcut(@Req() req: Request) {
-    return await this.productService.search(req);
-  }
-
-  @Get("filter")
-  @Public()
-  @ApiOperation({ summary: 'Filter products', description: 'Filter product by name, cate name, subcate name, brand name, minPrice & maxPrice' })
-  @ApiResponse({ status: 200, description: 'Filtered products' })
-  @ApiResponse({ status: 500, description: 'Failed' })
-  @ApiQuery({name: "product", required: false, example: "Dưỡng"})
+  @ApiQuery({name: "key", required: false, example: "toner"})
   @ApiQuery({name: "category", required: false, example: ""})
   @ApiQuery({name: "subcate", required: false, example: ""})
   @ApiQuery({name: "brand", required: false, example: ""})
   @ApiQuery({name: "minPrice", required: false, example: 400})
   @ApiQuery({name: "maxPrice", required: false, example: 500})
+  @ApiQuery({name: "sortBy", required: false, enum: ["price", "name", "id"], example: "price"})
+  @ApiQuery({name: "orderBy", required: false, enum: ["ASC", "DESC"], example: "ASC"})
   @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, example: 5, description: 'Number of records per page' })
-  async filter(@Req() req: Request) {
-    return await this.productService.filter(req);
+  async searchProdcut(@Req() req: Request) {
+    return await this.productService.searchAndFilter(req);
   }
 
   @Get()

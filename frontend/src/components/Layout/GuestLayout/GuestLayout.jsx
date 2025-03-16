@@ -1,8 +1,11 @@
 import Header from "../../Header/Header.jsx";
 import Footer from "../../Footer/Footer.jsx";
 import CartDrawer from "@components/Cart/CartDrawer/CartDrawer.jsx";
+import useCartStore from "@components/Cart/ZustandCartStore.js";
 
 const GuestLayout = ({ children }) => {
+  const isCartDrawerOpen = useCartStore((state) => state.isCartDrawerOpen);
+
   return (
     <div className="Container">
       <Header />
@@ -11,7 +14,7 @@ const GuestLayout = ({ children }) => {
       </div>
       <Footer />
 
-      <CartDrawer />
+      {isCartDrawerOpen && <CartDrawer />}
     </div>
   );
 };

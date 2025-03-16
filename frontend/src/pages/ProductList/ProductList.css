@@ -1,8 +1,8 @@
-@import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap');
-
-* {
-    box-sizing: border-box;
-    margin: 0;
+.custom-pagination .ant-pagination-item-active a,
+.custom-pagination .ant-pagination-item-active a:hover {
+  color: #91775e; /* Màu chữ */
 }
 
+.custom-pagination .ant-pagination-item-active {
+  border-color: #675746 !important; /* Màu viền */
+}

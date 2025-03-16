@@ -137,6 +137,7 @@ export class OrderService {
         where: {
           order
         },
+        order:{id: "ASC"},
         take: (limit as number),
         skip: ((page as number) - 1) * (limit as number),
       });
