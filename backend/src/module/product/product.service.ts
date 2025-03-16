@@ -283,7 +283,7 @@ export class ProductService {
     const offset = (page - 1) * limit;
 
     return await this.dataSource.query(`
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
