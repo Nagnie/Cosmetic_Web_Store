@@ -1,4 +1,4 @@
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaTimes } from "react-icons/fa";
 import { GiLipstick, GiMedicines, GiAmpleDress } from "react-icons/gi";
 import { BsClipboard2HeartFill } from "react-icons/bs";
 import { PiHairDryerFill } from "react-icons/pi";
@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useScrollDirection } from "@hooks/useScrollDirectionHook.jsx";
 import "./Header.css";
 import { useCartStore } from "@components/Cart";
+import { useSearchStore } from "./ZustandSearchStore";
 import { Link } from "react-router-dom";
 import categoriesApi from "@apis/categoriesApi.js";
 import { Hearts } from "react-loader-spinner";
@@ -13,9 +14,13 @@ import { Hearts } from "react-loader-spinner";
 const Header = () => {
   const scrollDirection = useScrollDirection();
   const [activeCategory, setActiveCategory] = useState(null);
-  const [search, setSearch] = useState("");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Sử dụng Zustand store thay vì useState
+  const searchText = useSearchStore((state) => state.searchText);
+  const setSearchText = useSearchStore((state) => state.setSearchText);
+  const clearSearchText = useSearchStore((state) => state.clearSearchText);
 
   // Map of category icons
   const categoryIcons = {
@@ -68,6 +73,7 @@ const Header = () => {
     };
   });
 
+  // const navigate = useNavigate();
   const toggleCartDrawer = useCartStore((state) => state.toggleCartDrawer);
   const cartItemsCount = useCartStore((state) => state.itemCount);
 
@@ -94,18 +100,37 @@ const Header = () => {
             Nâu Cosmetic
           </h2>
         </Link>
-        <div className="search-bar flex gap-2">
+        <div className="search-bar relative flex gap-2">
           <input
-            value={search}
+            value={searchText}
             type="text"
             placeholder="Tìm kiếm sản phẩm, danh mục hay thương hiệu mong muốn..."
             className="rounded-3xl border px-5 py-2"
-            style={{ width: "90%" }}
-            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: "90%",
+              paddingRight: searchText ? "40px" : "12px", // Thêm padding bên phải khi có text
+            }}
+            onChange={(e) => setSearchText(e.target.value)}
           />
 
+          {/* Nút clear đã được điều chỉnh vị trí */}
+          {searchText && (
+            <button
+              className="absolute top-1/2 right-16 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onClick={() => {
+                clearSearchText();
+
+                // if (window.location.pathname === "/all_products" && f) {
+                //   navigate("/all_products");
+                // }
+              }}
+            >
+              <FaTimes />
+            </button>
+          )}
+
           <Link
-            to={`/all_products?search=${search}`}
+            to={`/all_products${searchText ? `?search=${searchText}` : ""}`}
             className="flex items-center justify-center rounded-3xl px-4 text-white"
             style={{ backgroundColor: "#8D7B68" }}
           >
@@ -172,7 +197,7 @@ const Header = () => {
                           className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
                         >
                           <Link
-                            to={`/all_products?subcategory=${item.scat_name}`}
+                            to={`/all_products?category=${category.cat_name}&subcategory=${item.scat_name}`}
                           >
                             {item.scat_name}
                           </Link>
