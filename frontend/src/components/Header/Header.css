@@ -28,7 +28,7 @@ nav {
     color: #8a735d;
 }
 
-@media (max-width: 1030px) {
+@media (max-width: 1145px) {
     .category {
         padding: 0 25px;
     }
@@ -47,12 +47,24 @@ nav {
     }
 }
 
+@media (max-width: 1000px) {
+    nav {
+        display: none;
+    }
+    header {
+        box-shadow: #8e785f 1px 1px 5px;
+    }
+}
+
 @media (max-width: 760px) {
     .category {
         padding: 0 35px;
     }
     header h2 {
-        font-size: 1.8em;
+        display: none;
+    }
+    .search-bar {
+        width: 50%;
     }
 }
 

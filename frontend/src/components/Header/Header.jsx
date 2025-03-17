@@ -8,14 +8,13 @@ import "./Header.css";
 import { useCartStore } from "@components/Cart";
 import { Link } from "react-router-dom";
 import categoriesApi from "@apis/categoriesApi.js";
-import subcategoriesApi from "@apis/subcategoriesApi";
+import { Hearts } from "react-loader-spinner";
 
 const Header = () => {
   const scrollDirection = useScrollDirection();
   const [activeCategory, setActiveCategory] = useState(null);
   const [search, setSearch] = useState("");
   const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Map of category icons
@@ -35,20 +34,12 @@ const Header = () => {
       try {
         setLoading(true);
 
-        // Fetch categories
+        // Fetch categories with their subcategories in a single API call
         const categoryResponse = await categoriesApi.getCategories({
           page: 1,
           limit: 100,
         });
-
-        // Fetch subcategories
-        const subcategoryResponse = await subcategoriesApi.getSubcategories({
-          page: 1,
-          limit: 500,
-        });
-
         setCategories(categoryResponse.data.data || []);
-        setSubcategories(subcategoryResponse.data.data || []);
       } catch (error) {
         console.error("Error fetching categories:", error);
       } finally {
@@ -59,21 +50,18 @@ const Header = () => {
     fetchData();
   }, []);
 
-  // Group subcategories by their parent category
-  const groupedSubcategories = categories.map((category) => {
-    const categorySubcategories = subcategories.filter(
-      (sub) => sub.cat_name === category.cat_name,
-    );
-
+  // Transform categories to include icons and properly format the menu structure
+  const formattedCategories = categories.map((category) => {
     return {
       cat_id: category.cat_id,
       cat_name: category.cat_name,
       icon: categoryIcons[category.cat_name] || defaultIcon,
       menu: [
         {
-          items: categorySubcategories.map((sub) => ({
-            id_subcat: sub.id_subcat,
+          items: (category.sub_category || []).map((sub) => ({
+            id_subcat: sub.id_scat,
             scat_name: sub.scat_name,
+            cat_id: sub.id_scat, // Using id_scat for the URL parameter
           })),
         },
       ],
@@ -93,7 +81,12 @@ const Header = () => {
       className={`${scrollDirection === "down" ? "opacity-0" : "opacity-100"} fixed top-0 right-0 left-0 z-50 transition-opacity duration-500`}
     >
       <header className="flex items-center justify-around bg-white py-6">
-        <Link to="/">
+        <Link className={"flex"} to="/">
+          <img
+            src="/logo_nonebg.png"
+            alt="Nâu Cosmetic Logo"
+            className="me-5 h-12"
+          />
           <h2
             className="cursor-pointer text-4xl font-bold"
             style={{ color: "#5d4e3e" }}
@@ -105,7 +98,7 @@ const Header = () => {
           <input
             value={search}
             type="text"
-            placeholder="Tìm kiếm"
+            placeholder="Tìm kiếm sản phẩm, danh mục hay thương hiệu mong muốn..."
             className="rounded-3xl border px-5 py-2"
             style={{ width: "90%" }}
             onChange={(e) => setSearch(e.target.value)}
@@ -134,13 +127,21 @@ const Header = () => {
         </span>
       </header>
       <nav
-        className="relative flex items-center justify-center py-3 text-start shadow-md"
+        className="relative flex items-center justify-center py-1 text-start shadow-md"
         style={{ backgroundColor: "#f6eadc" }}
       >
         {loading ? (
-          <div>Đang tải danh mục...</div>
+          <Hearts
+            height="40"
+            width="40"
+            color="#91775E"
+            ariaLabel="hearts-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+            visible={true}
+          />
         ) : (
-          groupedSubcategories.map((category, index) => (
+          formattedCategories.map((category, index) => (
             <div
               key={category.cat_id}
               className="category relative mx-4"
@@ -148,15 +149,15 @@ const Header = () => {
               onMouseLeave={() => setActiveCategory(null)}
             >
               <Link
-                to={`/products/category/${category.cat_id}`}
-                className="flex cursor-pointer items-center transition-colors duration-300 hover:text-orange-800"
+                to={`/all_products?category=${category.cat_name}`}
+                className="flex cursor-pointer items-center py-2 transition-colors duration-300 hover:text-orange-800"
               >
                 {category.icon}
                 {category.cat_name}
               </Link>
 
               <div
-                className={`dropdown-menu absolute top-6.5 z-50 mt-3 flex w-full min-w-max origin-top bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${activeCategory === index ? "visible scale-y-100 opacity-100" : "invisible scale-y-0 opacity-0"}`}
+                className={`dropdown-menu absolute top-6.5 z-50 mt-5 flex w-full min-w-max origin-top bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${activeCategory === index ? "visible scale-y-100 opacity-100" : "invisible scale-y-0 opacity-0"}`}
               >
                 {category.menu.map((section, idx) => (
                   <div
@@ -170,7 +171,9 @@ const Header = () => {
                           key={item.id_subcat}
                           className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
                         >
-                          <Link to={`/products/subcategory/${item.cat_id}`}>
+                          <Link
+                            to={`/all_products?subcategory=${item.scat_name}`}
+                          >
                             {item.scat_name}
                           </Link>
                         </li>
