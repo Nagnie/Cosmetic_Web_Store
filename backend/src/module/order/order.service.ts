@@ -31,6 +31,36 @@ export class OrderService {
     setupCloudinary(this.configService);
   }
 
+  async getListProduct(@Req() req: Request & { session: any }) {
+    if (!req.session.cart || req.session.cart.length === 0) {
+      return {
+        message: "Empty cart",
+        data: []
+      }
+    }
+
+    const cartItemsJson = JSON.stringify(req.session.cart);
+    const data = await this.dataSource.query(`
+      WITH cart_items AS (
+          SELECT * FROM jsonb_to_recordset($1::jsonb) 
+          AS x(id_pro INT, id_class INT, quantity INT)
+      )
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, class.id_class AS id_class, class.name AS class_name, (ci.quantity * pro.price) AS pro_price, ci.quantity AS quantity,
+      COALESCE((
+        SELECT json_agg(img.link)
+        FROM product_image AS img
+        WHERE img.id_pro = pro.id_pro), '[]'::json
+      ) AS images
+      FROM cart_items AS ci
+      JOIN product AS pro ON pro.id_pro = ci.id_pro
+      LEFT JOIN classification AS class ON class.id_class = ci.id_class
+    `, [cartItemsJson])
+
+    return {
+      data: data
+    }
+  }
+
   async create(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
     const { name, email, phone, address, note, order_items, total_price } = createOrderDto;
     const queryRunner = this.dataSource.createQueryRunner();
@@ -137,7 +167,7 @@ export class OrderService {
         where: {
           order
         },
-        order:{id: "ASC"},
+        order: { id: "ASC" },
         take: (limit as number),
         skip: ((page as number) - 1) * (limit as number),
       });
@@ -198,7 +228,7 @@ export class OrderService {
       throw new InternalServerErrorException(error.message);
     }
   }
-  
+
   private async uploadImageToCloudinary(filePath: string): Promise<{ url: string, publicId: string }> {
     const deleteAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
     const result = await cloudinary.uploader.upload(filePath, {
