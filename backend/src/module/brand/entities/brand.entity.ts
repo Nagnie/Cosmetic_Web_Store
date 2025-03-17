@@ -10,4 +10,7 @@ export class Brand {
 
     @Column({name: "num_pro", default: 0})
     numProducts: number;
+
+    @Column({name: "image"})
+    image: string;
 }
