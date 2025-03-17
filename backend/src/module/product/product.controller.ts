@@ -25,10 +25,10 @@ export class ProductController {
 
   @Get("brand")
   @ApiOperation({ summary: 'Get product by brand', description: 'Get product by brand name' })
-  @ApiQuery({name: "brand", required: true, example: "Dove"})
-  @ApiQuery({name: "page", required: false, example: 1, default: 1})
-  @ApiQuery({name: "limit", required: false, example: 5, default: 5})
-  @ApiResponse({type: ResponseDto})
+  @ApiQuery({ name: "brand", required: true, example: "Dove" })
+  @ApiQuery({ name: "page", required: false, example: 1, default: 1 })
+  @ApiQuery({ name: "limit", required: false, example: 5, default: 5 })
+  @ApiResponse({ type: ResponseDto })
   @Public()
   async getProductsByBrand(@Req() req: Request) {
     return await this.productService.getProductsByBrand(req);
@@ -36,14 +36,29 @@ export class ProductController {
 
   @Get("category")
   @ApiOperation({ summary: 'Get product by category', description: 'Get product by sub_category name' })
-  @ApiQuery({name: "category", required: false, example: "makeup"})
-  @ApiQuery({name: "subcate", required: false, example: "shampoo"})
-  @ApiQuery({name: "page", required: false, example: 1, default: 1})
-  @ApiQuery({name: "limit", required: false, example: 5, default: 5})
-  @ApiResponse({type: ResponseDto})
+  @ApiQuery({ name: "category", required: false, example: "makeup" })
+  @ApiQuery({ name: "subcate", required: false, example: "shampoo" })
+  @ApiQuery({ name: "page", required: false, example: 1, default: 1 })
+  @ApiQuery({ name: "limit", required: false, example: 5, default: 5 })
+  @ApiResponse({ type: ResponseDto })
   @Public()
   async getProductsByCategory(@Req() req: Request) {
     return await this.productService.getProductsByCategory(req);
+  }
+
+  @Get('subcategory')
+  @Public()
+  @ApiOperation({ summary: 'Get product by subcategory' })
+  @ApiResponse({ status: 200, description: 'Get product by subcategory' })
+  @ApiQuery({ name: 'scat_name', required: false, example: 'Chống nắng', description: "Subcategory's name" })
+  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of records per page' })
+  async getProductsBySubcategory(
+    @Query('scat_name') scat_name: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ) {
+    return await this.productService.getProductBySubcategory(scat_name, Number(page), Number(limit));
   }
 
   @Get("search")
@@ -51,14 +66,14 @@ export class ProductController {
   @ApiOperation({ summary: 'Search products', description: 'Search product by name, cate name, subcate name & brand name' })
   @ApiResponse({ status: 200, description: 'List products' })
   @ApiResponse({ status: 500, description: 'Failed to search products' })
-  @ApiQuery({name: "key", required: false, example: "toner"})
-  @ApiQuery({name: "category", required: false, example: ""})
-  @ApiQuery({name: "subcate", required: false, example: ""})
-  @ApiQuery({name: "brand", required: false, example: ""})
-  @ApiQuery({name: "minPrice", required: false, example: 400})
-  @ApiQuery({name: "maxPrice", required: false, example: 500})
-  @ApiQuery({name: "sortBy", required: false, enum: ["price", "name", "id"], example: "price"})
-  @ApiQuery({name: "orderBy", required: false, enum: ["ASC", "DESC"], example: "ASC"})
+  @ApiQuery({ name: "key", required: false, example: "toner" })
+  @ApiQuery({ name: "category", required: false, example: "" })
+  @ApiQuery({ name: "subcate", required: false, example: "" })
+  @ApiQuery({ name: "brand", required: false, example: "" })
+  @ApiQuery({ name: "minPrice", required: false, example: 400 })
+  @ApiQuery({ name: "maxPrice", required: false, example: 500 })
+  @ApiQuery({ name: "sortBy", required: false, enum: ["price", "name", "id"], example: "price" })
+  @ApiQuery({ name: "orderBy", required: false, enum: ["ASC", "DESC"], example: "ASC" })
   @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, example: 5, description: 'Number of records per page' })
   async searchProdcut(@Req() req: Request) {
@@ -90,7 +105,7 @@ export class ProductController {
     @Query('bra_name') bra_name: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 4
-  ){
+  ) {
     return await this.productService.findSameBrand(bra_name, Number(page), Number(limit));
   }
 
@@ -106,7 +121,7 @@ export class ProductController {
     @Query('scat_name') scat_name: string,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10
-  ){
+  ) {
     return await this.productService.findSameSubcategory(scat_name, Number(page), Number(limit));
   }
 
