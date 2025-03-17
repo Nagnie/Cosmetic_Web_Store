@@ -22,7 +22,8 @@ const useCartStore = create(
       setTotalPrice: (price) => set({ totalPrice: price }),
 
       // Reset giỏ hàng
-      clearCart: () => set({ itemCount: 0, totalPrice: 0 }),
+      clearCart: () =>
+        set({ itemCount: 0, totalPrice: 0, isCartDrawerOpen: false }),
     }),
     {
       name: "cart-storage",

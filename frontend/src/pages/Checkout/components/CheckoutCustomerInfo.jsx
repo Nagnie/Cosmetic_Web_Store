@@ -192,6 +192,7 @@ const CheckoutCustomerInfo = () => {
 
   const finishOrderMutation = useFinishOrder();
   const totalCartPrice = useCartStore((state) => state.totalPrice);
+  const clearCart = useCartStore((state) => state.clearCart);
 
   // Handle form submission
   const handleSubmit = async (values) => {
@@ -228,7 +229,10 @@ const CheckoutCustomerInfo = () => {
 
       const order_items = data.data.map((item) => ({
         id_pro: item.id_pro,
+        pro_image: item.images[0] || "",
+        pro_name: item.pro_name || "",
         id_class: item.id_class ?? 0,
+        class_name: item.class_name || "",
         quantity: +item.quantity || 1,
         price: Number(item.pro_price || 0),
       }));
@@ -243,6 +247,8 @@ const CheckoutCustomerInfo = () => {
         total_price: totalCartPrice,
       };
 
+      // console.log("Submitting order:", JSON.stringify(persistData, null, 2));
+
       const res = await finishOrderMutation.mutateAsync({
         ...persistData,
       });
@@ -251,9 +257,7 @@ const CheckoutCustomerInfo = () => {
         message.success("Đặt hàng thành công!");
 
         // Clear cart
-        useCartStore.setState((state) => {
-          state.clearCart();
-        });
+        clearCart();
 
         navigate("/payment-confirmation", {
           state: {
@@ -261,6 +265,8 @@ const CheckoutCustomerInfo = () => {
             qr_code_url: res.qr_code_url.url,
           },
         });
+
+        return res;
       } else {
         message.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
       }
