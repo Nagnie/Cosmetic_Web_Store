@@ -1,11 +1,9 @@
 import {
-  Facebook,
-  Instagram,
-  Twitter,
   Mail,
   Phone,
   MapPin,
 } from "lucide-react";
+import { FaTiktok, FaFacebookF } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -30,7 +28,7 @@ const Footer = () => {
               <div className="flex items-center gap-2">
                 <MapPin size={18} style={{ color: "#41372d" }} />
                 <span className={"text-start"}>
-                  123 Beauty Lane, Fashion City, FC 12345
+                  부산 서구 서대신동1가 26-4
                 </span>
               </div>
             </div>
@@ -53,25 +51,25 @@ const Footer = () => {
             <h3 className="text-brown-600 text-lg font-semibold">Follow Us</h3>
             <div className="flex justify-center gap-4">
               <a
-                href="https://web.facebook.com/profile.php?id=100094204077003"
+                href="https://www.facebook.com/profile.php?id=100094394933462"
                 target="_blank"
                 className="rounded-full bg-white p-2 transition-colors hover:bg-orange-50"
               >
-                <Facebook size={20} style={{ color: "#41372d" }} />
+                <FaFacebookF size={20} style={{ color: "#41372d" }} />
               </a>
               <a
-                href="#"
+                href="https://www.facebook.com/profile.php?id=100094204077003 "
                 target="_blank"
                 className="rounded-full bg-white p-2 transition-colors hover:bg-orange-50"
               >
-                <Instagram size={20} style={{ color: "#41372d" }} />
+                <FaFacebookF size={20} style={{ color: "#41372d" }} />
               </a>
               <a
-                href="#"
+                href="https://www.tiktok.com/@naucosmetic?_t=ZS-8ukm3nUap3i&_r=1"
                 target="_blank"
                 className="rounded-full bg-white p-2 transition-colors hover:bg-orange-50"
               >
-                <Twitter size={20} style={{ color: "#41372d" }} />
+                <FaTiktok size={20} style={{ color: "#41372d" }} />
               </a>
             </div>
           </div>
