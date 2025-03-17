@@ -18,7 +18,8 @@ CREATE TABLE sub_category (
 
 CREATE TABLE brand (
     id_bra SERIAL PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL
+    name VARCHAR(255) UNIQUE NOT NULL,
+    image TEXT
 );
 
 CREATE TABLE product (
