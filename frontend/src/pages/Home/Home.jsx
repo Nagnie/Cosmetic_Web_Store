@@ -8,6 +8,8 @@ import { useBrands } from "@hooks/useBrandQueries.js";
 import { useProducts } from "@hooks/useProductQueries.js";
 import { numberToArray } from "@utils/utils.js";
 import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
+import BrandCard from "@components/BrandCard/BrandCard.jsx";
+import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -46,52 +48,6 @@ const Homepage = () => {
           <h1 className="mb-2 text-5xl font-bold">Welcome to Nâu Cosmetic</h1>
           <p className="text-2xl">Mỹ phẩm, thực phẩm chức năng, sâm Hàn Quốc</p>
         </div>
-        <style>
-          {`
-                      .swiper-pagination-bullet {
-                        opacity: 0.5;
-                        width: 15px;
-                        height: 15px;
-                        background-color: #D14D72;
-                      }
-                      .swiper-pagination-bullet-active {
-                        opacity: 1;
-                        background-color: #D14D72;
-                      }
-                      .swiper {
-                        padding-bottom: 40px !important;
-                      }
-                      .swiper-pagination {
-                        bottom: 10px !important;
-                      }
-                    `}
-        </style>
-        {/* Static Overlay */}
-
-        <div className="absolute top-60 right-29 left-29 z-20 flex h-96 items-center justify-center"></div>
-        {/*<Swiper*/}
-        {/*    pagination={{*/}
-        {/*        dynamicBullets: true,*/}
-        {/*        clickable: true,*/}
-        {/*    }}*/}
-        {/*    autoplay={{*/}
-        {/*        delay: 10000, // 10 seconds*/}
-        {/*        disableOnInteraction: false,*/}
-        {/*    }}*/}
-        {/*    modules={[Pagination, Autoplay]}*/}
-        {/*    className="h-106 rounded-3xl"*/}
-        {/*>*/}
-        {/*    {SlideData.map((slide, index) => (*/}
-        {/*        <SwiperSlide key={index}>*/}
-        {/*            <img*/}
-        {/*                src={slide.image}*/}
-        {/*                alt={slide.title}*/}
-        {/*                className="w-full h-full object-cover rounded-3xl"*/}
-        {/*            />*/}
-        {/*            <div className="absolute top-0 left-0 right-0 h-96 opacity-20 z-10 rounded-3xl" style={{ backgroundColor: "#D14D72"}}/>*/}
-        {/*        </SwiperSlide>*/}
-        {/*    ))}*/}
-        {/*</Swiper>*/}
       </section>
 
       {/* Brands Section */}
@@ -110,8 +66,12 @@ const Homepage = () => {
         </div>
         <div className="flex cursor-pointer flex-wrap justify-center gap-6">
           {brandsQuery.isLoading ? (
-            <div className="w-full py-10 text-center">Loading brands...</div>
-          ) : (
+                <>
+                  {[...Array(5)].map((_, index) => (
+                      <BrandCardSkeleton key={index} />
+                  ))}
+                </>
+            ) : (
             topBrands.map((brand) => (
               <BrandCard
                 key={brand.id}
@@ -192,38 +152,6 @@ const Homepage = () => {
         >
           View all products
         </button>
-      </div>
-    </div>
-  );
-};
-
-const BrandCard = ({ brand, image }) => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate(`/brands/${brand.id}`);
-  };
-
-  return (
-    <div
-      className="relative mb-4 h-66 w-55 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
-      onClick={handleClick}
-    >
-      {/* Image */}
-      <img
-        src={image}
-        alt={brand.name}
-        className="h-full w-full object-cover"
-      />
-
-      {/* Gradient overlay and text */}
-      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-orange-950/50 to-transparent p-3 sm:p-4 md:p-5 lg:p-6">
-        <h3 className="text-lg font-semibold text-white hover:underline sm:text-xl md:text-2xl">
-          {brand.name}
-        </h3>
-        <p className="mt-1 text-sm text-white">
-          {brand.numProducts} product{brand.numProducts !== 1 ? "s" : ""}
-        </p>
       </div>
     </div>
   );
