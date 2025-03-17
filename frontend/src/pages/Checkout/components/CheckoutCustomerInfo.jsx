@@ -1,4 +1,7 @@
+import { fetchListOrderItems } from "@apis/orderApi";
+import { useCartStore } from "@components/Cart";
 import useFormPersistence from "@hooks/useFormPersistence";
+import { useFinishOrder } from "@hooks/useOrderQueries";
 import LocationService from "@services/LocationService";
 import { Form, Input, Select, Spin, message } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -187,6 +190,9 @@ const CheckoutCustomerInfo = () => {
     [form],
   );
 
+  const finishOrderMutation = useFinishOrder();
+  const totalCartPrice = useCartStore((state) => state.totalPrice);
+
   // Handle form submission
   const handleSubmit = async (values) => {
     setLoading((prev) => ({ ...prev, submit: true }));
@@ -212,19 +218,54 @@ const CheckoutCustomerInfo = () => {
 
       // console.log("Submitting form data:", formattedAddress);
 
+      // Submit order
+      const data = await fetchListOrderItems();
+
+      if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
+        message.error("Không thể tải danh sách sản phẩm. Vui lòng thử lại.");
+        return;
+      }
+
+      const order_items = data.data.map((item) => ({
+        id_pro: item.id_pro,
+        id_class: item.id_class ?? 0,
+        quantity: +item.quantity || 1,
+        price: Number(item.pro_price || 0),
+      }));
+
       const persistData = {
         name: formattedAddress.name,
-        email: formattedAddress.email,
+        email: formattedAddress.email || "",
         phone: formattedAddress.phone,
         address: `${formattedAddress.address}, ${formattedAddress.wardName}, ${formattedAddress.districtName}, ${formattedAddress.cityName}`,
-        note: formattedAddress.note,
-        order_items: JSON.parse(localStorage.getItem("cartItems")),
+        note: formattedAddress.note || "",
+        order_items: order_items,
+        total_price: totalCartPrice,
       };
 
-      console.log("Persisting data:", persistData);
+      const res = await finishOrderMutation.mutateAsync({
+        ...persistData,
+      });
+
+      if (res && +res.statusCode === 201) {
+        message.success("Đặt hàng thành công!");
+
+        // Clear cart
+        useCartStore.setState((state) => {
+          state.clearCart();
+        });
+
+        navigate("/payment-confirmation", {
+          state: {
+            invoice_url: res.invoice_url.url,
+            qr_code_url: res.qr_code_url.url,
+          },
+        });
+      } else {
+        message.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
+      }
 
       // Navigate to next step
-      navigate("/payment-confirmation");
     } catch (error) {
       console.error("Error submitting form:", error);
       message.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
