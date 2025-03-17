@@ -1,4 +1,4 @@
-import { ConfigProvider, InputNumber, Slider, Space } from "antd";
+import { ConfigProvider, InputNumber, Slider, Space, Select } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
@@ -43,6 +43,7 @@ const FilterPanel = ({
   const [range, setRange] = useState(minMaxPrice);
   const [inputMin, setInputMin] = useState(minMaxPrice[0]);
   const [inputMax, setInputMax] = useState(minMaxPrice[1]);
+  const [subcategories, setSubcategories] = useState([]);
 
   const debouncedMin = useDebounce(inputMin, 500);
   const debouncedMax = useDebounce(inputMax, 500);
@@ -64,6 +65,34 @@ const FilterPanel = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedMin, debouncedMax]);
 
+  // Cập nhật danh sách danh mục con khi danh mục chính thay đổi
+  useEffect(() => {
+    if (filters.category) {
+      const selectedCategory = categories?.find(
+        (category) => category.cat_name === filters.category,
+      );
+      setSubcategories(selectedCategory?.sub_category || []);
+    } else {
+      setSubcategories([]);
+    }
+  }, [filters.category, categories]);
+
+  // Xử lý sự kiện thay đổi cho các Select của Ant Design
+  const handleSelectChange = (value, name) => {
+    onFilterChange({
+      target: { name, value },
+    });
+
+    // Reset subcategory when main category changes
+    if (name === "category") {
+      onFilterChange({
+        target: { name: "subcate", value: "" },
+      });
+    }
+  };
+
+  // console.log(">>> subcategories", subcategories);
+
   return (
     <ConfigProvider
       theme={{
@@ -81,6 +110,12 @@ const FilterPanel = ({
 
             handleShadow: `0 0 0 2px ${theme.primary.DEFAULT}`,
             handleActiveColor: theme.primary.dark,
+          },
+          Select: {
+            colorPrimary: theme.primary.DEFAULT,
+            colorPrimaryHover: theme.primary.dark,
+            controlItemBgActive: theme.secondary.light,
+            optionSelectedBg: theme.secondary.DEFAULT,
           },
         },
       }}
@@ -163,74 +198,96 @@ const FilterPanel = ({
           <label className="mb-2 block font-medium text-gray-700">
             Danh mục
           </label>
-          {isLoading ? (
-            <select className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none">
-              <option>Đang tải danh mục...</option>
-            </select>
-          ) : error ? (
-            <select className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none">
-              <option>Không thể tải danh mục</option>
-            </select>
-          ) : (
-            <select
-              name="category"
-              value={filters.category}
-              onChange={onFilterChange}
-              className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none"
-            >
-              <option value="">Tất cả</option>
-              {categories?.map((category) => (
-                <option key={category.cat_id} value={category.cat_name}>
-                  {category.cat_name}
-                </option>
-              ))}
-            </select>
-          )}
+          <Select
+            placeholder={isLoading ? "Đang tải danh mục..." : "Chọn danh mục"}
+            style={{ width: "100%" }}
+            value={filters.category || undefined}
+            onChange={(value) => handleSelectChange(value, "category")}
+            disabled={isLoading || !!error}
+            status={error ? "error" : ""}
+            loading={isLoading}
+            options={[
+              { value: "", label: "Tất cả" },
+              ...(categories?.map((category) => ({
+                value: category.cat_name,
+                label: category.cat_name,
+              })) || []),
+            ]}
+            notFoundContent={error ? "Không thể tải danh mục" : undefined}
+          />
+        </div>
+
+        {/* Thêm danh mục con */}
+        <div className="mb-4">
+          <label className="mb-2 block font-medium text-gray-700">
+            Danh mục con
+          </label>
+          <Select
+            placeholder={
+              !filters.category
+                ? "Vui lòng chọn danh mục trước"
+                : "Chọn danh mục con"
+            }
+            style={{ width: "100%" }}
+            value={filters.subcate || undefined}
+            onChange={(value) => handleSelectChange(value, "subcate")}
+            disabled={subcategories.length === 0}
+            options={[
+              { value: "", label: "Tất cả" },
+              ...(subcategories?.map((subcategory) => ({
+                value: subcategory.scat_name,
+                label: subcategory.scat_name,
+              })) || []),
+            ]}
+            notFoundContent={
+              subcategories.length === 0 && filters.category
+                ? "Không có danh mục con"
+                : undefined
+            }
+          />
         </div>
 
         <div className="mb-4">
           <label className="mb-2 block font-medium text-gray-700">
             Thương hiệu
           </label>
-          {brandsLoading ? (
-            <select className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none">
-              <option>Đang tải thương hiệu...</option>
-            </select>
-          ) : brandsError ? (
-            <select className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none">
-              <option>Không thể tải thương hiệu</option>
-            </select>
-          ) : (
-            <select
-              name="brand"
-              value={filters.brand}
-              onChange={onFilterChange}
-              className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none"
-            >
-              <option value="">Tất cả</option>
-              {brands?.map((brand) => (
-                <option key={brand.id} value={brand.name}>
-                  {brand.name}
-                </option>
-              ))}
-            </select>
-          )}
+          <Select
+            placeholder={
+              brandsLoading ? "Đang tải thương hiệu..." : "Chọn thương hiệu"
+            }
+            style={{ width: "100%" }}
+            value={filters.brand || undefined}
+            onChange={(value) => handleSelectChange(value, "brand")}
+            disabled={brandsLoading || !!brandsError}
+            status={brandsError ? "error" : ""}
+            loading={brandsLoading}
+            options={[
+              { value: "", label: "Tất cả" },
+              ...(brands?.map((brand) => ({
+                value: brand.name,
+                label: brand.name,
+              })) || []),
+            ]}
+            notFoundContent={
+              brandsError ? "Không thể tải thương hiệu" : undefined
+            }
+          />
         </div>
 
         <div className="mb-4">
           <label className="mb-2 block font-medium text-gray-700">
             Sắp xếp theo
           </label>
-          <select
-            name="sortBy"
+          <Select
+            style={{ width: "100%" }}
             value={filters.sortBy}
-            onChange={onFilterChange}
-            className="w-full rounded-lg border border-gray-400 p-2 focus:border-orange-900 focus:outline-none"
-          >
-            <option value="newest">Mới nhất</option>
-            <option value="priceLow">Giá thấp đến cao</option>
-            <option value="priceHigh">Giá cao đến thấp</option>
-          </select>
+            onChange={(value) => handleSelectChange(value, "sortBy")}
+            options={[
+              { value: "newest", label: "Mới nhất" },
+              { value: "priceLow", label: "Giá thấp đến cao" },
+              { value: "priceHigh", label: "Giá cao đến thấp" },
+            ]}
+          />
         </div>
       </div>
     </ConfigProvider>

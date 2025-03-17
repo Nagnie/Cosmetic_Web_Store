@@ -7,6 +7,7 @@ export const finishOrder = async ({
   address,
   note,
   order_items,
+  total_price,
 }) => {
   const response = await axios.post("/order/finish", {
     name,
@@ -15,6 +16,13 @@ export const finishOrder = async ({
     address,
     note,
     order_items,
+    total_price,
   });
+  return response.data;
+};
+
+export const fetchListOrderItems = async () => {
+  const response = await axios.get("/order/list-product");
+
   return response.data;
 };

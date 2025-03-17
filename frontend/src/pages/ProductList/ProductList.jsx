@@ -10,16 +10,19 @@ import ProductGrid from "./components/ProductGrid.jsx";
 
 import "./ProductList.css";
 import { useAllBrands } from "@hooks/useBrandQueries.js";
+import { useLocation } from "react-router-dom";
 
 const LIMIT = 9;
 const MIN_MAX_PRICE = [0, 10000000];
 
 const ProductListingPage = () => {
+  const location = useLocation();
+
   const queryString = useQueryString();
   const {
     brand: brandName,
     category: categoryParam,
-    subcate: subcateParam,
+    subcategory: subcateParam,
     search: searchParam,
     page,
     minPrice: minPriceParam,
@@ -69,9 +72,39 @@ const ProductListingPage = () => {
     sortByParam,
   ]);
 
+  useEffect(() => {
+    // Cập nhật filters khi URL thay đổi
+    const params = new URLSearchParams(location.search);
+
+    setFilters({
+      category: params.get("category") || "",
+      subcate: params.get("subcategory") || "",
+      brand: params.get("brand") || "",
+      priceRange: [
+        params.get("minPrice")
+          ? parseInt(params.get("minPrice"))
+          : MIN_MAX_PRICE[0],
+        params.get("maxPrice")
+          ? parseInt(params.get("maxPrice"))
+          : MIN_MAX_PRICE[1],
+      ],
+      sortBy: params.get("sortBy") || "",
+      orderBy: params.get("orderBy") || "",
+      key: params.get("search") || "",
+    });
+
+    // Cập nhật trang hiện tại
+    const pageParam = params.get("page");
+    if (pageParam) {
+      setCurrentPage(parseInt(pageParam));
+    } else {
+      setCurrentPage(1);
+    }
+  }, [location.search]); // Chỉ chạy khi URL thay đổi
+
   // Update filters when URL params change and user hasn't interacted with filters
   useEffect(() => {
-    if (hasUrlParams && !userInteractedWithFilters) {
+    if (hasUrlParams) {
       setFilters({
         category: categoryParam || "",
         subcate: subcateParam || "",
@@ -99,63 +132,61 @@ const ProductListingPage = () => {
   ]);
 
   useEffect(() => {
-    if (userInteractedWithFilters) {
-      const url = new URL(window.location);
+    const url = new URL(window.location);
 
-      // Cập nhật URL với giá trị filter hiện tại
-      if (filters.category && filters.category !== "") {
-        url.searchParams.set("category", filters.category);
-      } else {
-        url.searchParams.delete("category");
-      }
-
-      if (filters.subcate) {
-        url.searchParams.set("subcate", filters.subcate);
-      } else {
-        url.searchParams.delete("subcate");
-      }
-
-      if (filters.brand) {
-        url.searchParams.set("brand", filters.brand);
-      } else {
-        url.searchParams.delete("brand");
-      }
-
-      const [minPrice, maxPrice] = filters.priceRange;
-      if (minPrice > MIN_MAX_PRICE[0]) {
-        url.searchParams.set("minPrice", minPrice);
-      } else {
-        url.searchParams.delete("minPrice");
-      }
-
-      if (maxPrice < MIN_MAX_PRICE[1]) {
-        url.searchParams.set("maxPrice", maxPrice);
-      } else {
-        url.searchParams.delete("maxPrice");
-      }
-
-      if (filters.sortBy) {
-        url.searchParams.set("sortBy", filters.sortBy);
-      } else {
-        url.searchParams.delete("sortBy");
-      }
-
-      if (filters.orderBy) {
-        url.searchParams.set("orderBy", filters.orderBy);
-      } else {
-        url.searchParams.delete("orderBy");
-      }
-
-      if (filters.key) {
-        url.searchParams.set("search", filters.key);
-      } else {
-        url.searchParams.delete("search");
-      }
-
-      url.searchParams.set("page", currentPage);
-
-      window.history.pushState({}, "", url);
+    // Cập nhật URL với giá trị filter hiện tại
+    if (filters.category && filters.category !== "") {
+      url.searchParams.set("category", filters.category);
+    } else {
+      url.searchParams.delete("category");
     }
+
+    if (filters.subcate) {
+      url.searchParams.set("subcategory", filters.subcate);
+    } else {
+      url.searchParams.delete("subcategory");
+    }
+
+    if (filters.brand) {
+      url.searchParams.set("brand", filters.brand);
+    } else {
+      url.searchParams.delete("brand");
+    }
+
+    const [minPrice, maxPrice] = filters.priceRange;
+    if (minPrice > MIN_MAX_PRICE[0]) {
+      url.searchParams.set("minPrice", minPrice);
+    } else {
+      url.searchParams.delete("minPrice");
+    }
+
+    if (maxPrice < MIN_MAX_PRICE[1]) {
+      url.searchParams.set("maxPrice", maxPrice);
+    } else {
+      url.searchParams.delete("maxPrice");
+    }
+
+    if (filters.sortBy) {
+      url.searchParams.set("sortBy", filters.sortBy);
+    } else {
+      url.searchParams.delete("sortBy");
+    }
+
+    if (filters.orderBy) {
+      url.searchParams.set("orderBy", filters.orderBy);
+    } else {
+      url.searchParams.delete("orderBy");
+    }
+
+    if (filters.key) {
+      url.searchParams.set("search", filters.key);
+    } else {
+      url.searchParams.delete("search");
+    }
+
+    url.searchParams.set("page", currentPage);
+
+    window.history.pushState({}, "", url);
   }, [filters, currentPage, userInteractedWithFilters]);
 
   // Prepare query parameters for API call
@@ -170,7 +201,7 @@ const ProductListingPage = () => {
       brand: filters.brand || "",
       subcate: filters.subcate || "",
       category: filters.category === "" ? "" : filters.category,
-      key: filters.key || "",
+      key: filters.key,
     };
   }, [filters]);
 
@@ -201,37 +232,14 @@ const ProductListingPage = () => {
 
   // Build result text message
   const resultText = useMemo(() => {
-    if (userInteractedWithFilters) return null;
-
     let searchTerms = [];
 
-    if (brandName) searchTerms.push(`thương hiệu "${brandName}"`);
-    if (categoryParam) searchTerms.push(`danh mục "${categoryParam}"`);
-    if (subcateParam) searchTerms.push(`danh mục con "${subcateParam}"`);
     if (searchParam) searchTerms.push(`từ khóa "${searchParam}"`);
-    // if (minPriceParam || maxPriceParam) {
-    //   const priceRange = [];
-    //   if (minPriceParam)
-    //     priceRange.push(
-    //       `từ ${parseInt(minPriceParam).toLocaleString("vi-VN")}đ`,
-    //     );
-    //   if (maxPriceParam)
-    //     priceRange.push(
-    //       `đến ${parseInt(maxPriceParam).toLocaleString("vi-VN")}đ`,
-    //     );
-    //   searchTerms.push(`giá ${priceRange.join(" ")}`);
-    // }
 
     if (searchTerms.length === 0) return null;
 
     return <p>Kết quả tìm kiếm cho {searchTerms.join(", ")}.</p>;
-  }, [
-    brandName,
-    categoryParam,
-    subcateParam,
-    searchParam,
-    userInteractedWithFilters,
-  ]);
+  }, [searchParam]);
 
   // Get categories for filter panel
   const {
@@ -275,6 +283,8 @@ const ProductListingPage = () => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
+  // console.log(">>> filters", filters);
+
   return (
     <div className="container mx-auto mt-40 mb-20 py-8">
       <h1
@@ -309,7 +319,7 @@ const ProductListingPage = () => {
         {showFilter ? "Ẩn bộ lọc" : "Hiển thị bộ lọc"}
       </button>
 
-      <div className="flex flex-col gap-10 lg:flex-row">
+      <div className="flex flex-col gap-2 md:gap-4 lg:flex-row lg:gap-5 xl:gap-10">
         {/* Filter column */}
         <div className={`lg:w-1/4 ${showFilter ? "block" : "hidden"} lg:block`}>
           <FilterPanel
