@@ -2,7 +2,7 @@ import { HomeOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useAddCartItem } from "@hooks/useCartQueries";
-import { message } from "antd";
+import { toast } from "react-toastify";
 
 const ProductActionMobile = ({ onCartClick, product }) => {
   const navigate = useNavigate();
@@ -23,11 +23,11 @@ const ProductActionMobile = ({ onCartClick, product }) => {
       if (res && res.cart && res.cart.length > 0) {
         navigate("/cart");
       } else {
-        message.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
       }
     } catch (error) {
       console.log("error", error);
-      message.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
     }
   };
   return (

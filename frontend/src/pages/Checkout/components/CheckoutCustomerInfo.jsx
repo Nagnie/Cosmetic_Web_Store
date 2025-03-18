@@ -4,9 +4,10 @@ import CustomSpin from "@components/Spin/CustomSpin";
 import useFormPersistence from "@hooks/useFormPersistence";
 import { useFinishOrder } from "@hooks/useOrderQueries";
 import LocationService from "@services/LocationService";
-import { Form, Input, Select, message } from "antd";
+import { Form, Input, Select } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const CheckoutCustomerInfo = () => {
   const [form] = Form.useForm();
@@ -51,11 +52,11 @@ const CheckoutCustomerInfo = () => {
         if (data.data && Array.isArray(data.data)) {
           setLocationData((prev) => ({ ...prev, cities: data.data }));
         } else {
-          message.error("Không thể tải danh sách tỉnh/thành phố");
+          toast.error("Không thể tải danh sách tỉnh/thành phố");
         }
       } catch (error) {
         console.error("Error fetching provinces:", error);
-        message.error("Không thể tải danh sách tỉnh/thành phố");
+        toast.error("Không thể tải danh sách tỉnh/thành phố");
       } finally {
         setLoading((prev) => ({ ...prev, cities: false }));
       }
@@ -134,7 +135,7 @@ const CheckoutCustomerInfo = () => {
         return data.data;
       } catch (error) {
         console.error("Error fetching districts:", error);
-        message.error("Không thể tải danh sách quận/huyện");
+        toast.error("Không thể tải danh sách quận/huyện");
       } finally {
         setLoading((prev) => ({ ...prev, districts: false }));
       }
@@ -183,7 +184,7 @@ const CheckoutCustomerInfo = () => {
         return data.data;
       } catch (error) {
         console.error("Error fetching wards:", error);
-        message.error("Không thể tải danh sách phường/xã");
+        toast.error("Không thể tải danh sách phường/xã");
       } finally {
         setLoading((prev) => ({ ...prev, wards: false }));
       }
@@ -225,7 +226,7 @@ const CheckoutCustomerInfo = () => {
       const data = await fetchListOrderItems();
 
       if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
-        message.error("Không thể tải danh sách sản phẩm. Vui lòng thử lại.");
+        toast.error("Không thể tải danh sách sản phẩm. Vui lòng thử lại.");
         return;
       }
 
@@ -256,7 +257,7 @@ const CheckoutCustomerInfo = () => {
       });
 
       if (res && +res.statusCode === 201) {
-        message.success("Đặt hàng thành công!");
+        toast.success("Đặt hàng thành công!");
 
         // Clear cart
         clearCart();
@@ -270,13 +271,13 @@ const CheckoutCustomerInfo = () => {
 
         return res;
       } else {
-        message.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
+        toast.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
       }
 
       // Navigate to next step
     } catch (error) {
       console.error("Error submitting form:", error);
-      message.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
+      toast.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
     } finally {
       setLoading((prev) => ({ ...prev, submit: false }));
     }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Button, message, Tag } from "antd";
+import { Button, Tag } from "antd";
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { toast } from "react-toastify";
 
 import QuantitySelector from "./QuantitySelector";
 import { formatCurrency } from "@utils/utils";
@@ -42,21 +43,21 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
       if (res && res.cart && res.cart.length > 0) {
         navigate("/cart");
       } else {
-        message.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
       }
     } catch (error) {
       console.log("error", error);
-      message.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
     }
   };
 
   useEffect(() => {
     if (addCartItemMutation.isSuccess) {
-      message.success("Thêm vào giỏ hàng thành công");
+      toast.success("Thêm vào giỏ hàng thành công");
     }
 
     if (addCartItemMutation.isError) {
-      message.error("Thêm vào giỏ hàng thất bại");
+      toast.error("Thêm vào giỏ hàng thất bại");
     }
   }, [addCartItemMutation.isSuccess, addCartItemMutation.isError]);
 
