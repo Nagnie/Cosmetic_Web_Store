@@ -117,6 +117,16 @@ const FilterPanel = ({
             controlItemBgActive: theme.secondary.light,
             optionSelectedBg: theme.secondary.DEFAULT,
           },
+          InputNumber: {
+            colorPrimary: theme.primary.DEFAULT,
+            colorPrimaryHover: theme.primary.dark,
+            activeShadow: `0 0 0 2px ${theme.secondary.DEFAULT}`,
+            activeBorderColor: theme.primary.DEFAULT,
+            hoverBorderColor: theme.primary.light,
+            addonBg: theme.secondary.DEFAULT,
+            controlItemBgActive: theme.secondary.light,
+            controlOutline: theme.secondary.DEFAULT,
+          },
         },
       }}
     >
@@ -279,13 +289,14 @@ const FilterPanel = ({
             Sắp xếp theo
           </label>
           <Select
+            placeholder="Chọn cách sắp xếp"
             style={{ width: "100%" }}
-            value={filters.sortBy}
-            onChange={(value) => handleSelectChange(value, "sortBy")}
+            value={filters.orderBy}
+            onChange={(value) => handleSelectChange(value, "orderBy")}
             options={[
-              { value: "newest", label: "Mới nhất" },
-              { value: "priceLow", label: "Giá thấp đến cao" },
-              { value: "priceHigh", label: "Giá cao đến thấp" },
+              { value: "", label: "Mặc định" },
+              { value: "ASC", label: "Giá thấp đến cao" },
+              { value: "DESC", label: "Giá cao đến thấp" },
             ]}
           />
         </div>

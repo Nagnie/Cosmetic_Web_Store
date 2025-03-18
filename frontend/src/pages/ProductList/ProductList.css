@@ -6,3 +6,12 @@
 .custom-pagination .ant-pagination-item-active {
   border-color: #675746 !important; /* Màu viền */
 }
+
+.custom-pagination .ant-pagination-options-quick-jumper input:focus,
+.custom-pagination .ant-pagination-options-quick-jumper input:hover {
+  border-color: #675746; /* Màu viền khi focus */
+}
+
+.custom-pagination .ant-pagination-options-quick-jumper input {
+  border-color: #675746; /* Màu viền */
+}

@@ -1,9 +1,10 @@
 import { fetchListOrderItems } from "@apis/orderApi";
 import { useCartStore } from "@components/Cart";
+import CustomSpin from "@components/Spin/CustomSpin";
 import useFormPersistence from "@hooks/useFormPersistence";
 import { useFinishOrder } from "@hooks/useOrderQueries";
 import LocationService from "@services/LocationService";
-import { Form, Input, Select, Spin, message } from "antd";
+import { Form, Input, Select, message } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -193,6 +194,7 @@ const CheckoutCustomerInfo = () => {
   const finishOrderMutation = useFinishOrder();
   const totalCartPrice = useCartStore((state) => state.totalPrice);
   const clearCart = useCartStore((state) => state.clearCart);
+  const itemCount = useCartStore((state) => state.itemCount);
 
   // Handle form submission
   const handleSubmit = async (values) => {
@@ -381,7 +383,9 @@ const CheckoutCustomerInfo = () => {
                 }
                 loading={loading.cities}
                 disabled={loading.cities}
-                notFoundContent={loading.cities ? <Spin size="small" /> : null}
+                notFoundContent={
+                  loading.cities ? <CustomSpin size="small" /> : null
+                }
               >
                 {locationData.cities.map((city) => (
                   <Select.Option key={city.id} value={city.id}>
@@ -417,7 +421,7 @@ const CheckoutCustomerInfo = () => {
                     }
                     loading={loading.districts}
                     notFoundContent={
-                      loading.districts ? <Spin size="small" /> : null
+                      loading.districts ? <CustomSpin size="small" /> : null
                     }
                   >
                     {locationAvailability.hasDistricts ? (
@@ -466,7 +470,7 @@ const CheckoutCustomerInfo = () => {
                     }
                     loading={loading.wards}
                     notFoundContent={
-                      loading.wards ? <Spin size="small" /> : null
+                      loading.wards ? <CustomSpin size="small" /> : null
                     }
                   >
                     {locationAvailability.hasWards ? (
@@ -504,12 +508,14 @@ const CheckoutCustomerInfo = () => {
             </Link>
             <button
               type="submit"
-              disabled={loading.submit}
+              disabled={loading.submit || !itemCount}
               className={`bg-primary hover:bg-primary-dark flex w-full items-center justify-center rounded-md py-3 text-white transition-colors duration-300 ${
-                loading.submit ? "cursor-not-allowed opacity-70" : ""
+                loading.submit || !itemCount
+                  ? "!cursor-not-allowed opacity-70"
+                  : ""
               }`}
             >
-              {loading.submit ? <Spin size="small" className="mr-2" /> : null}
+              {loading.submit ? <CustomSpin size="small" /> : null}
               {loading.submit ? "Đang xử lý..." : "Đặt hàng"}
             </button>
           </div>

@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { formatCurrency } from "@utils/utils";
+import { useCartStore } from "@components/Cart";
 
 const CartPriceInfo = ({ totalPrice = 0 }) => {
+  const itemCount = useCartStore((state) => state.itemCount);
+
   return (
     <>
       <p className="border-b-5 border-gray-300 pb-4 text-lg font-semibold">
@@ -41,7 +44,13 @@ const CartPriceInfo = ({ totalPrice = 0 }) => {
 
         <Link
           to="/checkout"
-          className="bg-primary hover:bg-primary-dark mt-4 flex w-full items-center justify-center rounded-md py-2 text-white transition-colors duration-300"
+          onClick={(e) => {
+            if (!itemCount) {
+              e.preventDefault();
+              return;
+            }
+          }}
+          className={`bg-primary hover:bg-primary-dark mt-4 flex w-full items-center justify-center rounded-md py-2 text-white transition-colors duration-300 ${itemCount ? "hover:bg-primary-darker" : "cursor-not-allowed opacity-50"}`}
         >
           Tiến hành đặt hàng
         </Link>

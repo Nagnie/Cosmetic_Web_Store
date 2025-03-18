@@ -198,7 +198,10 @@ const ProductDetail = () => {
       )}
 
       <div className={`md:hidden ${showBottomSheet ? "hidden" : "block"}`}>
-        <ProductActionMobile onCartClick={toggleBottomSheet} />
+        <ProductActionMobile
+          product={product}
+          onCartClick={toggleBottomSheet}
+        />
       </div>
     </div>
   );

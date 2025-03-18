@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, message, Tag } from "antd";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 
 import QuantitySelector from "./QuantitySelector";
@@ -25,6 +25,29 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
     };
 
     addCartItemMutation.mutate(item);
+  };
+
+  const navigate = useNavigate();
+  const handleBuyNow = async () => {
+    const item = {
+      id_pro: product.id_pro,
+      id_class:
+        selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
+      quantity: quantity,
+    };
+
+    try {
+      const res = await addCartItemMutation.mutateAsync(item);
+
+      if (res && res.cart && res.cart.length > 0) {
+        navigate("/cart");
+      } else {
+        message.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      message.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
   };
 
   useEffect(() => {
@@ -134,7 +157,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
             type="primary"
             icon={<ThunderboltOutlined />}
             size="large"
-            // onClick={handleBuyNow}
+            onClick={() => handleBuyNow()}
             className="!bg-primary-dark !border-primary-dark flex flex-1 items-center justify-center !text-white"
           >
             Mua ngay
