@@ -77,7 +77,12 @@ export class CartService {
           SELECT json_agg(img.link)
           FROM product_image AS img
           WHERE img.id_pro = pro.id_pro), '[]'::json
-        ) AS images
+        ) AS images,
+        COALESCE(
+          (SELECT json_agg(DISTINCT jsonb_build_object('id_class', class.id_class, 'name', class.name)) 
+          FROM classification AS class 
+          WHERE class.id_pro = pro.id_pro), '[]'::json
+        ) AS classification
         FROM cart_items AS ci
         JOIN product AS pro ON pro.id_pro = ci.id_pro
         LEFT JOIN classification AS class ON class.id_class = ci.id_class

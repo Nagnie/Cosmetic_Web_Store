@@ -11,6 +11,16 @@ import axios from 'axios';
 export class OrderController {
   constructor(private readonly orderService: OrderService) { }
 
+  // [GET]: /order/list-product
+  @Get('list-product')
+  @Public()
+  @ApiOperation({ summary: 'Get all list products in cart' })
+  @ApiResponse({ status: 200, description: 'Get all list products in cart' })
+  async listItems(@Req() req: Request & { session: any }) {
+    return this.orderService.getListProduct(req);
+  }
+
+  // [POST]: /order/finish
   @Post('finish')
   @Public()
   @ApiOperation({ summary: 'Finish order' })

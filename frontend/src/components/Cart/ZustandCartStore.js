@@ -20,6 +20,10 @@ const useCartStore = create(
 
       // Cập nhật tổng giá tiền
       setTotalPrice: (price) => set({ totalPrice: price }),
+
+      // Reset giỏ hàng
+      clearCart: () =>
+        set({ itemCount: 0, totalPrice: 0, isCartDrawerOpen: false }),
     }),
     {
       name: "cart-storage",

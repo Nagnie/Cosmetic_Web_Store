@@ -4,7 +4,8 @@ import CartDrawer from "@components/Cart/CartDrawer/CartDrawer.jsx";
 import useCartStore from "@components/Cart/ZustandCartStore.js";
 
 const GuestLayout = ({ children }) => {
-  const isCartDrawerOpen = useCartStore((state) => state.isCartDrawerOpen);
+  const isCartDrawerOpen =
+    useCartStore((state) => state.isCartDrawerOpen) || false;
 
   return (
     <div className="Container">
