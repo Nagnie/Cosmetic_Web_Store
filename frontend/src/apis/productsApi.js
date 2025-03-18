@@ -125,6 +125,18 @@ const productsApi = {
       },
     });
   },
+
+  createProduct: async (productData) => {
+    return axios.post(`/product/create`,  productData );
+  },
+
+  deleteProduct: async (productId) => {
+    return axios.delete(`/product/delete/${productId}`, {})
+  },
+
+  updateProduct: async (productId, productData) => {
+    return axios.put(`/product/update/${productId}`, productData);
+  }
 };
 
 export default productsApi;

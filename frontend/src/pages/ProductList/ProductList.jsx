@@ -12,7 +12,7 @@ import "./ProductList.css";
 import { useAllBrands } from "@hooks/useBrandQueries.js";
 import { useLocation } from "react-router-dom";
 
-const LIMIT = 9;
+const LIMIT = 12;
 const MIN_MAX_PRICE = [0, 10000000];
 
 const ProductListingPage = () => {

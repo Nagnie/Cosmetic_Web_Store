@@ -13,7 +13,7 @@ const CategoryTable = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 5;
+    const limit = 7;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
@@ -271,15 +271,21 @@ const CategoryTable = () => {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead style={{ backgroundColor: '#D14D72' }}>
                             <tr>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Category Name</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Product Count</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">ID</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Category Name</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Product Count</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider"></th>
                             </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                             {filteredCategories.length > 0 ? (
                                 filteredCategories.map(category => (
                                     <tr key={category.cat_id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="font-medium text-gray-900">{category.cat_id}</div>
+                                            </div>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="font-medium text-gray-900">{category.cat_name}</div>
