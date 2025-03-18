@@ -392,7 +392,7 @@ export class ProductService {
         }
     }
 
-    async findSameBrand(bra_name: string, page: number, limit: number) {
+    async findSameBrand(id_pro: number, bra_name: string, page: number, limit: number) {
         const offset = (page - 1) * limit;
 
         const data = await this.dataSource.query(
@@ -405,10 +405,10 @@ export class ProductService {
         ) AS images
         FROM product AS pro
         JOIN brand AS bra ON pro.id_bra = bra.id_bra
-        WHERE bra.name = $1
-        LIMIT $2 OFFSET $3
+        WHERE bra.name = $1 AND pro.id_pro != $2
+        LIMIT $3 OFFSET $4
       `,
-            [bra_name, limit, offset]
+            [bra_name, id_pro, limit, offset]
         );
 
         const totalQuery = await this.dataSource.query(
@@ -416,9 +416,9 @@ export class ProductService {
         SELECT COUNT(pro.id_pro) AS total_items
         FROM product AS pro
         JOIN brand AS bra ON pro.id_bra = bra.id_bra 
-        WHERE bra.name = $1
+        WHERE bra.name = $1 AND pro.id_pro != $2
       `,
-            [bra_name]
+            [bra_name, id_pro]
         );
         const total_items = Number(totalQuery[0]?.total_items || 0);
         // console.log('TOTAL ITEMS: ', total_items);
@@ -434,12 +434,12 @@ export class ProductService {
         };
     }
 
-    async findSameSubcategory(scat_name: string, page: number, limit: number) {
+    async findSameSubcategory(id_pro: number, scat_name: string, page: number, limit: number) {
         const offset = (page - 1) * limit;
 
         const data = await this.dataSource.query(
             `
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -447,10 +447,11 @@ export class ProductService {
         ) AS images
         FROM product AS pro
         JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
-        WHERE scat.name = $1
-        LIMIT $2 OFFSET $3
+        JOIN brand AS bra ON pro.id_bra = bra.id_bra
+        WHERE scat.name = $1 AND pro.id_pro != $2
+        LIMIT $3 OFFSET $4
       `,
-            [scat_name, limit, offset]
+            [scat_name, id_pro, limit, offset]
         );
 
         const totalQuery = await this.dataSource.query(
@@ -458,9 +459,9 @@ export class ProductService {
       SELECT COUNT(pro.id_pro) AS total_items
       FROM product AS pro
       JOIN sub_category AS scat ON scat.id_subcat = pro.id_subcat 
-      WHERE scat.name = $1
+      WHERE scat.name = $1 AND pro.id_pro != $2
     `,
-            [scat_name]
+            [scat_name, id_pro]
         );
 
         const total_items = Number(totalQuery[0]?.total_items || 0);
