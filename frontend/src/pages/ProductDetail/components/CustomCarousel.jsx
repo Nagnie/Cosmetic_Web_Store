@@ -216,10 +216,10 @@ const CustomCarousel = memo(
       <div className="relative w-full py-8 pt-2">
         {/* Loading overlay for initial load */}
         {isLoading && (
-          <div className="bg-opacity-60 absolute inset-0 z-20 flex items-center justify-center bg-white">
+          <div className="bg-opacity-60 bg-background absolute inset-0 z-20 flex items-center justify-center">
             <div className="text-center">
-              <Loader className="mx-auto h-10 w-10 animate-spin text-blue-600" />
-              <p className="mt-2 font-medium text-blue-600">
+              <Loader className="text-primary-dark mx-auto h-10 w-10 animate-spin" />
+              <p className="text-primary-dark mt-2 font-medium">
                 Đang tải sản phẩm...
               </p>
             </div>
@@ -270,7 +270,7 @@ const CustomCarousel = memo(
 
         {/* Loading indicator for "load more" */}
         {isFetchingNextPage && (
-          <div className="absolute top-1/2 right-12 z-10 flex -translate-y-1/2 items-center rounded-lg bg-blue-500 px-3 py-2 text-white shadow-lg">
+          <div className="bg-primary absolute top-1/2 right-12 z-10 flex -translate-y-1/2 items-center rounded-lg px-3 py-2 text-white shadow-lg">
             <Loader className="mr-2 h-4 w-4 animate-spin" />
             <span className="text-sm">Đang tải thêm...</span>
           </div>

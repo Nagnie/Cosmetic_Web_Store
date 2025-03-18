@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo } from "react";
-import { Breadcrumb, Empty, List, Spin } from "antd";
+import { Breadcrumb, Empty, List } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import InfiniteScroll from "react-infinite-scroll-component";
 
@@ -10,6 +10,7 @@ import {
   getAvailableClassifications,
   getUnavailableClassifications,
 } from "@utils/utils";
+import CustomSpin from "@components/Spin/CustomSpin";
 
 const CartPage = () => {
   const setItemCount = useCartStore((state) => state.setItemCount);
@@ -87,7 +88,7 @@ const CartPage = () => {
     if (isLoading) {
       return (
         <div className="flex h-full items-center justify-center">
-          <Spin size="large" />
+          <CustomSpin size="large" />
         </div>
       );
     }
@@ -118,7 +119,7 @@ const CartPage = () => {
         hasMore={!!hasNextPage}
         loader={
           <div className="py-4 text-center">
-            {isFetchingNextPage && <Spin />}
+            {isFetchingNextPage && <CustomSpin />}
           </div>
         }
         scrollThreshold={0.8}

@@ -36,7 +36,7 @@ const CartDrawerCart = ({ item }) => {
       id_pro: item.id_pro,
       id_class: item.id_class ?? item.old_id_class ?? 0,
       quantity,
-      old_id_class: item.id_class,
+      old_id_class: item.id_class ?? item.old_id_class ?? 0,
     });
   };
 

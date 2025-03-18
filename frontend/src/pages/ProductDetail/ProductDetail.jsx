@@ -72,10 +72,16 @@ const ProductDetail = () => {
           data: { data: [], total_items: 0, page: 1, total_pages: 1 },
         });
       }
-      return productsApi.getProductsByBrand(product.bra_name, {
-        pageParam,
-        limit,
-      });
+      return productsApi.getProductsByBrand(
+        {
+          brandName: product.bra_name,
+          id_pro: product.id_pro,
+        },
+        {
+          pageParam,
+          limit,
+        },
+      );
     },
     [product?.id_pro, product?.bra_name],
   );
@@ -87,10 +93,16 @@ const ProductDetail = () => {
           data: { data: [], total_items: 0, page: 1, total_pages: 1 },
         });
       }
-      return productsApi.getProductsByCategory(product.scat_name, {
-        pageParam,
-        limit,
-      });
+      return productsApi.getProductsByCategory(
+        {
+          categoryName: product.scat_name,
+          id_pro: product.id_pro,
+        },
+        {
+          pageParam,
+          limit,
+        },
+      );
     },
     [product?.id_pro, product?.scat_name],
   );
@@ -198,7 +210,10 @@ const ProductDetail = () => {
       )}
 
       <div className={`md:hidden ${showBottomSheet ? "hidden" : "block"}`}>
-        <ProductActionMobile onCartClick={toggleBottomSheet} />
+        <ProductActionMobile
+          product={product}
+          onCartClick={toggleBottomSheet}
+        />
       </div>
     </div>
   );

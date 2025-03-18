@@ -1,3 +1,5 @@
+import { ToastContainer } from "react-toastify";
+
 import Header from "../../Header/Header.jsx";
 import Footer from "../../Footer/Footer.jsx";
 import CartDrawer from "@components/Cart/CartDrawer/CartDrawer.jsx";
@@ -16,6 +18,7 @@ const GuestLayout = ({ children }) => {
       <Footer />
 
       {isCartDrawerOpen && <CartDrawer />}
+      <ToastContainer autoClose={2000} position="top-center" />
     </div>
   );
 };

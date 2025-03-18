@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import useCartStore from "../ZustandCartStore";
 import { formatCurrency } from "@utils/utils";
 
-const CartDrawerFooter = ({ totalPrice }) => {
+const CartDrawerFooter = ({ totalPrice, itemCount }) => {
   const { closeCartDrawer } = useCartStore();
 
   return (
@@ -23,8 +23,14 @@ const CartDrawerFooter = ({ totalPrice }) => {
       <div>
         <Link
           to="/checkout"
-          className={`!bg-primary-dark h mt-2 flex w-full items-center justify-center rounded-lg py-3 !text-white transition-opacity duration-300 hover:opacity-90`}
-          onClick={() => closeCartDrawer()}
+          className={`!bg-primary-dark h mt-2 flex w-full items-center justify-center rounded-lg py-3 !text-white transition-opacity duration-300 ${itemCount === 0 ? "!cursor-not-allowed opacity-50" : "hover:opacity-90"}`}
+          onClick={(e) => {
+            if (itemCount === 0) {
+              e.preventDefault();
+              return;
+            }
+            closeCartDrawer();
+          }}
         >
           Tiến hành đặt hàng
         </Link>
@@ -42,6 +48,7 @@ const CartDrawerFooter = ({ totalPrice }) => {
 
 CartDrawerFooter.propTypes = {
   totalPrice: PropTypes.number,
+  itemCount: PropTypes.number,
 };
 
 export default CartDrawerFooter;
