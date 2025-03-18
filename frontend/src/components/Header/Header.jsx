@@ -116,7 +116,7 @@ const Header = () => {
           {/* Nút clear đã được điều chỉnh vị trí */}
           {searchText && (
             <button
-              className="absolute top-1/2 right-16 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute top-1/2 right-16 -translate-y-1/2 !border-none !bg-transparent text-gray-500 !outline-none hover:text-gray-700"
               onClick={() => {
                 clearSearchText();
 

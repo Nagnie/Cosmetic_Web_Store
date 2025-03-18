@@ -10,7 +10,7 @@ const QuantitySelector = ({
   height = 40,
   value,
 }) => {
-  const [quantity, setQuantity] = useState(initialValue);
+  const [quantity, setQuantity] = useState(() => initialValue);
   const [inputValue, setInputValue] = useState(() => initialValue.toString());
 
   const validateValue = (value) => {
@@ -72,9 +72,11 @@ const QuantitySelector = ({
     >
       <button
         onClick={handleDecrease}
-        disabled={quantity <= min}
+        disabled={(value || quantity) <= min}
         className={`!bg-secondary-medium !border-secondary-deep flex h-full items-center justify-center !rounded-l-lg !border !border-r-0 !px-4 !py-2 !font-bold !outline-none select-none hover:opacity-90 ${
-          quantity <= min ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+          (value || quantity) <= min
+            ? "cursor-not-allowed opacity-50"
+            : "cursor-pointer"
         }`}
         style={{
           width: width / 4,
@@ -92,9 +94,11 @@ const QuantitySelector = ({
       />
       <button
         onClick={handleIncrease}
-        disabled={quantity >= max}
+        disabled={(value || quantity) >= max}
         className={`!bg-secondary-medium !border-secondary-deep !flex h-full !items-center !justify-center !rounded-r-lg !border !border-l-0 !px-4 !py-2 !font-bold !outline-none select-none hover:opacity-90 ${
-          quantity >= max ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+          (value || quantity) >= max
+            ? "cursor-not-allowed opacity-50"
+            : "cursor-pointer"
         }`}
         style={{
           width: width / 4,
