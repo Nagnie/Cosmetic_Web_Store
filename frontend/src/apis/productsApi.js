@@ -44,12 +44,13 @@ const productsApi = {
   },
 
   getProductsByBrand: (
-    brandName,
+    { brandName, id_pro },
     { pageParam = 1, limit = 8, signal } = {},
   ) => {
     return axios.get("/product/same_brand", {
       signal,
       params: {
+        id_pro: id_pro,
         bra_name: brandName,
         limit: limit,
         page: pageParam,
@@ -58,12 +59,13 @@ const productsApi = {
   },
 
   getProductsByCategory: (
-    categoryName,
+    { categoryName, id_pro },
     { pageParam = 1, limit = 8, signal } = {},
   ) => {
     return axios.get("/product/same_subcategory", {
       signal,
       params: {
+        id_pro: id_pro,
         scat_name: categoryName,
         limit: limit,
         page: pageParam,
@@ -127,16 +129,16 @@ const productsApi = {
   },
 
   createProduct: async (productData) => {
-    return axios.post(`/product/create`,  productData );
+    return axios.post(`/product/create`, productData);
   },
 
   deleteProduct: async (productId) => {
-    return axios.delete(`/product/delete/${productId}`, {})
+    return axios.delete(`/product/delete/${productId}`, {});
   },
 
   updateProduct: async (productId, productData) => {
     return axios.put(`/product/update/${productId}`, productData);
-  }
+  },
 };
 
 export default productsApi;
