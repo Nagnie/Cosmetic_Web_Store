@@ -92,7 +92,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.id_cat AS cat_id, cat.name AS cat_name, scat.id_subcat AS scat_id, scat.name AS scat_name, bra.id_bra AS bra_id, bra.name AS bra_name,
       pro.price AS price,
       COALESCE((
         SELECT json_agg(img.link)
