@@ -46,6 +46,7 @@ export class SubcategoryService {
         JOIN category AS cat ON scat.id_cat = cat.id_cat
         LEFT JOIN product AS p ON p.id_subcat = scat.id_subcat
         GROUP BY scat.id_subcat, scat.name, cat.name
+        ORDER BY scat.id_subcat ASC
         LIMIT $1 OFFSET $2
       `, [limit, offset]);
 

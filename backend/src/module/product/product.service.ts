@@ -108,6 +108,7 @@ export class ProductService {
       JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
       JOIN category AS cat ON scat.id_cat = cat.id_cat
       JOIN brand AS bra ON pro.id_bra = bra.id_bra
+      ORDER BY pro.id_pro ASC
       LIMIT $1 OFFSET $2
     `,
             [limit, offset]
