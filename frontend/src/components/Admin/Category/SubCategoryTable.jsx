@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
 import { MutatingDots } from 'react-loader-spinner';
 import subcategoriesApi from "@apis/subcategoriesApi.js";
-import categoriesApi from "@apis/categoriesApi.js";
 
 const SubCategoryTable = () => {
     const [subcategories, setSubcategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState([]);
-    const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [actionMessage, setActionMessage] = useState({ text: '', type: '' });
@@ -16,14 +13,14 @@ const SubCategoryTable = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 5;
+    const limit = 15;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
     const [formOpen, setFormOpen] = useState(false);
     const [currentSubcategory, setCurrentSubcategory] = useState(null);
     const [newSubcategory, setNewSubcategory] = useState({
-        scat_name: '',
+        subcat_name: '',
         id_cat: ''
     });
     const [isEditing, setIsEditing] = useState(false);
@@ -48,29 +45,6 @@ const SubCategoryTable = () => {
         }
     };
 
-    // Fetch categories from API
-    const fetchCategories = async () => {
-        try {
-            setCategoriesLoading(true);
-            const response = await categoriesApi.getCategories({
-                page: 1,
-                limit: 100 // Fetch a large number to get all categories
-            });
-
-            if (response.status === 200) {
-                setCategories(response.data.data);
-            } else {
-                throw new Error(response.data.message || 'Failed to fetch categories');
-            }
-        } catch (err) {
-            console.error('Error fetching Categories:', err);
-            // Still show the form but with an error message
-            showActionMessage('Error loading categories. Please try again.', 'error');
-        } finally {
-            setCategoriesLoading(false);
-        }
-    };
-
     // Show action message
     const showActionMessage = (text, type) => {
         setActionMessage({ text, type });
@@ -83,17 +57,18 @@ const SubCategoryTable = () => {
     // Load data on component mount and when page changes
     useEffect(() => {
         fetchSubcategories();
-        fetchCategories();
     }, [page]);
 
     // Handle form input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+
         setNewSubcategory({
             ...newSubcategory,
-            [name]: value,
+            [name]: name === "id_cat" ? parseInt(value, 10) || '' : value,
         });
     };
+
 
     // Filter Subcategories based on search term
     const filteredSubcategories = subcategories.filter(subcategory =>
@@ -105,9 +80,10 @@ const SubCategoryTable = () => {
     const addSubcategory = async (subcategoryData) => {
         try {
             setActionLoading(true);
-            const response = await subcategoriesApi.createSubcategory(subcategoryData)
-
-            console.log(response);
+            const response = await subcategoriesApi.createSubcategory({
+                subcat_name: subcategoryData.scat_name, // Sửa "scat_name" -> "subcat_name"
+                id_cat: Number(subcategoryData.id_cat)  // Đảm bảo id_cat là số
+            });
 
             if (response.status !== 201) {
                 throw new Error(response.data.message || 'Failed to add subcategory');
@@ -124,15 +100,12 @@ const SubCategoryTable = () => {
         }
     };
 
+
     // Update subcategory
     const updateSubcategory = async (id, subcategoryData) => {
         try {
             setActionLoading(true);
-            // Use the API function instead of direct fetch
-            // When editing, only send the subcategory name
-            const response = await subcategoriesApi.updateSubcategoryDetail(id, {
-                scat_name: subcategoryData.scat_name
-            });
+            const response = await subcategoriesApi.updateSubcategoryDetail(id, subcategoryData);
 
             if (response.status !== 200) {
                 throw new Error(response.data.message || 'Failed to update subcategory');
@@ -200,11 +173,6 @@ const SubCategoryTable = () => {
 
     // Edit Subcategory
     const handleEdit = (subcategory) => {
-        // Make sure categories are loaded before editing
-        if (categories.length === 0) {
-            fetchCategories();
-        }
-
         setCurrentSubcategory(subcategory);
         setNewSubcategory({
             scat_name: subcategory.scat_name,
@@ -315,10 +283,11 @@ const SubCategoryTable = () => {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead style={{ backgroundColor: '#D14D72' }}>
                             <tr>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Subcategory Name</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Category</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Product Count</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">ID</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Subcategory Name</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Category</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Product Count</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Actions</th>
                             </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -327,11 +296,18 @@ const SubCategoryTable = () => {
                                     <tr key={index} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
+                                                <div className="font-medium text-gray-900">{subcategory.id_subcat}</div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
                                                 <div className="font-medium text-gray-900">{subcategory.scat_name}</div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="font-medium text-gray-900">{subcategory.cat_name}</div>
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-pink-100 text-pink-800">
+                                                {subcategory.cat_name}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {subcategory.num_pro}
@@ -434,42 +410,18 @@ const SubCategoryTable = () => {
                                             disabled={actionLoading}
                                         />
                                     </div>
-                                    {!isEditing && (
-                                        <div>
-                                            <label className="block font-medium text-gray-700 mb-3">Category</label>
-                                            <select
-                                                name="id_cat"
-                                                value={newSubcategory.id_cat}
-                                                onChange={handleInputChange}
-                                                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
-                                                required
-                                                disabled={actionLoading || categoriesLoading}
-                                            >
-                                                <option value="">Select a category</option>
-                                                {categories.map((category) => (
-                                                    <option key={category.id} value={category.id}>
-                                                        {category.cat_name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {categoriesLoading && (
-                                                <div className="mt-2 text-sm text-gray-500">
-                                                    Loading categories...
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                    {isEditing && currentSubcategory && (
-                                        <div>
-                                            <label className="block font-medium text-gray-700 mb-3">Category</label>
-                                            <div className="w-full p-2 border rounded bg-gray-100 text-gray-700">
-                                                {currentSubcategory.cat_name}
-                                            </div>
-                                            <div className="mt-2 text-sm text-gray-500">
-                                                Category cannot be changed when editing a subcategory
-                                            </div>
-                                        </div>
-                                    )}
+                                    <div>
+                                        <label className="block font-medium text-gray-700 mb-3">Category</label>
+                                        <input
+                                            type="number"
+                                            name="id_cat"
+                                            value={newSubcategory.id_cat}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            required
+                                            disabled={actionLoading}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex justify-end space-x-2">

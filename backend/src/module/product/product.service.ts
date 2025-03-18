@@ -92,7 +92,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.id_cat AS cat_id, cat.name AS cat_name, scat.id_subcat AS scat_id, scat.name AS scat_name, bra.id_bra AS bra_id, bra.name AS bra_name,
       pro.price AS price,
       COALESCE((
         SELECT json_agg(img.link)
@@ -108,6 +108,7 @@ export class ProductService {
       JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
       JOIN category AS cat ON scat.id_cat = cat.id_cat
       JOIN brand AS bra ON pro.id_bra = bra.id_bra
+      ORDER BY pro.id_pro ASC
       LIMIT $1 OFFSET $2
     `,
             [limit, offset]

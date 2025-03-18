@@ -7,8 +7,6 @@ const ProductModal = ({
                           product,
                           isEditing,
                           onSubmit,
-                          subcategories,
-                          brands,
                           isLoading
                       }) => {
     const [formData, setFormData] = useState({
@@ -17,7 +15,7 @@ const ProductModal = ({
         id_bra: '',
         price: '',
         img_url: '',
-        description: '',
+        desc: '',
         classification: '',
         status: 'Available'
     });
@@ -31,7 +29,7 @@ const ProductModal = ({
                 id_bra: product.id_bra || '',
                 price: product.price || '',
                 img_url: Array.isArray(product.img_url) ? product.img_url.join(', ') : product.img_url || '',
-                description: product.description || '',
+                desc: product.desc || '',
                 classification: Array.isArray(product.classification) ?
                     product.classification.join(', ') : product.classification || '',
                 status: product.status || 'Available'
@@ -44,7 +42,7 @@ const ProductModal = ({
                 id_bra: '',
                 price: '',
                 img_url: '',
-                description: '',
+                desc: '',
                 classification: '',
                 status: 'Available'
             });
@@ -68,10 +66,12 @@ const ProductModal = ({
             id_bra: parseInt(formData.id_bra),
             price: parseFloat(formData.price),
             status: formData.status,
-            img_url: formData.img_url.split(',').map(img => img.trim()),
-            description: formData.description,
-            classification: formData.classification.split(',').map(cls => cls.trim()),
+            img_url: formData.img_url.split(',').map(url => url.trim()), // Chuyển chuỗi thành mảng
+            classification: formData.classification.split(',').map(item => item.trim()), // Chuyển chuỗi thành mảng
+            desc: formData.desc,
         };
+
+        console.log(submissionData);
 
         onSubmit(submissionData);
     };
@@ -93,11 +93,11 @@ const ProductModal = ({
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-5">
+                <form onSubmit={handleSubmit} className="p-5 text-left">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Product Name */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-black mb-1">
                                 Product Name
                             </label>
                             <input
@@ -112,49 +112,37 @@ const ProductModal = ({
 
                         {/* Subcategory */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-black mb-1">
                                 Subcategory
                             </label>
-                            <select
+                            <input
+                                type="number"
                                 name="id_subcat"
                                 value={formData.id_subcat}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
-                            >
-                                <option value="">Select Subcategory</option>
-                                {subcategories.map((subcat) => (
-                                    <option key={subcat.id_subcat} value={subcat.id_subcat}>
-                                        {subcat.scat_name}
-                                    </option>
-                                ))}
-                            </select>
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            />
                         </div>
 
                         {/* Brand */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-black mb-1">
                                 Brand
                             </label>
-                            <select
+                            <input
+                                type="number"
                                 name="id_bra"
                                 value={formData.id_bra}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
-                            >
-                                <option value="">Select Brand</option>
-                                {brands.map((brand) => (
-                                    <option key={brand.id_bra} value={brand.id_bra}>
-                                        {brand.bra_name}
-                                    </option>
-                                ))}
-                            </select>
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            />
                         </div>
 
                         {/* Price */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-black mb-1">
                                 Price
                             </label>
                             <input
@@ -170,7 +158,7 @@ const ProductModal = ({
 
                         {/* Status */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-black mb-1">
                                 Status
                             </label>
                             <select
@@ -187,7 +175,7 @@ const ProductModal = ({
 
                         {/* Image URLs */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-black mb-1">
                                 Image URLs (comma separated)
                             </label>
                             <textarea
@@ -205,7 +193,7 @@ const ProductModal = ({
 
                         {/* Classification */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-black mb-1">
                                 Classification (comma separated)
                             </label>
                             <input
@@ -223,11 +211,11 @@ const ProductModal = ({
 
                         {/* Description */}
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-black mb-1">
                                 Description
                             </label>
                             <textarea
-                                name="description"
+                                name="desc"
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows="4"
