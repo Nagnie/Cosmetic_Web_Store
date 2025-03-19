@@ -92,7 +92,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.id_cat AS cat_id, cat.name AS cat_name, scat.id_subcat AS scat_id, scat.name AS scat_name, bra.id_bra AS bra_id, bra.name AS bra_name,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.id_cat AS cat_id, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name,
       pro.price AS price,
       COALESCE((
         SELECT json_agg(img.link)
@@ -137,7 +137,7 @@ export class ProductService {
     async findOne(id_pro: number) {
         const productInfo = this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name, pro.status AS pro_status,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -479,7 +479,7 @@ export class ProductService {
     }
 
     async update(id_pro: number, updateProductDto: UpdateProductDto) {
-        const { pro_name, price, id_subcat, id_bra, status, img_url, classification, desc } =
+        const { pro_name, price, id_subcat, id_bra, status, images, classification, description } =
             updateProductDto;
 
         // START TRANSACTION
@@ -495,11 +495,11 @@ export class ProductService {
           SET name = $1, price = $2, id_subcat = $3, id_bra = $4, status = $5, description = $6
           WHERE id_pro = $7;
       `,
-                [pro_name, price, id_subcat, id_bra, status, desc, id_pro]
+                [pro_name, price, id_subcat, id_bra, status, description, id_pro]
             );
 
             // If having new image list
-            if (img_url && img_url.length > 0) {
+            if (images && images.length > 0) {
                 // Xóa ảnh cũ
                 await queryRunner.query(
                     `
@@ -509,7 +509,7 @@ export class ProductService {
                 );
 
                 // Thêm ảnh mới
-                for (const img of img_url) {
+                for (const img of images) {
                     await queryRunner.query(
                         `
                   INSERT INTO product_image (id_pro, link) VALUES ($1, $2);

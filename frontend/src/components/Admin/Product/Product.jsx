@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Edit, Trash2, Search, X, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Circles } from "react-loader-spinner";
 import productsApi from "@apis/productsApi.js";
 import brandsApi from "@apis/brandsApi.js";
 import subcategoriesApi from "@apis/subcategoriesApi.js";
-import ProductDetail from "./ProductDetail";
+import ProductInfo from "./ProductInfo.jsx";
 import ProductModal from "./ProductModal.jsx"
 
 const Product = () => {
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
-    const [brands, setBrands] = useState([]);
-    const [subcategories, setSubcategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
@@ -53,41 +53,8 @@ const Product = () => {
         }
     };
 
-    // Fetch subcategories
-    const fetchSubcategories = async () => {
-        try {
-            const response = await subcategoriesApi.getSubcategories();
-
-            console.log(response);
-
-            if (response.status === 200) {
-                setSubcategories(response.data.data);
-            } else {
-                throw new Error(response.message);
-            }
-        } catch (err) {
-            console.error("Error fetching subcategories:", err);
-        }
-    };
-
-    // Fetch brands
-    const fetchBrands = async () => {
-        try {
-            const response = await brandsApi.getBrands();
-            if (response.status === 200) {
-                setBrands(response.data.data.data);
-            } else {
-                throw new Error(response.data.message);
-            }
-        } catch (err) {
-            console.error("Error fetching brands:", err);
-        }
-    };
-
     useEffect(() => {
         fetchProducts();
-        fetchSubcategories();
-        fetchBrands();
     }, [page]);
 
     // Show action message
@@ -165,29 +132,15 @@ const Product = () => {
         setModalOpen(true);
     };
 
-    // Open modal for editing product
-    const handleEdit = (product) => {
-        setCurrentProduct(product);
-        setIsEditing(true);
-        setModalOpen(true);
-    };
-
     // Handle form submission from modal
     const handleSubmit = async (formData) => {
-        let success = false;
-
-        if (isEditing && currentProduct) {
-            success = await updateProduct(currentProduct.id_pro, formData);
-        } else {
-            success = await addProduct(formData);
-        }
+        const success = await addProduct(formData);
 
         if (success) {
             fetchProducts();
             closeModal();
         }
     };
-
 
     // Delete product
     const handleDelete = async (id) => {
@@ -199,23 +152,19 @@ const Product = () => {
         }
     };
 
-    // View product details
-    const handleView = (product) => {
-        setSelectedProductId(product.id_pro);
-        setViewOpen(true);
+    // Navigate to product details page
+    const handleViewDetails = (productId) => {
+        navigate(`/admin/product/${productId}`);
+    };
+
+    // Navigate to edit page
+    const handleEdit = (productId) => {
+        navigate(`/admin/product/${productId}/update`);
     };
 
     // Close modal
     const closeModal = () => {
         setModalOpen(false);
-        setCurrentProduct(null);
-        setIsEditing(false);
-    };
-
-    // Close view modal
-    const closeViewModal = () => {
-        setViewOpen(false);
-        setSelectedProductId(null);
     };
 
     // Handle pagination
@@ -317,7 +266,7 @@ const Product = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap cursor-pointer hover:text-bold" onClick={() => handleView(product)}>
+                                        <td className="px-6 py-4 whitespace-nowrap cursor-pointer hover:text-bold" onClick={() => handleViewDetails(product.id_pro)}>
                                             <div className="flex items-center">
                                                 <div>
                                                     <div className="font-medium text-gray-900">{product.pro_name}</div>
@@ -344,12 +293,6 @@ const Product = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
-                                                <button
-                                                    onClick={() => handleEdit(product)}
-                                                    className="text-blue-600 hover:text-blue-900"
-                                                >
-                                                    <Edit size={18} />
-                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(product.id_pro)}
                                                     className="text-red-600 hover:text-red-900"
@@ -421,15 +364,6 @@ const Product = () => {
                 onSubmit={handleSubmit}
                 isLoading={actionLoading}
             />
-
-            {/* View Product Details Modal */}
-            {viewOpen && selectedProductId && (
-                <ProductDetail
-                    isOpen={viewOpen}
-                    onClose={closeViewModal}
-                    productId={selectedProductId}
-                />
-            )}
         </div>
     );
 };
