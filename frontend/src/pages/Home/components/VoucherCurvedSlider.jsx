@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 
+import { useModalStore } from "@components/Modal";
+import { VoucherModalContent } from "@components/Modal/Content";
+
 import "./VoucherCurvedSlider.css";
 
 const VoucherCurvedSlider = ({
@@ -154,11 +157,18 @@ const VoucherCurvedSlider = ({
   const handleItemClick = useCallback(
     (index, position) => {
       // Nếu đang animating hoặc đã active rồi thì không làm gì
+      if (position === 0 && !isAnimating) {
+        handleShowVoucherModal();
+
+        return;
+      }
+
       if (isAnimating || position === 0 || items.length <= 1) return;
 
       setIsAnimating(true);
       setActiveIndex(index);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isAnimating, items.length],
   );
 
@@ -170,6 +180,41 @@ const VoucherCurvedSlider = ({
     },
     [halfItemsToShow],
   );
+
+  const showModal = useModalStore((state) => state.showModal);
+  const hideModal = useModalStore((state) => state.hideModal);
+
+  const activeItem = items[activeIndex];
+
+  const handleShowVoucherModal = () => {
+    // Khi click vào voucher, hiển thị modal với nội dung là VoucherModalContent
+    showModal(
+      <VoucherModalContent item={activeItem.metadata} onCancel={hideModal} />,
+      {
+        title: (
+          <div className="text-primary-deepest pb-2 text-center text-2xl font-bold">
+            Chi tiết voucher
+          </div>
+        ),
+        width: window.innerWidth < 640 ? "90%" : 500,
+        styles: {
+          header: {
+            backgroundColor: "#FAF5F0",
+            borderBottom: "1px solid #C8B6A6",
+          },
+          body: {
+            padding: 0,
+            backgroundColor: "#FAF5F0",
+          },
+          content: {
+            borderRadius: "12px",
+            overflow: "hidden",
+            boxShadow: "0 4px 12px rgba(145, 119, 94, 0.15)",
+          },
+        },
+      },
+    );
+  };
 
   // Kiểm tra nếu không có items hoặc chỉ có 1 item
   if (!items.length) {

@@ -112,6 +112,7 @@ const Homepage = () => {
   const voucher = VOUCHER.map((item) => {
     return {
       id: item.id,
+      metadata: item,
       content: <DiscountCard item={item} />,
     };
   });
