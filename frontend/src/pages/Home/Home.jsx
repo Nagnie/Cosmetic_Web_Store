@@ -10,6 +10,92 @@ import { numberToArray } from "@utils/utils.js";
 import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
 import BrandCard from "@components/BrandCard/BrandCard.jsx";
 import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
+import VoucherCurvedSlider from "./components/VoucherCurvedSlider.jsx";
+import DiscountCard from "./components/DiscountCard.jsx";
+
+const VOUCHER = [
+  {
+    id: 1,
+    title: "Giảm giá cố định",
+    price: "200.000đ",
+    description: "Áp dụng cho đơn hàng từ 1.000.000đ",
+    code: "HOLIDAY200K",
+    expiry: "30/04/2025",
+    ribbonText: "200K",
+  },
+  {
+    id: 2,
+    title: "Freeship Extra",
+    price: "50.000đ",
+    description: "Miễn phí vận chuyển toàn quốc",
+    code: "FREESHIP50",
+    expiry: "15/04/2025",
+    ribbonText: "SHIP",
+  },
+  {
+    id: 3,
+    title: "Giảm 30%",
+    price: "Tối đa 199.000đ",
+    description: "Đơn hàng từ 300.000đ",
+    code: "FASHION30",
+    expiry: "10/04/2025",
+    ribbonText: "30%",
+  },
+  {
+    id: 4,
+    title: "Voucher Sinh Nhật",
+    price: "300.000đ",
+    description: "Quà tặng đặc biệt cho thành viên",
+    code: "BIRTHDAY300",
+    expiry: "05/04/2025",
+    ribbonText: "GIFT",
+  },
+  {
+    id: 5,
+    title: "Giảm 15%",
+    price: "Tối đa 50.000đ",
+    description: "Đơn hàng từ 200.000đ",
+    code: "NEW15PCT",
+    expiry: "20/04/2025",
+    ribbonText: "15%",
+  },
+  {
+    id: 6,
+    title: "Giảm 20%",
+    price: "Tối đa 500.000đ",
+    description: "Cho sản phẩm điện tử, công nghệ",
+    code: "TECH20PCT",
+    expiry: "25/04/2025",
+    ribbonText: "20%",
+  },
+  {
+    id: 7,
+    title: "Giảm 50%",
+    price: "Tối đa 1.000.000đ",
+    description: "Dành cho khách hàng VIP",
+    code: "VIP50PCT",
+    expiry: "01/05/2025",
+    ribbonText: "50%",
+  },
+  {
+    id: 8,
+    title: "Giảm 15%",
+    price: "Tối đa 100.000đ",
+    description: "Cho tất cả đồ gia dụng",
+    code: "HOME15PCT",
+    expiry: "12/04/2025",
+    ribbonText: "15%",
+  },
+  {
+    id: 9,
+    title: "Giảm 15%",
+    price: "Tối đa 100.000đ",
+    description: "Cho tất cả đồ gia dụng",
+    code: "HOME15PCT",
+    expiry: "12/04/2025",
+    ribbonText: "15%",
+  },
+];
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -22,6 +108,13 @@ const Homepage = () => {
 
   // Lấy 5 brands đầu tiên
   const topBrands = brands.slice(0, 5);
+
+  const voucher = VOUCHER.map((item) => {
+    return {
+      id: item.id,
+      content: <DiscountCard item={item} />,
+    };
+  });
 
   return (
     <div className="font-sans">
@@ -51,18 +144,13 @@ const Homepage = () => {
         </div>
         <div className="flex cursor-pointer flex-wrap justify-center gap-6">
           {brandsQuery.isLoading ? (
-                <>
-                  {[...Array(5)].map((_, index) => (
-                      <BrandCardSkeleton key={index} />
-                  ))}
-                </>
-            ) : (
-            topBrands.map((brand) => (
-              <BrandCard
-                key={brand.id}
-                brand={brand}
-              />
-            ))
+            <>
+              {[...Array(5)].map((_, index) => (
+                <BrandCardSkeleton key={index} />
+              ))}
+            </>
+          ) : (
+            topBrands.map((brand) => <BrandCard key={brand.id} brand={brand} />)
           )}
         </div>
       </section>
@@ -110,6 +198,15 @@ const Homepage = () => {
           </div>
         </div>
       </section>
+      <div className="reset-all">
+        <div className="voucher-container">
+          <VoucherCurvedSlider
+            items={voucher}
+            itemsToShow={5}
+            itemsToScroll={3}
+          />
+        </div>
+      </div>
 
       {/* Best Sellers Section */}
       <div className="px-10 py-10">

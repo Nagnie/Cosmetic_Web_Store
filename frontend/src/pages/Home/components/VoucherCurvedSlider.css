@@ -1,0 +1,643 @@
+.voucher-slider-outer-container {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.voucher-slider-container {
+  position: relative;
+  height: 380px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1200px;
+  margin-bottom: 60px;
+  overflow: hidden;
+  background-color: #faf5f0; /* background.DEFAULT */
+}
+
+.voucher-slider-container.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6b7280; /* neutral.gray */
+  font-style: italic;
+  height: 200px;
+  background: #fffaf3; /* background.light */
+  border-radius: 8px;
+}
+
+.voucher-slider-overflow-container {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.voucher-slider-wrapper {
+  position: relative;
+  width: 80%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  margin: 0 auto;
+}
+
+.voucher-curved-slider {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.voucher-item {
+  position: absolute;
+  width: 280px;
+  height: 160px;
+  transition: all 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  overflow: visible;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  backface-visibility: hidden; /* Tối ưu hiệu suất animation */
+}
+
+.voucher-item.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Điều chỉnh các item ở rìa */
+.voucher-item.edge .voucher-inner {
+  height: calc(100% - 20px); /* Giảm chiều cao của các item ở rìa */
+  opacity: 0.8; /* Làm mờ hơn nữa */
+}
+
+.voucher-inner {
+  width: 100%;
+  height: 100%;
+  background: #ffffff; /* neutral.DEFAULT */
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(87, 74, 58, 0.1); /* primary.deepest with opacity */
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #f1dec9 100%
+  ); /* neutral.DEFAULT to secondary.DEFAULT */
+  border: 1px dashed #c8b6a6; /* secondary.medium */
+  transition: all 0.3s ease;
+}
+
+/* Hiệu ứng lỗ đục trên voucher */
+.voucher-hole {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #faf5f0; /* background.DEFAULT */
+  border-radius: 50%;
+  box-shadow: inset 0 0 5px rgba(87, 74, 58, 0.2); /* primary.deepest with opacity */
+  border: 1px solid #c8b6a6; /* secondary.medium */
+}
+
+.voucher-hole.left {
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.voucher-hole.right {
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Đường đứt đoạn giữa voucher */
+.voucher-dashed-line {
+  position: absolute;
+  bottom: 40px;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  border-bottom: 1px dashed #a4907c; /* secondary.light */
+}
+
+/* Overlay cho việc click vào item chưa active */
+.voucher-click-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(145, 119, 94, 0); /* primary.DEFAULT with 0 opacity */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  border-radius: 10px;
+}
+
+.voucher-item.clickable:hover .voucher-click-overlay {
+  background: rgba(145, 119, 94, 0.1); /* primary.DEFAULT with low opacity */
+  opacity: 1;
+}
+
+.click-indicator {
+  background: rgba(145, 119, 94, 0.8); /* primary.DEFAULT with high opacity */
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 5px 15px;
+  border-radius: 20px;
+  transform: translateY(10px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.voucher-item.clickable:hover .click-indicator {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.voucher-nav-button {
+  background: rgba(255, 255, 255, 0.9); /* neutral.DEFAULT with opacity */
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 100;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(87, 74, 58, 0.15); /* primary.deepest with opacity */
+  transition: all 0.3s ease;
+}
+
+.voucher-nav-button:hover {
+  background: #91775e; /* primary.DEFAULT */
+  color: white;
+  transform: scale(1.1);
+}
+
+.voucher-nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(200, 200, 200, 0.8);
+}
+
+.prev {
+  left: 20px;
+}
+
+.next {
+  right: 20px;
+}
+
+.voucher-nav-button span {
+  display: block;
+  line-height: 0;
+}
+
+/* Hiệu ứng nổi bật khi hover vào voucher */
+.voucher-item.visible:hover .voucher-inner {
+  box-shadow: 0 8px 25px rgba(145, 119, 94, 0.3); /* primary.DEFAULT with opacity */
+  border-color: #91775e; /* primary.DEFAULT */
+}
+
+/* Item không phải center khi hover có hiệu ứng nhấc lên nhẹ */
+.voucher-item.visible:not(.center):hover .voucher-inner {
+  transform: translateY(-5px) scale(1.03);
+}
+
+/* Chỉ báo pagination */
+.voucher-pagination {
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 20px;
+}
+
+.pagination-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #c8b6a6; /* secondary.medium */
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  margin: 0 3px;
+}
+
+.pagination-dot.active {
+  background-color: #91775e; /* primary.DEFAULT */
+  transform: scale(1.3);
+}
+
+/* Hiển thị chỉ báo số trang */
+.voucher-page-counter {
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #675746; /* primary.dark */
+  background: #f1dec9; /* secondary.DEFAULT */
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+/* Style cho nội dung slide */
+.voucher-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.voucher-title {
+  margin: 0 0 5px;
+  font-size: 16px;
+  color: #574a3a; /* primary.deepest */
+  font-weight: bold;
+}
+
+.voucher-price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #91775e; /* primary.DEFAULT */
+  margin: 5px 0;
+}
+
+.voucher-description {
+  margin: 5px 0;
+  font-size: 12px;
+  color: #6b7280; /* neutral.gray */
+}
+
+.voucher-code {
+  background: #faf5f0; /* background.DEFAULT */
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px dashed #a4907c; /* secondary.light */
+  font-family: monospace;
+  font-size: 12px;
+  color: #574a3a; /* primary.deepest */
+  margin-top: 8px;
+}
+
+.voucher-expiry {
+  font-size: 11px;
+  color: #6b7280; /* neutral.gray */
+  margin-top: 5px;
+}
+
+/* Chỉnh cho hiệu ứng mượt mà hơn */
+.voucher-item.center .voucher-inner {
+  box-shadow: 0 8px 30px rgba(87, 74, 58, 0.2); /* primary.deepest with opacity */
+  border-color: #675746; /* primary.dark */
+}
+
+/* Thêm hiệu ứng đổ bóng trên đường cong */
+.voucher-curved-slider::after {
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 20px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(87, 74, 58, 0.1) 0%,
+    rgba(87, 74, 58, 0) 80%
+  ); /* primary.deepest with opacity */
+  border-radius: 50%;
+  z-index: -1;
+}
+
+/* Tạo hiệu ứng đường cong với phần tử giả */
+.voucher-curved-slider::before {
+  content: "";
+  position: absolute;
+  width: 90%;
+  height: 50px;
+  bottom: 20px;
+  left: 5%;
+  border-radius: 50%;
+  box-shadow: 0 0 20px 5px rgba(145, 119, 94, 0.05); /* primary.DEFAULT with opacity */
+  z-index: -1;
+}
+
+/* Thêm hiệu ứng lướt qua mượt mà */
+@keyframes floatAnimation {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.voucher-item.center:hover .voucher-inner {
+  animation: floatAnimation 2s ease-in-out infinite;
+}
+
+/* Hiệu ứng đổi màu nhẹ khi hover */
+.voucher-item.clickable:hover .voucher-inner {
+  background: linear-gradient(
+    135deg,
+    #fffaf3 0%,
+    #f1dec9 100%
+  ); /* background.light to secondary.DEFAULT */
+}
+
+/* Thêm hiệu ứng xoay khi nhấp chuột */
+@keyframes pulseClick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.voucher-item.clickable:active .voucher-inner {
+  animation: pulseClick 0.3s forwards;
+}
+
+/* Hiệu ứng phóng to cho item đang active */
+.voucher-item.center .voucher-inner {
+  transform: scale(1.05);
+  z-index: 20;
+}
+
+/* Tối ưu hiệu ứng hover trên thiết bị di động */
+@media (hover: hover) {
+  .voucher-item.visible:hover .voucher-inner {
+    box-shadow: 0 8px 25px rgba(145, 119, 94, 0.3); /* primary.DEFAULT with opacity */
+    border-color: #91775e; /* primary.DEFAULT */
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .voucher-item {
+    width: 250px;
+    height: 150px;
+  }
+
+  .voucher-price {
+    font-size: 20px;
+  }
+
+  .click-indicator {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .voucher-slider-container {
+    height: 300px;
+  }
+
+  .voucher-slider-wrapper {
+    width: 70%;
+  }
+
+  .voucher-item {
+    width: 220px;
+    height: 140px;
+  }
+
+  .voucher-nav-button {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .voucher-title {
+    font-size: 14px;
+  }
+
+  .voucher-price {
+    font-size: 18px;
+  }
+
+  .voucher-description {
+    font-size: 11px;
+  }
+
+  .voucher-code {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .click-indicator {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .voucher-slider-container {
+    height: 250px;
+  }
+
+  .voucher-item {
+    width: 200px;
+    height: 130px;
+  }
+
+  .voucher-price {
+    font-size: 16px;
+  }
+
+  .voucher-description {
+    font-size: 10px;
+  }
+
+  .voucher-code {
+    margin-top: 5px;
+  }
+
+  .voucher-expiry {
+    font-size: 9px;
+  }
+
+  .voucher-nav-button {
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+  }
+
+  .pagination-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .click-indicator {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+}
+
+/* Cải thiện thiết kế với các yếu tố thêm vào */
+.voucher-inner {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Thêm hiệu ứng trang trí góc cho voucher */
+.voucher-inner::before,
+.voucher-inner::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #faf5f0; /* background.DEFAULT */
+  z-index: 1;
+}
+
+.voucher-inner::before {
+  top: -10px;
+  left: -10px;
+  border-radius: 0 0 20px 0;
+  border-right: 1px dashed #a4907c; /* secondary.light */
+  border-bottom: 1px dashed #a4907c; /* secondary.light */
+}
+
+.voucher-inner::after {
+  bottom: -10px;
+  right: -10px;
+  border-radius: 20px 0 0 0;
+  border-left: 1px dashed #a4907c; /* secondary.light */
+  border-top: 1px dashed #a4907c; /* secondary.light */
+}
+
+/* Thêm ribbon cho voucher */
+.voucher-ribbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  z-index: 3;
+}
+
+.voucher-ribbon-text {
+  position: absolute;
+  display: block;
+  width: 120px;
+  padding: 5px 0;
+  background-color: #675746; /* primary.dark */
+  color: #ffffff; /* neutral.DEFAULT */
+  text-align: center;
+  font-size: 10px;
+  font-weight: bold;
+  transform: rotate(45deg);
+  right: -30px;
+  top: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Thêm line pattern để tạo cảm giác texture */
+.voucher-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 5px,
+    rgba(145, 119, 94, 0.03) 5px,
+    /* primary.DEFAULT with low opacity */ rgba(145, 119, 94, 0.03) 10px
+      /* primary.DEFAULT with low opacity */
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Thêm style cho content để nổi lên trên pattern */
+.voucher-content {
+  position: relative;
+  z-index: 2;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.7); /* neutral.DEFAULT with opacity */
+  border-radius: 8px;
+  width: 90%;
+}
+
+/* Thêm shine effect khi hover */
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.voucher-item.center:hover .voucher-inner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shine 1.5s infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Thêm icon cho nút click */
+.voucher-item.clickable .voucher-click-overlay .click-indicator::before {
+  content: "✓";
+  margin-right: 5px;
+}

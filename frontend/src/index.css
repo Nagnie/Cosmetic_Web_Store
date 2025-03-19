@@ -32,9 +32,15 @@
   }
 }
 
-* {
-  box-sizing: border-box;
+@layer base {
+  .reset-all * {
+    all: revert;
+  }
 }
+
+/* * {
+  box-sizing: border-box;
+} */
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -82,7 +88,7 @@ button {
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto #F1DEC9;
+  outline: 4px auto #f1dec9;
 }
 
 @media (prefers-color-scheme: light) {
