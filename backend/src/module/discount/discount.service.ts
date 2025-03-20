@@ -22,11 +22,13 @@ export class DiscountService {
         }
       });
 
-      if (existingDiscount) {
+      if (!existingDiscount) {
         throw new InternalServerErrorException("Discount has existed");
       }
 
-      return await this.discountRepository.save(createDiscountDto);
+      const newDiscount = await this.discountRepository.save(createDiscountDto);
+
+      return new ResponseDto(HttpStatus.CREATED, "Successfully", newDiscount);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -59,16 +61,16 @@ export class DiscountService {
   }
 
   async findOne(id: number, code: string) {
+    const whereClause = id ? {id} : {code};
 
     const discount = await this.discountRepository.findOne({ 
       where: [
-        {id},
-        {code}
+        whereClause
       ]
     });
 
     if (!discount) {
-      throw new HttpException(`Discount not found for id: ${id}`, HttpStatus.NOT_FOUND);
+      throw new HttpException(`Discount not found for id: ${id}`, HttpStatus.BAD_REQUEST);
     }
 
     return new ResponseDto(HttpStatus.OK, "Successfully", discount);
@@ -82,15 +84,27 @@ export class DiscountService {
     });
 
     if (!existingDiscount) {
-      throw new HttpException("Discount has not existed", HttpStatus.NOT_FOUND);
+      throw new HttpException("Discount has not existed", HttpStatus.BAD_REQUEST);
     }
 
-    const newDiscount = await this.discountRepository.save(updateDiscountDto);
+    const newDiscount = await this.discountRepository.update(id, updateDiscountDto);
 
-    return new ResponseDto(HttpStatus.OK, "Successfully", newDiscount);
+    return new ResponseDto(HttpStatus.OK, "Successfully", null);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} discount`;
+  async remove(id: number) {
+    const existingDiscount = await this.discountRepository.findOne({
+      where: {
+        id
+      }
+    });
+
+    if (!existingDiscount) {
+      throw new HttpException("Discount has not existed", HttpStatus.BAD_REQUEST);
+    }
+
+    await this.discountRepository.delete(id);
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", null);
   }
 }

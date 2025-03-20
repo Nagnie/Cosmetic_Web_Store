@@ -6,7 +6,7 @@ export class Discount {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({default: "NOCODE"})
+    @Column({default: ""})
     code: string;
 
     @Column()
