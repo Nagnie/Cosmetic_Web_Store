@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { DNA } from 'react-loader-spinner';
+import { RingLoader } from 'react-spinners';
 import brandsApi from "@apis/brandsApi.js";
 
 const Brand = () => {
@@ -250,14 +250,7 @@ const Brand = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-70">
-                        <DNA
-                            visible={true}
-                            height="100"
-                            width="100"
-                            ariaLabel="dna-loading"
-                            wrapperStyle={{}}
-                            wrapperClass="dna-wrapper"
-                        />
+                        <RingLoader color="#ffa6ae" />
                     </div>
                 )}
 

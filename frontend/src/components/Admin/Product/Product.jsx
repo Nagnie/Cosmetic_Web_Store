@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Edit, Trash2, Search, X, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Circles } from "react-loader-spinner";
+import { MoonLoader } from "react-spinners";
 import productsApi from "@apis/productsApi.js";
 import brandsApi from "@apis/brandsApi.js";
 import subcategoriesApi from "@apis/subcategoriesApi.js";
@@ -222,15 +222,7 @@ const Product = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-80">
-                        <Circles
-                            height="70"
-                            width="70"
-                            color="#c42e57"
-                            ariaLabel="circles-loading"
-                            wrapperStyle={{}}
-                            wrapperClass=""
-                            visible={true}
-                        />
+                        <MoonLoader color={"#c42e57"}  />
                     </div>
                 )}
 

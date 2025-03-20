@@ -9,7 +9,7 @@ import { useCartStore } from "@components/Cart";
 import { useSearchStore } from "./ZustandSearchStore";
 import { Link } from "react-router-dom";
 import categoriesApi from "@apis/categoriesApi.js";
-import { Hearts } from "react-loader-spinner";
+import { PropagateLoader } from "react-spinners";
 
 const Header = () => {
   const scrollDirection = useScrollDirection();
@@ -152,64 +152,52 @@ const Header = () => {
         </span>
       </header>
       <nav
-        className="relative flex items-center justify-center py-1 text-start shadow-md"
-        style={{ backgroundColor: "#f6eadc" }}
+          className="relative flex items-center justify-center py-1 text-start shadow-md"
+          style={{ backgroundColor: "#f6eadc" }}
       >
-        {loading ? (
-          <Hearts
-            height="40"
-            width="40"
-            color="#91775E"
-            ariaLabel="hearts-loading"
-            wrapperStyle={{}}
-            wrapperClass=""
-            visible={true}
-          />
-        ) : (
-          formattedCategories.map((category, index) => (
+        {formattedCategories.map((category, index) => (
             <div
-              key={category.cat_id}
-              className="category relative mx-4"
-              onMouseEnter={() => setActiveCategory(index)}
-              onMouseLeave={() => setActiveCategory(null)}
+                key={category.cat_id}
+                className="category relative mx-4"
+                onMouseEnter={() => setActiveCategory(index)}
+                onMouseLeave={() => setActiveCategory(null)}
             >
               <Link
-                to={`/all_products?category=${category.cat_name}`}
-                className="flex cursor-pointer items-center py-2 transition-colors duration-300 hover:text-orange-800"
+                  to={`/all_products?category=${category.cat_name}`}
+                  className="flex cursor-pointer items-center py-2 transition-colors duration-300 hover:text-orange-800"
               >
                 {category.icon}
                 {category.cat_name}
               </Link>
 
               <div
-                className={`dropdown-menu absolute top-6.5 z-50 mt-5 flex w-full min-w-max origin-top bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${activeCategory === index ? "visible scale-y-100 opacity-100" : "invisible scale-y-0 opacity-0"}`}
+                  className={`dropdown-menu absolute top-6.5 z-50 mt-5 flex w-full min-w-max origin-top bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${activeCategory === index ? "visible scale-y-100 opacity-100" : "invisible scale-y-0 opacity-0"}`}
               >
                 {category.menu.map((section, idx) => (
-                  <div
-                    key={idx}
-                    className="dropdown-section min-w-64"
-                    style={{ color: "#41392f" }}
-                  >
-                    <ul>
-                      {section.items.map((item) => (
-                        <li
-                          key={item.id_subcat}
-                          className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
-                        >
-                          <Link
-                            to={`/all_products?category=${category.cat_name}&subcategory=${item.scat_name}`}
-                          >
-                            {item.scat_name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                    <div
+                        key={idx}
+                        className="dropdown-section min-w-64"
+                        style={{ color: "#41392f" }}
+                    >
+                      <ul>
+                        {section.items.map((item) => (
+                            <li
+                                key={item.id_subcat}
+                                className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
+                            >
+                              <Link
+                                  to={`/all_products?category=${category.cat_name}&subcategory=${item.scat_name}`}
+                              >
+                                {item.scat_name}
+                              </Link>
+                            </li>
+                        ))}
+                      </ul>
+                    </div>
                 ))}
               </div>
             </div>
-          ))
-        )}
+        ))}
       </nav>
     </div>
   );

@@ -5,7 +5,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation"
-import {RotatingLines} from "react-loader-spinner";
+import { HashLoader } from "react-spinners";
 
 const ProductInfo = () => {
     const { id } = useParams();
@@ -63,7 +63,7 @@ const ProductInfo = () => {
     if (loading) {
         return (
             <div className={"container pt-30 mx-auto"}>
-                <RotatingLines
+                <HashLoader
                     strokeColor={"#D14D72"}
                     visible={true}
                     height="96"

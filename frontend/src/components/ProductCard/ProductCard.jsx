@@ -61,7 +61,7 @@ const ProductCard = ({ product }) => {
       >
         {/* Product status badge */}
         <div
-            className={`absolute top-8 right-0 py-1 px-3 rounded font-semibold ${
+            className={`absolute top-8 right-0 shadow py-1 px-3 rounded font-semibold ${
                 product.status ? "bg-yellow-100 text-yellow-800" : "bg-teal-100 text-teal-800"
             }`}
         >
