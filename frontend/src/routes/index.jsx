@@ -12,6 +12,7 @@ import PaymentSuccess from "@pages/PaymentSuccess/PaymentSuccess.jsx";
 import AllBrands from "@pages/AllBrand/AllBrands.jsx";
 import ProductEdit from "@components/Admin/Product/ProductEdit.jsx";
 import ProductInfo from "@components/Admin/Product/ProductInfo.jsx";
+import ComboProduct from "@pages/ComboProduct/ComboProduct.jsx";
 
 const PublicRoutes = [
   {
@@ -70,6 +71,11 @@ const PublicRoutes = [
   {
     path: "/brands",
     component: AllBrands,
+    layout: GuestLayout,
+  },
+  {
+    path: "/combo",
+    component: ComboProduct,
     layout: GuestLayout,
   }
 ];

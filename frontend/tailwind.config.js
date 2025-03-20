@@ -9,6 +9,7 @@ export default {
           light: "#C8B6A6", // Lighter brown from "Why Choose Us" section
           dark: "#675746", // Darker brown for buttons and accents
           deepest: "#574A3A", // Very deep brown for text and headings
+          medium: "#8d7053",
         },
         secondary: {
           DEFAULT: "#F1DEC9", // Soft cream tone from "Why Choose Us" section
