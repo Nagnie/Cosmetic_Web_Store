@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import productsApi from '@apis/productsApi';
+import { Plus, Minus } from 'lucide-react'
 
 const ProductEdit = () => {
     const { id } = useParams();
@@ -172,7 +173,7 @@ const ProductEdit = () => {
                 <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
                     Product not found
                 </div>
-                <Link to="/products" className="mt-4 inline-block text-blue-600 hover:underline">
+                <Link to="/admin" className="mt-4 inline-block text-blue-600 hover:underline">
                     Back to Products
                 </Link>
             </div>
@@ -216,7 +217,7 @@ const ProductEdit = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Product Name */}
                             <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block font-medium text-black mb-1">
                                     Product Name <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -231,7 +232,7 @@ const ProductEdit = () => {
 
                             {/* Price */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block font-medium text-black mb-1">
                                     Price (VND) <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -246,7 +247,7 @@ const ProductEdit = () => {
 
                             {/* Status */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block font-medium text-black mb-1">
                                     Status <span className="text-red-500">*</span>
                                 </label>
                                 <select
@@ -263,7 +264,7 @@ const ProductEdit = () => {
 
                             {/* Subcategory ID */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block font-medium text-black mb-1">
                                     Subcategory ID <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -278,7 +279,7 @@ const ProductEdit = () => {
 
                             {/* Brand ID */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block font-medium text-black mb-1">
                                     Brand ID <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -293,7 +294,7 @@ const ProductEdit = () => {
 
                             {/* Image URLs */}
                             <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block font-medium text-black mb-1">
                                     Image URLs
                                 </label>
                                 {formData.images.map((url, index) => (
@@ -311,17 +312,17 @@ const ProductEdit = () => {
                                     <button
                                         type="button"
                                         onClick={() => handleArrayAction('images', 'add')}
-                                        className="px-2 py-1 bg-green-500 text-white rounded-md text-sm"
+                                        className="p-2 flex bg-teal-600 text-white rounded-full"
                                     >
-                                        + Add Image URL
+                                        <Plus size={22} />
                                     </button>
                                     {formData.images.length > 1 && (
                                         <button
                                             type="button"
                                             onClick={() => handleArrayAction('images', 'remove')}
-                                            className="px-2 py-1 bg-red-500 text-white rounded-md text-sm"
+                                            className="p-2 flex bg-rose-600 text-white rounded-full"
                                         >
-                                            - Remove Last
+                                            <Minus size={22} />
                                         </button>
                                     )}
                                 </div>
@@ -329,7 +330,7 @@ const ProductEdit = () => {
 
                             {/* Classification */}
                             <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block font-medium text-black mb-1">
                                     Classification Options (sizes, variants, etc.)
                                 </label>
                                 {formData.classification.map((option, index) => (
@@ -347,17 +348,17 @@ const ProductEdit = () => {
                                     <button
                                         type="button"
                                         onClick={() => handleArrayAction('classification', 'add')}
-                                        className="px-2 py-1 bg-green-500 text-white rounded-md text-sm"
+                                        className="p-2 flex bg-teal-600 text-white rounded-full"
                                     >
-                                        + Add Option
+                                        <Plus size={22} />
                                     </button>
                                     {formData.classification.length > 1 && (
                                         <button
                                             type="button"
                                             onClick={() => handleArrayAction('classification', 'remove')}
-                                            className="px-2 py-1 bg-red-500 text-white rounded-md text-sm"
+                                            className="p-2 flex bg-rose-600 text-white rounded-full"
                                         >
-                                            - Remove Last
+                                            <Minus size={22} />
                                         </button>
                                     )}
                                 </div>
@@ -365,7 +366,7 @@ const ProductEdit = () => {
 
                             {/* Description */}
                             <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block font-medium text-black mb-1">
                                     Description
                                 </label>
                                 <textarea
@@ -381,8 +382,8 @@ const ProductEdit = () => {
                         {/* Submit Buttons */}
                         <div className="mt-8 flex items-center justify-end space-x-3">
                             <Link
-                                to={`/products/${id}`}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                to={`/admin/product/${id}`}
+                                className="px-4 py-2 border border-gray-300 rounded-md text-black hover:bg-gray-50"
                             >
                                 Cancel
                             </Link>

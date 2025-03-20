@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Edit, Trash2, Search, X, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Circles } from "react-loader-spinner";
+import { MoonLoader } from "react-spinners";
 import productsApi from "@apis/productsApi.js";
 import brandsApi from "@apis/brandsApi.js";
 import subcategoriesApi from "@apis/subcategoriesApi.js";
@@ -222,15 +222,7 @@ const Product = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-80">
-                        <Circles
-                            height="70"
-                            width="70"
-                            color="#c42e57"
-                            ariaLabel="circles-loading"
-                            wrapperStyle={{}}
-                            wrapperClass=""
-                            visible={true}
-                        />
+                        <MoonLoader color={"#c42e57"}  />
                     </div>
                 )}
 
@@ -293,6 +285,12 @@ const Product = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
+                                                <button
+                                                    onClick={() => handleEdit(product.id_pro)}
+                                                    className="text-blue-600 hover:text-blue-900"
+                                                >
+                                                    <Edit size={18} />
+                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(product.id_pro)}
                                                     className="text-red-600 hover:text-red-900"
