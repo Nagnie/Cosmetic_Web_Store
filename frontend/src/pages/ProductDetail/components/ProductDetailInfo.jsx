@@ -91,17 +91,6 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
           </span>
         </Tag>
       </div>
-      {/* <div className={`!mt-4 ${isShowBottomSheet ? "hidden" : ""}`}>
-        <p>
-          <span className="!font-bold">
-            Colorkey Rose Wild Violet Eau De Parfum
-          </span>{" "}
-          là sự kết hợp hoàn hảo của ba tầng hương tinh tế: mở đầu tươi mới với
-          tinh dầu bạch tùng hương và hạt tiêu hồng, dịu dàng của hoa violet và
-          ấm áp từ gỗ tuyết tùng, gỗ đàn hương, kết thúc quyến rũ với rêu, cây
-          bách, hương thảo. Một mùi hương đầy nữ tính, sâu lắng và khó quên.
-        </p>
-      </div> */}
       {classification.length > 0 && (
         <div className="!mt-4">
           <span className="!font-bold">Phân loại</span>

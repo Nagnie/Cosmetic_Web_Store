@@ -8,7 +8,6 @@ import { DataSource } from 'typeorm';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { ImageModule } from './module/image/image.module';
 import { MinioService } from './minio/minio.service';
@@ -19,6 +18,7 @@ import { CategoryModule } from './module/category/category.module';
 import { SubcategoryModule } from './module/subcategory/subcategory.module';
 import { OrderModule } from './module/order/order.module';
 import { CartModule } from './module/cart/cart.module';
+import { DiscountModule } from './module/discount/discount.module';
 
 
 @Module({
@@ -55,7 +55,8 @@ import { CartModule } from './module/cart/cart.module';
     CategoryModule,
     SubcategoryModule,
     OrderModule,
-    CartModule
+    CartModule,
+    DiscountModule
   ],
   controllers: [AppController],
   providers: [

@@ -19,7 +19,7 @@ export class ProductService {
         @InjectRepository(Product)
         private readonly productRepository: Repository<Product>,
         private readonly dataSource: DataSource
-    ) {}
+    ) { }
 
     async create(createProductDto: CreateProductDto) {
         const { pro_name, price, id_subcat, id_bra, status, img_url, classification, desc } =
@@ -166,7 +166,7 @@ export class ProductService {
             const allItems = await this.dataSource.query(
                 `
         SELECT p.*
-        FROM product p
+        FROM product p 
         JOIN brand b ON p.id_bra = b.id_bra
         WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
       `,
@@ -253,6 +253,49 @@ export class ProductService {
             });
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async getProductBySubcategory(scat_name: string, page: number, limit: number) {
+        const offset = (page - 1) * limit;
+
+        const data = await this.dataSource.query(
+            `
+            SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name,
+            COALESCE((
+            SELECT json_agg(img.link)
+            FROM product_image AS img
+            WHERE img.id_pro = pro.id_pro), '[]'::json
+            ) AS images
+            FROM product AS pro
+            JOIN brand AS bra ON pro.id_bra = bra.id_bra
+            JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
+            WHERE scat.name = $1
+            LIMIT $2 OFFSET $3
+        `,
+            [scat_name, limit, offset]
+        );
+
+        const totalQuery = await this.dataSource.query(
+            `
+            SELECT COUNT(pro.id_pro) AS total_items
+            FROM product AS pro
+            JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat 
+            WHERE scat.name = $1
+        `,
+            [scat_name]
+        );
+        const total_items = Number(totalQuery[0]?.total_items || 0);
+        // console.log('TOTAL ITEMS: ', total_items);
+        const total_pages = Math.ceil(total_items / limit);
+
+        return {
+            message: "All same brand products",
+            page: page,
+            limit: limit,
+            total_pages: total_pages,
+            total_items: total_items,
+            data: data,
         }
     }
 
