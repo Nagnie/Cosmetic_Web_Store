@@ -1,5 +1,6 @@
 import { Brand } from "@/module/brand/entities/brand.entity";
 import { Category } from "@/module/category/entities/category.entity";
+import { Discount } from "@/module/discount/entities/discount.entity";
 import { Order } from "@/module/order/entities/order.entity";
 import { OrderDetail } from "@/module/order/entities/order_detail.entity";
 import { Product } from "@/module/product/entities/product.entity";
@@ -24,6 +25,7 @@ export default new DataSource({
     Category,
     Subcategory,
     Order,
-    OrderDetail
+    OrderDetail,
+    Discount
   ],
 });
