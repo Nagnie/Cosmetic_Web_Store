@@ -72,7 +72,7 @@ export class CartService {
             SELECT * FROM jsonb_to_recordset($1::jsonb) 
             AS x(id_pro INT, id_class INT, quantity INT)
         )
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, class.id_class AS id_class, class.name AS class_name, (ci.quantity * pro.price) AS pro_price, ci.quantity AS quantity,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, class.id_class AS id_class, class.name AS class_name, pro.price AS pro_price, ci.quantity AS quantity,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
