@@ -168,8 +168,7 @@ const ProductModal = ({
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
                             >
                                 <option value="Available">Available</option>
-                                <option value="Out of Stock">Out of Stock</option>
-                                <option value="Discontinued">Discontinued</option>
+                                <option value="Out of Stock">Ordering</option>
                             </select>
                         </div>
 

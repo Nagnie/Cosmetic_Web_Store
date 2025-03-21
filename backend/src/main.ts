@@ -15,8 +15,9 @@ import { createClient } from "redis";
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: "http://localhost",
             methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+            allowedHeaders: 'Content-Type, Accept, Authorization, credentials',
             credentials: true,
         },
     });

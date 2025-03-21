@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { MutatingDots } from 'react-loader-spinner';
+import { BeatLoader } from 'react-spinners';
 import categoriesApi from "@apis/categoriesApi.js";
 
 const CategoryTable = () => {
@@ -245,17 +245,7 @@ const CategoryTable = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-80">
-                        <MutatingDots
-                            visible={true}
-                            height="80"
-                            width="80"
-                            color="#c42e57"
-                            secondaryColor="#D14D72"
-                            radius="12.5"
-                            ariaLabel="mutating-dots-loading"
-                            wrapperStyle={{}}
-                            wrapperClass=""
-                        />
+                        <BeatLoader color={"#c42e57"} />
                     </div>
                 )}
 

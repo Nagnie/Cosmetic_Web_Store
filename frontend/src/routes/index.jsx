@@ -10,8 +10,9 @@ import CartPage from "@pages/Cart/CartPage.jsx";
 import CheckoutPage from "@pages/Checkout/CheckoutPage.jsx";
 import PaymentSuccess from "@pages/PaymentSuccess/PaymentSuccess.jsx";
 import AllBrands from "@pages/AllBrand/AllBrands.jsx";
-
-import ProtectedRoute from "@components/ProtectedRoute.jsx";
+import ProductEdit from "@components/Admin/Product/ProductEdit.jsx";
+import ProductInfo from "@components/Admin/Product/ProductInfo.jsx";
+import ComboProduct from "@pages/ComboProduct/ComboProduct.jsx";
 
 const PublicRoutes = [
   {
@@ -51,6 +52,18 @@ const PublicRoutes = [
     protected: true,
   },
   {
+    path: "/admin/product/:id",
+    component: ProductInfo,
+    layout: AdminLayout,
+    protected: true,
+  },
+  {
+    path: "/admin/product/:id/update",
+    component: ProductEdit,
+    layout: AdminLayout,
+    protected: true,
+  },
+  {
     path: "/payment-confirmation",
     component: PaymentSuccess,
     layout: GuestLayout,
@@ -58,6 +71,11 @@ const PublicRoutes = [
   {
     path: "/brands",
     component: AllBrands,
+    layout: GuestLayout,
+  },
+  {
+    path: "/combo",
+    component: ComboProduct,
     layout: GuestLayout,
   }
 ];

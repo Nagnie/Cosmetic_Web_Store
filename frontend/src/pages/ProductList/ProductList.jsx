@@ -48,8 +48,7 @@ const ProductListingPage = () => {
   return (
     <div className="container mx-auto mt-40 mb-20 py-8">
       <h1
-        className="mb-10 text-center text-3xl font-bold"
-        style={{ color: "#911f3f" }}
+        className="mb-10 text-center text-3xl font-bold text-primary-deepest"
       >
         Danh Sách Sản Phẩm
       </h1>

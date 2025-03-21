@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { MutatingDots } from 'react-loader-spinner';
+import { BeatLoader } from 'react-spinners';
 import subcategoriesApi from "@apis/subcategoriesApi.js";
+import categoriesApi from "@apis/categoriesApi.js";
 
 const SubCategoryTable = () => {
     const [subcategories, setSubcategories] = useState([]);
@@ -9,7 +10,7 @@ const SubCategoryTable = () => {
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
     const [actionMessage, setActionMessage] = useState({ text: '', type: '' });
-
+    const [categories, setCategories] = useState([]);
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -45,6 +46,25 @@ const SubCategoryTable = () => {
         }
     };
 
+    const fetchCategories = async () => {
+        try {
+            setLoading(true);
+            const response = await categoriesApi.getCategories({ page, limit });
+
+            if (response.status === 200) {
+                setCategories(response.data.data);
+                setTotalPages(response.data.total_pages);
+            } else {
+                throw new Error(response.data.message || 'Failed to fetch categories');
+            }
+        } catch (err) {
+            setError(err.message);
+            console.error('Error fetching Categories:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Show action message
     const showActionMessage = (text, type) => {
         setActionMessage({ text, type });
@@ -57,6 +77,7 @@ const SubCategoryTable = () => {
     // Load data on component mount and when page changes
     useEffect(() => {
         fetchSubcategories();
+        // fetchCategories();
     }, [page]);
 
     // Handle form input changes
@@ -69,10 +90,9 @@ const SubCategoryTable = () => {
         });
     };
 
-
     // Filter Subcategories based on search term
     const filteredSubcategories = subcategories.filter(subcategory =>
-        subcategory.scat_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        subcategory.subcat_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subcategory.cat_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -81,7 +101,7 @@ const SubCategoryTable = () => {
         try {
             setActionLoading(true);
             const response = await subcategoriesApi.createSubcategory({
-                subcat_name: subcategoryData.scat_name, // Sửa "scat_name" -> "subcat_name"
+                subcat_name: subcategoryData.subcat_name, // Sửa "subcat_name" -> "subcat_name"
                 id_cat: Number(subcategoryData.id_cat)  // Đảm bảo id_cat là số
             });
 
@@ -105,6 +125,8 @@ const SubCategoryTable = () => {
     const updateSubcategory = async (id, subcategoryData) => {
         try {
             setActionLoading(true);
+
+            console.log(subcategoryData);
             const response = await subcategoriesApi.updateSubcategoryDetail(id, subcategoryData);
 
             if (response.status !== 200) {
@@ -175,7 +197,7 @@ const SubCategoryTable = () => {
     const handleEdit = (subcategory) => {
         setCurrentSubcategory(subcategory);
         setNewSubcategory({
-            scat_name: subcategory.scat_name,
+            subcat_name: subcategory.subcat_name,
             id_cat: subcategory.id_cat  // Keep category ID but won't use it when updating
         });
         setIsEditing(true);
@@ -195,7 +217,7 @@ const SubCategoryTable = () => {
     // Reset form
     const resetForm = () => {
         setNewSubcategory({
-            scat_name: '',
+            subcat_name: '',
             id_cat: ''
         });
         setCurrentSubcategory(null);
@@ -257,17 +279,7 @@ const SubCategoryTable = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-80">
-                        <MutatingDots
-                            visible={true}
-                            height="80"
-                            width="80"
-                            color="#c42e57"
-                            secondaryColor="#D14D72"
-                            radius="12.5"
-                            ariaLabel="mutating-dots-loading"
-                            wrapperStyle={{}}
-                            wrapperClass=""
-                        />
+                        <BeatLoader color={"#c42e57"} />
                     </div>
                 )}
 
@@ -301,7 +313,7 @@ const SubCategoryTable = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="font-medium text-gray-900">{subcategory.scat_name}</div>
+                                                <div className="font-medium text-gray-900">{subcategory.subcat_name}</div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -402,8 +414,8 @@ const SubCategoryTable = () => {
                                         <label className="block font-medium text-gray-700 mb-3">Subcategory Name</label>
                                         <input
                                             type="text"
-                                            name="scat_name"
-                                            value={newSubcategory.scat_name}
+                                            name="subcat_name"
+                                            value={newSubcategory.subcat_name}
                                             onChange={handleInputChange}
                                             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
                                             required
@@ -412,6 +424,21 @@ const SubCategoryTable = () => {
                                     </div>
                                     <div>
                                         <label className="block font-medium text-gray-700 mb-3">Category</label>
+                                        {/*<select*/}
+                                        {/*    name="id_cat"*/}
+                                        {/*    value={newSubcategory.id_cat}*/}
+                                        {/*    onChange={handleInputChange}*/}
+                                        {/*    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"*/}
+                                        {/*    required*/}
+                                        {/*    disabled={actionLoading}*/}
+                                        {/*>*/}
+                                        {/*    <option value="">Select a category</option>*/}
+                                        {/*    {categories.map(category => (*/}
+                                        {/*        <option key={category.id_cat} value={category.id_cat}>*/}
+                                        {/*            {category.cat_name}*/}
+                                        {/*        </option>*/}
+                                        {/*    ))}*/}
+                                        {/*</select>*/}
                                         <input
                                             type="number"
                                             name="id_cat"

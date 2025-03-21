@@ -12,6 +12,7 @@ import BrandCard from "@components/BrandCard/BrandCard.jsx";
 import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
 import VoucherCurvedSlider from "./components/VoucherCurvedSlider.jsx";
 import DiscountCard from "./components/DiscountCard.jsx";
+import ComboProduct from "@pages/ComboProduct/ComboProduct.jsx";
 
 const VOUCHER = [
   {
@@ -209,6 +210,10 @@ const Homepage = () => {
         </div>
       </div>
 
+      <section className="mt-10">
+        <ComboProduct />
+      </section>
+
       {/* Best Sellers Section */}
       <div className="px-10 py-10">
         <h2 className="text-center text-3xl font-semibold">Best Sellers</h2>
@@ -232,7 +237,7 @@ const Homepage = () => {
           style={{ backgroundColor: "#675746" }}
           onClick={() => navigate("/all_products")}
         >
-          View all products
+          Xem tất cả sản phẩm
         </button>
       </div>
     </div>

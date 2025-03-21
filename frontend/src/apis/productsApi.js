@@ -30,7 +30,7 @@ const productsApi = {
     });
   },
 
-  getProductAdmin: async ({ page = 1, limit = 9 }) => {
+  getProductAdmin: async ({ page, limit}) => {
     return axios.get(`/product`, {
       params: {
         page,
@@ -39,8 +39,8 @@ const productsApi = {
     });
   },
 
-  getProductDetail: async (id, { signal }) => {
-    return axios.get(`/product/${id}`, { signal });
+  getProductDetail: async (id) => {
+    return axios.get(`/product/${id}`);
   },
 
   getProductsByBrand: (
@@ -137,7 +137,7 @@ const productsApi = {
   },
 
   updateProduct: async (productId, productData) => {
-    return axios.put(`/product/update/${productId}`, productData);
+    return axios.patch(`/product/update/${productId}`, productData);
   },
 };
 
