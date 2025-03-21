@@ -25,7 +25,8 @@ CREATE TABLE brand (
 CREATE TABLE product (
     id_pro SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    price DECIMAL NOT NULL,
+    origin_price DECIMAL,
     description TEXT,
     status VARCHAR(50) NOT NULL,
     id_subcat INT,
@@ -38,6 +39,29 @@ CREATE TABLE product_image (
     id_img SERIAL PRIMARY KEY,
     id_pro INT,
     link TEXT NOT NULL,
+    FOREIGN KEY (id_pro) REFERENCES product(id_pro) ON DELETE CASCADE
+);
+
+CREATE TABLE combo (
+    id_combo SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL NOT NULL,
+    origin_price DECIMAL,
+    description TEXT,
+    status VARCHAR(50) NOT NULL,
+);
+
+CREATE TABLE combo_image (
+    id_img SERIAL PRIMARY KEY,
+    id_combo INT NOT NULL,
+    link TEXT NOT NULL,
+    FOREIGN KEY (id_combo) REFERENCES combo(id_combo) ON DELETE CASCADE
+);
+
+CREATE TABLE combo_detail (
+    id_comde SERIAL PRIMARY KEY,
+    id_combo INT NOT NULL,
+    id_pro INT NOT NULL,
     FOREIGN KEY (id_pro) REFERENCES product(id_pro) ON DELETE CASCADE
 );
 
