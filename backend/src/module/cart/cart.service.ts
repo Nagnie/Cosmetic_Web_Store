@@ -94,6 +94,13 @@ export class CartService {
       total_prices += item.pro_price * item.quantity;
     }
 
+    if (!req.session.total) {
+      req.session.total = {}; // Khởi tạo object thay vì mảng
+    }
+
+    req.session.total.total_prices = total_prices; // Gán key-value đúng cách
+    console.log(req.session.total);
+
     return {
       message: "Products in cart",
       page: page,
