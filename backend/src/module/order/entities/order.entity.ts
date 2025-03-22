@@ -10,6 +10,9 @@ export class Order {
     @Column({name: "email"})
     email: string;
 
+    @Column()
+    checked: boolean;
+
     @Column({name: "customer"})
     customer: string;
 
