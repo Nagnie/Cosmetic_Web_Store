@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { BeatLoader } from 'react-spinners';
+import { RotateLoader } from 'react-spinners';
 import subcategoriesApi from "@apis/subcategoriesApi.js";
 import categoriesApi from "@apis/categoriesApi.js";
 
@@ -279,7 +279,7 @@ const SubCategoryTable = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-80">
-                        <BeatLoader color={"#c42e57"} />
+                        <RotateLoader color={"#c42e57"} />
                     </div>
                 )}
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { RingLoader } from 'react-spinners';
+import { MoonLoader } from 'react-spinners';
 import brandsApi from "@apis/brandsApi.js";
 
 const Brand = () => {
@@ -250,7 +250,7 @@ const Brand = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-70">
-                        <RingLoader color="#ffa6ae" />
+                        <MoonLoader color="#ffa6ae" />
                     </div>
                 )}
 

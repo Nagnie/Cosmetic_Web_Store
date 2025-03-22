@@ -11,6 +11,7 @@ import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx
 import BrandCard from "@components/BrandCard/BrandCard.jsx";
 import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
 import ComboProductCard from "@components/ComboProductCard/ComboProductCard.jsx";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -24,17 +25,77 @@ const Homepage = () => {
   // Lấy 5 brands đầu tiên
   const topBrands = brands.slice(0, 5);
 
+  // Animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const scaleIn = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
+  // Loader animation
+  const loaderVariants = {
+    animate: {
+      scale: [1, 1.2, 1],
+      opacity: [0.5, 1, 0.5],
+      transition: {
+        duration: 1.5,
+        repeat: Infinity,
+        repeatType: "loop"
+      }
+    }
+  };
+
   return (
     <div className="font-sans">
       <Header />
 
+
       {/* Swiper Section */}
-      <section className={"mx-auto mt-50 mb-20 max-w-6xl pt-10"}>
+      <motion.section
+          className={"mx-auto mt-50 mb-20 max-w-6xl pt-10"}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          transition={{ duration: 0.5 }}
+      >
         <div className="my-5 text-center" style={{ color: "#574a3a" }}>
-          <h1 className="mb-2 text-5xl font-bold">Welcome to Nâu Cosmetic</h1>
-          <p className="text-2xl">Mỹ phẩm, thực phẩm chức năng, sâm Hàn Quốc</p>
+          <motion.h1
+              className="mb-2 text-5xl font-bold"
+              variants={fadeInUp}
+              transition={{ delay: 0.5 }}
+          >
+            Welcome to Nâu Cosmetic
+          </motion.h1>
+          <motion.p
+              className="text-2xl"
+              variants={fadeInUp}
+              transition={{ delay: 0.5 }}
+          >
+            Mỹ phẩm, thực phẩm chức năng, sâm Hàn Quốc
+          </motion.p>
         </div>
-      </section>
+      </motion.section>
 
       {/* Brands Section */}
       <section className="mx-auto py-3">
@@ -69,24 +130,43 @@ const Homepage = () => {
       </section>
 
       {/*Why choose us section*/}
-      <section className="mt-10 py-10">
-        <h2 className="mb-8 text-center text-3xl font-bold">Why Choose Us?</h2>
+      <motion.section
+          className="mt-10 py-10"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeInUp}
+          transition={{ duration: 0.7 }}
+      >
+        <motion.h2
+            className="mb-8 text-center text-3xl font-bold"
+            variants={fadeInUp}
+        >
+          Why Choose Us?
+        </motion.h2>
 
-        <div className="mb-10 grid grid-cols-1 gap-10 md:grid-cols-3">
-          <div
-            className="rounded-2xl px-7 py-10 text-center shadow-xl"
-            style={{ backgroundColor: "#F1DEC9" }}
+        <motion.div
+            className="mb-10 grid grid-cols-1 gap-10 md:grid-cols-3"
+            variants={staggerContainer}
+        >
+          <motion.div
+              className="rounded-2xl px-7 py-10 text-center shadow-xl"
+              style={{ backgroundColor: "#F1DEC9" }}
+              variants={scaleIn}
+              whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
           >
             <h3 className="mb-4 text-xl font-semibold">Chất Lượng Chuẩn Hàn</h3>
             <p className="text-gray-600">
               Chúng tôi tuyển chọn mỹ phẩm xách tay chính hãng từ Hàn Quốc, cam
               kết mang đến sản phẩm an toàn, chất lượng cao cho bạn.
             </p>
-          </div>
+          </motion.div>
 
-          <div
-            className="rounded-2xl px-7 py-10 text-center shadow-xl"
-            style={{ backgroundColor: "#e0cdbc" }}
+          <motion.div
+              className="rounded-2xl px-7 py-10 text-center shadow-xl"
+              style={{ backgroundColor: "#e0cdbc" }}
+              variants={scaleIn}
+              whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
           >
             <h3 className="mb-4 text-xl font-semibold">
               Khách Hàng Là Thượng Đế
@@ -95,11 +175,13 @@ const Homepage = () => {
               Chúng tôi luôn lắng nghe và đồng hành cùng bạn, mang đến trải
               nghiệm mua sắm dễ dàng, dịch vụ tận tâm và hỗ trợ nhanh chóng.
             </p>
-          </div>
+          </motion.div>
 
-          <div
-            className="rounded-2xl px-7 py-10 text-center shadow-xl"
-            style={{ backgroundColor: "#cbb7a4" }}
+          <motion.div
+              className="rounded-2xl px-7 py-10 text-center shadow-xl"
+              style={{ backgroundColor: "#cbb7a4" }}
+              variants={scaleIn}
+              whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
           >
             <h3 className="mb-4 text-xl font-semibold">
               Vẻ Đẹp Chuẩn Xu Hướng
@@ -108,9 +190,9 @@ const Homepage = () => {
               Khám phá những sản phẩm hot hit từ Hàn Quốc, kết hợp xu hướng làm
               đẹp hiện đại với sự tinh tế, giúp bạn luôn rạng rỡ và tự tin.
             </p>
-          </div>
-        </div>
-      </section>
+          </motion.div>
+        </motion.div>
+      </motion.section>
 
       <section className="mt-10">
         <ComboProductCard />

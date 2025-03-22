@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {Eye, Search, Trash2, X, Check, Edit2, ChevronLeft, ChevronRight, Save} from "lucide-react";
 import ordersApi from '@apis/ordersApi'; // Adjust the import path as needed
-import { RotateLoader} from "react-spinners";
+import { RotateLoader } from "react-spinners";
 
 const Order = () => {
     const [orders, setOrders] = useState([]);
@@ -42,9 +42,8 @@ const Order = () => {
     const statusOptions = [
         { value: 'not_ordered', label: 'Chưa đặt hàng' },
         { value: 'ordered', label: 'Đã đặt hàng' },
-        { value: 'shipping', label: 'Đang giao' },
-        { value: 'delivered', label: 'Đã giao' },
-        { value: 'cancelled', label: 'Đã hủy' }
+        { value: 'delivering', label: 'Đang giao' },
+        { value: 'delivered', label: 'Đã giao' }
     ];
 
     // Show action message
@@ -132,9 +131,8 @@ const Order = () => {
         const statusMap = {
             'not_ordered': 'Chưa đặt hàng',
             'ordered': 'Đã đặt hàng',
-            'shipping': 'Đang giao',
+            'delivering': 'Đang giao',
             'delivered': 'Đã giao',
-            'cancelled': 'Đã hủy'
         };
         return statusMap[status] || status;
     };
@@ -144,16 +142,14 @@ const Order = () => {
         switch(status) {
             case 'delivered':
                 return 'bg-green-100 text-green-800';
-            case 'shipping':
+            case 'delivering':
                 return 'bg-blue-100 text-blue-800';
             case 'ordered':
                 return 'bg-yellow-100 text-yellow-800';
             case 'not_ordered':
                 return 'bg-orange-100 text-orange-800';
-            case 'cancelled':
-                return 'bg-red-100 text-red-800';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-red-100 text-red-800';
         }
     };
 
@@ -321,7 +317,7 @@ const Order = () => {
                                 <tbody className="divide-y divide-gray-200">
                                 {filterOrders.length > 0 ? (
                                     filterOrders.map(order => (
-                                        <tr key={order.id} className={`hover:bg-gray-50 ${order.checked ? 'bg-green-50' : ''}`}>
+                                        <tr key={order.id} className={`hover:bg-gray-50 ${order.checked ? 'bg-rose-50 hover:bg-rose-100' : ''}`}>
                                             <td className="px-6 py-4">
                                                 <div className="relative inline-block">
                                                     <input
@@ -330,6 +326,18 @@ const Order = () => {
                                                         onChange={() => handleToggleChecked(order.id, order.checked)}
                                                         className="peer appearance-none h-5 w-5 rounded border border-gray-300 checked:bg-rose-400 checked:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all cursor-pointer"
                                                     />
+                                                    <svg
+                                                        className="absolute w-5 h-5 pointer-events-none opacity-0 peer-checked:opacity-100 text-white top-0 left-0"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="3"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
+                                                        <polyline points="6 12 10 16 18 8"></polyline>
+                                                    </svg>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">#{order.id}</td>
@@ -438,7 +446,7 @@ const Order = () => {
                             <div className="p-4">
                                 {loadingDetail ? (
                                     <div className={"my-20"}>
-                                        <RotateLoader color="#c42e57" />
+                                        <RotateLoader color={"#c42e57"} />
                                     </div>
                                 ) : (
                                     <>
@@ -545,7 +553,7 @@ const Order = () => {
                             <div className="border-t p-4 flex justify-end">
                                 <button
                                     onClick={handleCloseView}
-                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                                 >
                                     Đóng
                                 </button>
@@ -559,7 +567,7 @@ const Order = () => {
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
                             <div className="flex justify-between items-center border-b p-4">
-                                <h2 className="text-xl font-bold">Chỉnh sửa trạng thái đơn hàng #{order.id}</h2>
+                                <h2 className="text-xl font-bold">Chỉnh sửa đơn hàng #{order.id}</h2>
                                 <button onClick={handleCloseEdit} className="text-gray-500 hover:text-gray-700">
                                     <X size={24} />
                                 </button>
@@ -567,14 +575,14 @@ const Order = () => {
 
                             <div className="p-6">
                                 <div className="mb-4">
-                                    <label htmlFor="orderStatus" className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="orderStatus" className="block text-left font-medium text-black mb-2">
                                         Trạng thái đơn hàng
                                     </label>
                                     <select
                                         id="orderStatus"
                                         value={editStatus}
                                         onChange={(e) => setEditStatus(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500"
+                                        className="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500"
                                     >
                                         {statusOptions.map(option => (
                                             <option key={option.value} value={option.value}>
@@ -583,31 +591,19 @@ const Order = () => {
                                         ))}
                                     </select>
                                 </div>
-
-                                <div className="flex items-center mb-4">
-                                    <input
-                                        type="checkbox"
-                                        id="orderChecked"
-                                        checked={order.checked}
-                                        onChange={() => setOrder({...order, checked: !order.checked})}
-                                        className="h-4 w-4 text-rose-500 focus:ring-rose-400 border-gray-300 rounded"
-                                    />
-                                    <label htmlFor="orderChecked" className="ml-2 block text-sm text-gray-700">
-                                        Đánh dấu là đã kiểm tra
-                                    </label>
-                                </div>
                             </div>
 
                             <div className="border-t p-4 flex justify-end space-x-3">
                                 <button
                                     onClick={handleCloseEdit}
-                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
                                 >
                                     Hủy
                                 </button>
                                 <button
                                     onClick={handleSaveEdit} disabled={actionLoading}
-                                    className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 flex items-center"
+                                    className="px-4 py-2 text-white rounded flex items-center"
+                                    style={{ background: '#D14D72' }}
                                 >
                                     {actionLoading ? (
                                         <>

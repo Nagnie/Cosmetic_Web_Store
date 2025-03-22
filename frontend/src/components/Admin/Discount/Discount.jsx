@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { RingLoader } from 'react-spinners';
+import { MoonLoader } from 'react-spinners';
 import discountsApi from "@apis/discountsApi.js";
 
 const Discount = () => {
@@ -291,7 +291,7 @@ const Discount = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-70">
-                        <RingLoader color="#ffa6ae" />
+                        <MoonLoader color="#ffa6ae" />
                     </div>
                 )}
 
@@ -480,16 +480,28 @@ const Discount = () => {
                                         </div>
                                         <div>
                                             <label className="block font-medium text-gray-700 mb-2">Status</label>
-                                            <div className="flex items-center mt-2">
+                                            <div className="relative inline-block mt-2">
                                                 <input
                                                     type="checkbox"
                                                     name="isAvailable"
                                                     checked={newDiscount.isAvailable}
                                                     onChange={handleInputChange}
-                                                    className="h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                                                    className="peer appearance-none h-6 w-6 rounded border border-gray-300 checked:bg-rose-400 checked:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-300 transition-all cursor-pointer"
                                                     disabled={actionLoading}
                                                 />
-                                                <label className="ml-2 block text-sm text-gray-900">
+                                                <svg
+                                                    className="absolute w-6 h-6 pointer-events-none opacity-0 peer-checked:opacity-100 text-white top-0 left-0"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="3"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <polyline points="6 12 10 16 18 8"></polyline>
+                                                </svg>
+                                                <label className="ms-2 absolute text-gray-900">
                                                     Active
                                                 </label>
                                             </div>

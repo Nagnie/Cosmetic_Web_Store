@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Product, Category, Brand, Order, Combo, Discount } from '../../components/Admin';
 import './Admin.css';
 import {useNavigate} from "react-router-dom";
+import ChangePasswordModal from "@pages/Admin/ChangePassword.jsx";
 
 const CosmeticAdminPage = () => {
     const [activeTab, setActiveTab] = useState('Product');
     const navigate = useNavigate();
+    const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem("isAdmin"); // Xóa trạng thái đăng nhập
@@ -38,10 +40,16 @@ const CosmeticAdminPage = () => {
                     <h2 className="text-3xl font-bold text-white">Cosmetic Store Admin</h2>
                     <div>
                         <button className={"text-pink-800 px-4 py-1 shadow rounded-3xl"}
-                                style={{ backgroundColor: "#ffe9ef"}}>Đổi mật khẩu
+                                style={{ backgroundColor: "#ffe9ef"}}
+                                onClick={() => setShowChangePasswordModal(true)}
+                        >
+                            Đổi mật khẩu
                         </button>
-                        <button className={"ms-4 text-pink-800 px-4 py-1 shadow rounded-3xl"}
-                                         onClick={handleLogout} style={{ backgroundColor: "#ffe9ef"}}>Đăng xuất
+                        <button
+                            className={"ms-4 text-pink-800 px-4 py-1 shadow rounded-3xl"}
+                            onClick={handleLogout} style={{ backgroundColor: "#ffe9ef"}}
+                        >
+                            Đăng xuất
                         </button>
                     </div>
 
@@ -65,6 +73,11 @@ const CosmeticAdminPage = () => {
             <div className="p-4 bg-white rounded-lg mt-4">
                 {renderComponent()}
             </div>
+            {/* Change Password Modal */}
+            <ChangePasswordModal
+                isOpen={showChangePasswordModal}
+                onClose={() => setShowChangePasswordModal(false)}
+            />
         </div>
     );
 };
