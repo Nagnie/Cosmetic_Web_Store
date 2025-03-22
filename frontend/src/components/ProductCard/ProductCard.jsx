@@ -50,7 +50,7 @@ const ProductCard = ({ product }) => {
   };
 
   // Determine product status
-  const productStatus = product.status ? "Available" : "Ordering";
+  const productStatus = product.status ? "Available" : "Order";
 
   return (
       <Link
@@ -62,10 +62,10 @@ const ProductCard = ({ product }) => {
         {/* Product status badge */}
         <div
             className={`absolute top-8 right-0 shadow py-1 px-3 rounded font-semibold ${
-                product.status ? "bg-yellow-100 text-yellow-800" : "bg-teal-100 text-teal-800"
+                product.status === "Available" ? "bg-yellow-100 text-yellow-800" : "bg-blue-100 text-blue-800"
             }`}
         >
-          {productStatus}
+          { product.status }
         </div>
 
         <img

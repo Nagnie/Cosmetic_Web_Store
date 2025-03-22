@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import productsApi from '@apis/productsApi';
-import { Plus, Minus } from 'lucide-react'
+import {Plus, Minus, Save} from 'lucide-react'
+import {PulseLoader} from "react-spinners";
+
 
 const ProductEdit = () => {
     const { id } = useParams();
@@ -161,8 +163,10 @@ const ProductEdit = () => {
 
     if (loading) {
         return (
-            <div className="container mx-auto px-4 py-8 flex justify-center">
-                <div className="loader">Loading...</div>
+            <div className={"container pt-30 mt-20 mx-auto"}>
+                <PulseLoader
+                    color={"#D14D72"}
+                />
             </div>
         );
     }
@@ -258,7 +262,7 @@ const ProductEdit = () => {
                                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                                 >
                                     <option value="Available">Available</option>
-                                    <option value="Ordering">Ordering</option>
+                                    <option value="Order">Order</option>
                                 </select>
                             </div>
 
@@ -388,13 +392,26 @@ const ProductEdit = () => {
                                 Cancel
                             </Link>
                             <button
-                                type="submit"
+                                type="submit" style={{ background: '#D14D72' }}
                                 disabled={submitting}
-                                className={`px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 ${
+                                className={`px-4 py-2 text-white flex items-center rounded-md hover:bg-pink-700 ${
                                     submitting ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
                             >
-                                {submitting ? 'Saving...' : 'Save Changes'}
+                                {submitting ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Processing...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="inline mr-2" size={16} />
+                                        Update
+                                    </>
+                                )}
                             </button>
                         </div>
                     </form>
