@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { OrderStatus } from "../order_status.enum";
+import { OrderStatus } from "../enum/order_status.enum";
 import { OrderDetail } from "./order_detail.entity";
 
 @Entity({name: "orders"})
@@ -9,6 +9,9 @@ export class Order {
 
     @Column({name: "email"})
     email: string;
+
+    @Column()
+    checked: boolean;
 
     @Column({name: "customer"})
     customer: string;
