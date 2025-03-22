@@ -23,6 +23,7 @@ import { JwtAuthGuard } from "./guard/jwt-auth.guard";
 import { Public } from "@/helpers/decorator/public";
 import { ResponseDto } from "@/helpers/utils";
 import { ApiBody, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ResetpassAuthDto } from "./dto/resetpassword-auth.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -55,5 +56,13 @@ export class AuthController {
     @Public()
     async renewToken(@Param("refreshToken") refreshToken: string) {
         return await this.authService.refreshAccessToken(refreshToken);
+    }
+
+    @Post("change-password")
+    @Public()
+    @ApiOperation({summary: "Change password"})
+    @ApiBody({type: ResetpassAuthDto})
+    async resetPassword(@Body() resetPassDto: ResetpassAuthDto) {
+        return await this.authService.resetPassword(resetPassDto);
     }
 }
