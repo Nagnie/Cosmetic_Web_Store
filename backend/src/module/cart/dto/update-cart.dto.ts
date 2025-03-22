@@ -1,11 +1,11 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { CreateCartDto } from './create-cart.dto';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class UpdateCartDto extends PartialType(CreateCartDto) {
-    @ApiProperty({ example: 1, description: `Product ID` })
-    @IsNotEmpty({ message: `Product ID must not be empty` })
-    @IsNumber({}, { message: `Product ID must be a number` })
+    @ApiProperty({ example: 1, description: `Product or combo ID` })
+    @IsNotEmpty({ message: `Product or combo ID must not be empty` })
+    @IsNumber({}, { message: `Product or combo ID must be a number` })
     id_pro: number;
 
     @ApiProperty({ example: 3, description: `Old classification ID before user update` })
@@ -22,4 +22,9 @@ export class UpdateCartDto extends PartialType(CreateCartDto) {
     @IsNotEmpty({ message: `Quantity must not be empty` })
     @IsNumber({}, { message: `Quantity must be a number` })
     quantity: number;
+
+    @ApiProperty({ example: 'product', description: `Type of item` })
+    @IsNotEmpty({ message: `Type must not be empty` })
+    @IsString({ message: `Item's type must be string` })
+    type: string;
 }
