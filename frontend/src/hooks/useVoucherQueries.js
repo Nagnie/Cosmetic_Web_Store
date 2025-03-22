@@ -65,3 +65,25 @@ export const useVouchers = (
     keepPreviousData: true, // Keep previous data while fetching new data
   });
 };
+
+export const useSearchAndFilterVouchers = (
+  params = {
+    page: 1,
+    limit: 10,
+    code: "",
+    filter: {
+      orderBy: "ASC",
+      sortBy: "id",
+    },
+  },
+) => {
+  return useQuery({
+    queryKey: ["vouchers", params],
+    queryFn: async () => {
+      const { data } = await discountsApi.searchAndFilterDiscounts(params);
+      return data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 phút
+    keepPreviousData: true, // Keep previous data while fetching new data
+  });
+};

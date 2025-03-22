@@ -15,7 +15,8 @@ import PropTypes from "prop-types";
 
 import "./CouponModalContent.css";
 import CustomSpin from "@components/Spin/CustomSpin";
-import { useVouchers } from "@hooks/useVoucherQueries";
+import { useSearchAndFilterVouchers } from "@hooks/useVoucherQueries";
+import { useDebounce } from "@hooks/useDebounce";
 
 const { Text } = Typography;
 
@@ -134,17 +135,10 @@ const CustomEmptyComponent = () => (
 );
 
 const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
-  const [voucherParams, setVoucherParams] = useState({
-    limit: 5,
-    page: 1,
-    orderBy: "ASC",
-    sortBy: "id",
-  });
-
-  const vouchersQuery = useVouchers(voucherParams);
+  const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 500);
 
   const [filteredVouchers, setFilteredVouchers] = useState([]);
-  const [searchText, setSearchText] = useState("");
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 0,
   );
@@ -153,6 +147,28 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
   const [selectedCouponId, setSelectedCouponId] = useState(
     selectedVoucher ? selectedVoucher.id : null,
   );
+
+  const [voucherParams, setVoucherParams] = useState({
+    page: 1,
+    limit: windowWidth < 576 ? 3 : 5,
+    code: "", // Khởi tạo với giá trị rỗng
+    filter: {
+      orderBy: "ASC",
+      sortBy: "id",
+    },
+  });
+
+  // Theo dõi sự thay đổi của debouncedSearchText và cập nhật voucherParams
+  useEffect(() => {
+    // Chỉ cập nhật nếu giá trị debounced thay đổi
+    setVoucherParams((prev) => ({
+      ...prev,
+      code: debouncedSearchText, // Cập nhật giá trị tìm kiếm từ debounced value
+      page: 1, // Reset về trang 1 khi tìm kiếm thay đổi
+    }));
+  }, [debouncedSearchText]);
+
+  const vouchersQuery = useSearchAndFilterVouchers(voucherParams);
 
   // Format vouchers từ API để phù hợp với cấu trúc hiển thị - di chuyển từ component cha
   const formattedVouchers = useMemo(() => {
@@ -249,49 +265,43 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
     }));
   };
 
-  // Search functionality
   const handleSearch = () => {
-    if (searchText.trim() === "") {
-      setFilteredVouchers(formattedVouchers || []);
-      return;
-    }
+    // Thủ công gọi API nếu muốn search ngay lập tức (bỏ qua debounce)
+    setVoucherParams((prev) => ({
+      ...prev,
+      code: searchText.trim(),
+      page: 1,
+    }));
+  };
 
-    const filtered = (formattedVouchers || []).filter(
-      (coupon) =>
-        coupon.code.toLowerCase().includes(searchText.toLowerCase()) ||
-        coupon.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        coupon.description.toLowerCase().includes(searchText.toLowerCase()),
-    );
-
-    setFilteredVouchers(filtered);
+  // Đơn giản hóa xử lý onChange cho Input
+  const handleSearchInputChange = (e) => {
+    setSearchText(e.target.value);
+    // Không cần thêm logic ở đây vì useDebounce sẽ xử lý
   };
 
   const handleClearSearch = () => {
     setSearchText("");
-    setFilteredVouchers(formattedVouchers || []);
+    // Xóa điều kiện tìm kiếm và reset về trang 1
+    setVoucherParams((prev) => ({
+      ...prev,
+      page: 1,
+      code: "",
+    }));
   };
 
   // Xử lý việc chọn mã giảm giá
   const handleCouponSelect = (couponId) => {
-    // Nếu đang chọn mã giảm giá đã được chọn, bỏ chọn nó
     if (selectedCouponId === couponId) {
       setSelectedCouponId(null);
-      // Thông báo cho component cha rằng không có mã nào được chọn
       if (onApplyCoupon) onApplyCoupon(null);
-
-      // Đóng modal nếu có callback onCancel
       if (onCancel) onCancel();
     } else {
-      // Ngược lại, chọn mã giảm giá mới
       setSelectedCouponId(couponId);
-      // Tìm dữ liệu của mã giảm giá được chọn
       const selectedCouponData = formattedVouchers.find(
         (v) => v.id === couponId,
       );
-      // Thông báo cho component cha về mã giảm giá được chọn
       if (onApplyCoupon) onApplyCoupon(selectedCouponData);
-
-      // Đóng modal nếu có callback onCancel
       if (onCancel) onCancel();
     }
   };
@@ -362,7 +372,7 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
             <Input
               placeholder="Tìm kiếm mã giảm giá"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={handleSearchInputChange}
               onPressEnter={handleSearch}
               style={{
                 width: "calc(100% - 90px)",
@@ -388,7 +398,7 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
             <Input
               placeholder="Tìm kiếm mã giảm giá"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={handleSearchInputChange}
               onPressEnter={handleSearch}
               style={{
                 width: "100%",
