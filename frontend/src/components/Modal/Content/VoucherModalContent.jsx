@@ -35,9 +35,9 @@ const VoucherModalContent = ({ item, onCancel }) => {
     <div className="bg-background-DEFAULT">
       {/* Phần header với gradient màu */}
       <div
-        className={`from-primary-dark to-secondary-medium text-neutral-DEFAULT relative mb-4 bg-gradient-to-r p-6 ${isMobile ? "px-4 py-5" : ""}`}
+        className={`from-primary-light to-secondary-light text-primary-deepest relative mb-4 bg-gradient-to-r p-6 ${isMobile ? "px-4 py-5" : ""}`}
       >
-        <div className="bg-secondary-DEFAULT text-primary-deepest absolute top-0 right-0 rotate-12 transform px-4 py-1 font-bold shadow-md">
+        <div className="bg-secondary-medium absolute top-0 right-0 rotate-12 transform px-4 py-1 font-bold text-white shadow-lg">
           {item.ribbonText ?? "30%"}
         </div>
         <h2 className={`${isMobile ? "text-2xl" : "text-3xl"} mb-2 font-bold`}>
@@ -83,7 +83,7 @@ const VoucherModalContent = ({ item, onCancel }) => {
             </div>
             <button
               onClick={copyVoucherCode}
-              className={`${isMobile ? "w-full rounded-b-md" : "rounded-r-md"} bg-primary-DEFAULT hover:bg-primary-dark text-neutral-DEFAULT flex items-center justify-center px-3 py-2 transition-colors`}
+              className={`${isMobile ? "w-full rounded-b-md" : "rounded-r-md"} bg-primary-dark hover:bg-primary-deepest flex items-center justify-center px-3 py-2 text-white transition-colors`}
             >
               <CopyOutlined className="text-xl" />
               <span className="ml-2">Sao chép</span>
@@ -113,14 +113,14 @@ const VoucherModalContent = ({ item, onCancel }) => {
       </div>
 
       {/* Nút sử dụng ngay */}
-      <div className={`mt-6 ${isMobile ? "px-4 pb-4" : "px-6 pb-6"}`}>
+      {/* <div className={`mt-6 ${isMobile ? "px-4 pb-4" : "px-6 pb-6"}`}>
         <button
           onClick={onCancel}
-          className="bg-primary-dark hover:bg-primary-deepest text-neutral-DEFAULT w-full rounded-md py-3 font-semibold transition-colors"
+          className="bg-primary-deepest hover:bg-primary-dark w-full rounded-md py-3 font-semibold text-white transition-colors"
         >
           Sử dụng ngay
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };
