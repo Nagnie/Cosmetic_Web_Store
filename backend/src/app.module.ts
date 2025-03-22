@@ -10,7 +10,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { join } from 'path';
 import { ImageModule } from './module/image/image.module';
-import { MinioService } from './minio/minio.service';
 import { RolesGuard } from './auth/guard/role.guard';
 import { BrandModule } from './module/brand/brand.module';
 import { ProductModule } from './module/product/product.module';
@@ -19,6 +18,7 @@ import { SubcategoryModule } from './module/subcategory/subcategory.module';
 import { OrderModule } from './module/order/order.module';
 import { CartModule } from './module/cart/cart.module';
 import { DiscountModule } from './module/discount/discount.module';
+import { ComboModule } from './module/combo/combo.module';
 
 
 @Module({
@@ -56,7 +56,8 @@ import { DiscountModule } from './module/discount/discount.module';
     SubcategoryModule,
     OrderModule,
     CartModule,
-    DiscountModule
+    DiscountModule,
+    ComboModule,
   ],
   controllers: [AppController],
   providers: [
@@ -69,7 +70,6 @@ import { DiscountModule } from './module/discount/discount.module';
       provide: APP_GUARD,
       useClass: RolesGuard
     },
-    MinioService,
   ],
 })
 export class AppModule implements NestModule {

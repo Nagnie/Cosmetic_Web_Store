@@ -38,7 +38,6 @@
     "@nestjs/throttler": "^6.3.0",
     "@nestjs/typeorm": "^10.0.2",
     "axios": "^1.8.3",
-    "bcrypt": "^5.1.1",
     "cache-manager-ioredis": "^2.1.0",
     "cache-manager-redis-store": "^3.0.1",
     "canvas": "^3.1.0",
