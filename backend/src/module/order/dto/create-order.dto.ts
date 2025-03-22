@@ -3,19 +3,19 @@ import { Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 
 class OrderItemDto {
-    @ApiProperty({ example: 1, description: "Product ID" })
-    @IsNumber({}, { message: "Product ID must be a number" })
-    @IsNotEmpty({ message: "Product ID must not be empty" })
+    @ApiProperty({ example: 1, description: "Product or combo ID" })
+    @IsNumber({}, { message: "Product or combo ID must be a number" })
+    @IsNotEmpty({ message: "Product or combo ID must not be empty" })
     id_pro: number;
 
-    @ApiProperty({ example: `/localhost`, description: `Product's image link` })
+    @ApiProperty({ example: `/localhost`, description: `Product or combo's image link` })
     @IsOptional()
-    @IsString({ message: `Product's image link must be a string` })
+    @IsString({ message: `Product or combo's image link must be a string` })
     pro_image: string;
 
-    @ApiProperty({ example: ``, description: `Product's name` })
+    @ApiProperty({ example: ``, description: `Product or combo's name` })
     @IsOptional()
-    @IsString({ message: `Product's name must be a string` })
+    @IsString({ message: `Product or combo's name must be a string` })
     pro_name: string;
 
     @ApiProperty({ example: 5, description: "Classification ID" })
@@ -33,10 +33,15 @@ class OrderItemDto {
     @IsNotEmpty({ message: "Quantity must not be empty" })
     quantity: number;
 
-    @ApiProperty({ example: 5, description: "Price per unit * quantity" })
+    @ApiProperty({ example: 5, description: "Price per unit" })
     @IsNumber({}, { message: "Price must be a number" })
     @IsNotEmpty({ message: "Price must not be empty" })
     price: number;
+
+    @ApiProperty({ example: `product`, description: `Type of item` })
+    @IsOptional()
+    @IsString({ message: `Type of item must be a string` })
+    type: string;
 }
 
 export class CreateOrderDto {
@@ -68,10 +73,10 @@ export class CreateOrderDto {
     @ApiProperty({
         example: [
             { 
-                "id_pro": 1, "pro_image": "product01", "pro_name": "Toner TheOrdinary Glycolic Acid 7%Toning Solution", "id_class": 1, "class_name": "20ml", "quantity": 3, "price": 400.00
+                "id_pro": 1, "pro_image": "product01", "pro_name": "Toner TheOrdinary Glycolic Acid 7%Toning Solution", "id_class": 1, "class_name": "20ml", "quantity": 3, "price": 40000, "type": "product"
             },
             { 
-                "id_pro": 2, "pro_image": "product02", "pro_name": "Toner TheOrdinary Glycolic Acid 7%Toning Solution", "id_class": 1, "class_name": "20ml", "quantity": 3, "price": 400.00 
+                "id_pro": 1, "pro_image": "link01", "pro_name": "Combo01", "id_class": 0, "class_name": "", "quantity": 3, "price": 500000, "type": "combo"
             }
         ],
         description: "List of order items"
