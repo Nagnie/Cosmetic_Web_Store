@@ -13,8 +13,8 @@ import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
 import VoucherCurvedSlider from "./components/VoucherCurvedSlider.jsx";
 import DiscountCard from "./components/DiscountCard.jsx";
 import ComboProductCard from "@components/ComboProductCard/ComboProductCard.jsx";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useVouchers } from "@hooks/useVoucherQueries.js";
+import { useCallback, useMemo } from "react";
+import { useInfiniteVouchers } from "@hooks/useVoucherQueries.js";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -28,46 +28,25 @@ const Homepage = () => {
   // Lấy 5 brands đầu tiên
   const topBrands = brands.slice(0, 5);
 
-  const [voucherParams, setVoucherParams] = useState({
+  // Sử dụng hook useInfiniteVouchers với cấu hình mặc định
+  const vouchersQuery = useInfiniteVouchers({
     limit: 10,
-    page: 1,
     orderBy: "ASC",
     sortBy: "id",
   });
 
-  // Mảng chứa tất cả vouchers đã tải (từ nhiều trang)
-  const [allVouchers, setAllVouchers] = useState([]);
-
-  // Gọi API lấy vouchers với tham số hiện tại
-  const vouchersQuery = useVouchers(voucherParams);
-
-  // Cập nhật mảng allVouchers khi có dữ liệu mới
-  useEffect(() => {
-    if (vouchersQuery.data?.data?.data) {
-      // Nếu là trang đầu, thay thế mảng; nếu không, thêm vào mảng hiện tại
-      if (voucherParams.page === 1) {
-        setAllVouchers(vouchersQuery.data.data.data);
-      } else {
-        // Loại bỏ các voucher trùng lặp (nếu có)
-        const existingIds = new Set(allVouchers.map((v) => v.id));
-        const newVouchers = vouchersQuery.data.data.data.filter(
-          (v) => !existingIds.has(v.id),
-        );
-        setAllVouchers((prev) => [...prev, ...newVouchers]);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vouchersQuery.data, voucherParams.page]);
+  // Lấy tất cả vouchers từ tất cả các trang đã tải
+  const allVouchers = useMemo(() => {
+    if (!vouchersQuery.data) return [];
+    // Gộp vouchers từ tất cả các trang thành một mảng duy nhất
+    return vouchersQuery.data.pages.flatMap((page) => page.data.data || []);
+  }, [vouchersQuery.data]);
 
   // Hàm tải trang tiếp theo
   const loadMoreVouchers = useCallback(async () => {
-    // Chỉ tải nếu có trang tiếp theo
-    if (vouchersQuery.hasNextPage) {
-      const nextPageParams = vouchersQuery.fetchNextPage();
-      if (nextPageParams) {
-        setVoucherParams(nextPageParams);
-        return true;
-      }
+    if (vouchersQuery.hasNextPage && !vouchersQuery.isFetchingNextPage) {
+      await vouchersQuery.fetchNextPage();
+      return true;
     }
     return false;
   }, [vouchersQuery]);
@@ -75,7 +54,7 @@ const Homepage = () => {
   // Chuyển đổi vouchers thành định dạng cho VoucherCurvedSlider
   const formattedVouchers = useMemo(() => {
     return allVouchers.map((voucher) => {
-      // Chuyển đổi thông tin từ API sang định dạng hiển thị (như code trước đó)
+      // Chuyển đổi thông tin từ API sang định dạng hiển thị
       const formattedVoucher = {
         id: voucher.id,
         title:
@@ -187,6 +166,8 @@ const Homepage = () => {
           </div>
         </div>
       </section>
+
+      {/* Vouchers Section */}
       {vouchersQuery.isLoading ? (
         <div className="reset-all">
           <div className="voucher-container">
@@ -207,9 +188,7 @@ const Homepage = () => {
                 itemsToScroll={3}
                 onLoadMore={loadMoreVouchers}
                 hasMoreItems={vouchersQuery.hasNextPage}
-                isLoadingMore={
-                  vouchersQuery.isFetching && voucherParams.page > 1
-                }
+                isLoadingMore={vouchersQuery.isFetchingNextPage}
               />
             ) : (
               <div className="py-4 text-center">

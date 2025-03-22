@@ -238,6 +238,7 @@ const CheckoutCustomerInfo = () => {
         class_name: item.class_name || "",
         quantity: +item.quantity || 1,
         price: Number(item.pro_price || 0),
+        type: item.type || "product",
       }));
 
       const persistData = {

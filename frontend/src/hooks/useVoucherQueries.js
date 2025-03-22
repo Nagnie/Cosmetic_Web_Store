@@ -1,69 +1,67 @@
 import discountsApi from "@apis/discountsApi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
-// Hook để lấy danh sách voucher với phân trang
-export const useVouchers = (
-  params = { limit: 10, page: 1, orderBy: "ASC", sortBy: "id" },
+export const useInfiniteVouchers = (
+  params = { limit: 10, orderBy: "ASC", sortBy: "id" },
 ) => {
-  const queryClient = useQueryClient();
+  const result = useInfiniteQuery({
+    queryKey: ["vouchers", params],
+    queryFn: async ({ pageParam = 1 }) => {
+      const { data } = await discountsApi.getDiscounts({
+        ...params,
+        page: pageParam,
+      });
+      return data;
+    },
+    getNextPageParam: (lastPage) => {
+      // Nếu trang hiện tại nhỏ hơn tổng số trang, trả về số trang tiếp theo
+      if (lastPage.data.page < lastPage.data.total_pages) {
+        return Number(lastPage.data.page) + 1;
+      }
+      // Trả về undefined nếu không còn trang tiếp theo
+      return undefined;
+    },
+    getPreviousPageParam: (firstPage) => {
+      // Nếu trang hiện tại lớn hơn 1, trả về số trang trước đó
+      if (firstPage.data.page > 1) {
+        return Number(firstPage.data.page) - 1;
+      }
+      // Trả về undefined nếu không có trang trước đó
+      return undefined;
+    },
+    staleTime: 5 * 60 * 1000, // 5 phút
+  });
 
-  // Prefetch trang tiếp theo
-  const prefetchNextPage = async (nextPage) => {
-    if (nextPage) {
-      await queryClient.prefetchQuery(
-        ["vouchers", { ...params, page: nextPage }],
-        async () => {
-          const { data } = await discountsApi.getDiscounts({
-            ...params,
-            page: nextPage,
-          });
+  // Tính toán các giá trị hữu ích từ dữ liệu trả về
+  const currentPage =
+    result.data?.pages[result.data.pages.length - 1]?.data.page || 1;
+  const totalPages =
+    result.data?.pages[result.data.pages.length - 1]?.data.total_pages || 1;
 
-          return data;
-        },
-      );
-    }
+  return {
+    ...result,
+    // Các thuộc tính hỗ trợ phân trang
+    hasNextPage: currentPage < totalPages,
+    hasPrevPage: currentPage > 1,
+    currentPage,
+    totalPages,
+    // Mở rộng để lấy dữ liệu trang hiện tại dễ dàng hơn
+    currentData: result.data?.pages[result.data?.pages.length - 1]?.data,
+    // Lấy tất cả các voucher từ tất cả các trang đã tải
+    allVouchers: result.data?.pages.flatMap((page) => page.data.items || []),
   };
+};
 
-  const result = useQuery({
+export const useVouchers = (
+  params = { limit: 10, orderBy: "ASC", sortBy: "id", page: 1 },
+) => {
+  return useQuery({
     queryKey: ["vouchers", params],
     queryFn: async () => {
       const { data } = await discountsApi.getDiscounts(params);
       return data;
     },
     staleTime: 5 * 60 * 1000, // 5 phút
-    keepPreviousData: true, // Giữ dữ liệu cũ - lưu ý: trong v5 nên dùng placeholderData thay vì keepPreviousData
-    onSuccess: (data) => {
-      // Nếu còn trang tiếp theo, prefetch trang đó
-      if (data.data.page < data.data.total_pages) {
-        prefetchNextPage(Number(data.data.page) + 1);
-      }
-      // Prefetch trang trước nếu không phải trang đầu
-      if (data.data.page > 1) {
-        prefetchNextPage(Number(data.data.page) - 1);
-      }
-    },
+    keepPreviousData: true, // Keep previous data while fetching new data
   });
-
-  return {
-    ...result,
-    // Thêm các hàm hỗ trợ phân trang
-    hasNextPage: result.data?.data?.page < result.data?.data?.total_pages,
-    hasPrevPage: result.data?.data?.page > 1,
-    currentPage: result.data?.data?.page ? Number(result.data?.data?.page) : 1,
-    totalPages: result.data?.data?.total_pages || 1,
-    // Hàm để nạp trang tiếp theo
-    fetchNextPage: () => {
-      if (result.data?.data?.page < result.data?.data?.total_pages) {
-        return { ...params, page: Number(result.data.data.page) + 1 };
-      }
-      return null;
-    },
-    // Hàm để nạp trang trước
-    fetchPrevPage: () => {
-      if (result.data?.data?.page > 1) {
-        return { ...params, page: Number(result.data.data.page) - 1 };
-      }
-      return null;
-    },
-  };
 };

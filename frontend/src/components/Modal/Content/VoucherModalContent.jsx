@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 const { Text } = Typography;
 
-const VoucherModalContent = ({ item, onCancel }) => {
+const VoucherModalContent = ({ item }) => {
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 0,
   );

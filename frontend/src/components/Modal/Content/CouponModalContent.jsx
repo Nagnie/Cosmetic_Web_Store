@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Button,
   Input,
@@ -8,97 +8,16 @@ import {
   Typography,
   Checkbox,
   Empty,
+  Alert,
 } from "antd";
 import { CloseOutlined, SearchOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
 
 import "./CouponModalContent.css";
+import CustomSpin from "@components/Spin/CustomSpin";
+import { useVouchers } from "@hooks/useVoucherQueries";
 
 const { Text } = Typography;
-
-const VOUCHER = [
-  {
-    id: 1,
-    title: "Giảm giá cố định",
-    price: "200.000đ",
-    description: "Áp dụng cho đơn hàng từ 1.000.000đ",
-    code: "HOLIDAY200K",
-    expiry: "30/04/2025",
-    ribbonText: "200K",
-  },
-  {
-    id: 2,
-    title: "Freeship Extra",
-    price: "50.000đ",
-    description: "Miễn phí vận chuyển toàn quốc",
-    code: "FREESHIP50",
-    expiry: "15/04/2025",
-    ribbonText: "SHIP",
-  },
-  {
-    id: 3,
-    title: "Giảm 30%",
-    price: "Tối đa 199.000đ",
-    description: "Đơn hàng từ 300.000đ",
-    code: "FASHION30",
-    expiry: "10/04/2025",
-    ribbonText: "30%",
-  },
-  {
-    id: 4,
-    title: "Voucher Sinh Nhật",
-    price: "300.000đ",
-    description: "Quà tặng đặc biệt cho thành viên",
-    code: "BIRTHDAY300",
-    expiry: "05/04/2025",
-    ribbonText: "GIFT",
-  },
-  {
-    id: 5,
-    title: "Giảm 15%",
-    price: "Tối đa 50.000đ",
-    description: "Đơn hàng từ 200.000đ",
-    code: "NEW15PCT",
-    expiry: "20/04/2025",
-    ribbonText: "15%",
-  },
-  {
-    id: 6,
-    title: "Giảm 20%",
-    price: "Tối đa 500.000đ",
-    description: "Cho sản phẩm điện tử, công nghệ",
-    code: "TECH20PCT",
-    expiry: "25/04/2025",
-    ribbonText: "20%",
-  },
-  {
-    id: 7,
-    title: "Giảm 50%",
-    price: "Tối đa 1.000.000đ",
-    description: "Dành cho khách hàng VIP",
-    code: "VIP50PCT",
-    expiry: "01/05/2025",
-    ribbonText: "50%",
-  },
-  {
-    id: 8,
-    title: "Giảm 15%",
-    price: "Tối đa 100.000đ",
-    description: "Cho tất cả đồ gia dụng",
-    code: "HOME15PCT",
-    expiry: "12/04/2025",
-    ribbonText: "15%",
-  },
-  {
-    id: 9,
-    title: "Giảm 15%",
-    price: "Tối đa 100.000đ",
-    description: "Cho tất cả đồ gia dụng",
-    code: "HOME15PCT",
-    expiry: "12/04/2025",
-    ribbonText: "15%",
-  },
-];
 
 // Color palette
 const colors = {
@@ -215,9 +134,17 @@ const CustomEmptyComponent = () => (
 );
 
 const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
-  const [voucher, setVoucher] = useState(VOUCHER);
+  const [voucherParams, setVoucherParams] = useState({
+    limit: 5,
+    page: 1,
+    orderBy: "ASC",
+    sortBy: "id",
+  });
+
+  const vouchersQuery = useVouchers(voucherParams);
+
+  const [filteredVouchers, setFilteredVouchers] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const [pageSize, setPageSize] = useState(5);
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 0,
   );
@@ -226,6 +153,48 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
   const [selectedCouponId, setSelectedCouponId] = useState(
     selectedVoucher ? selectedVoucher.id : null,
   );
+
+  // Format vouchers từ API để phù hợp với cấu trúc hiển thị - di chuyển từ component cha
+  const formattedVouchers = useMemo(() => {
+    if (!vouchersQuery.data?.data?.data) return [];
+
+    return vouchersQuery.data.data.data.map((voucher) => {
+      // Chuyển đổi ngày hết hạn sang định dạng DD/MM/YYYY
+      const endDate = new Date(voucher.end_at);
+      const formattedEndDate = `${endDate.getDate().toString().padStart(2, "0")}/${(endDate.getMonth() + 1).toString().padStart(2, "0")}/${endDate.getFullYear()}`;
+
+      // Xác định giá trị và tiêu đề dựa trên unit (fixed hoặc percentage)
+      let price, title, ribbonText;
+      if (voucher.unit === "fixed") {
+        price = `${new Intl.NumberFormat("vi-VN").format(voucher.value)}đ`;
+        title = "Giảm giá cố định";
+        ribbonText = `${Math.floor(voucher.value / 1000)}K`;
+      } else {
+        price = `Tối đa ${new Intl.NumberFormat("vi-VN").format(voucher.max_value)}đ`;
+        title = `Giảm ${voucher.value}%`;
+        ribbonText = `${voucher.value}%`;
+      }
+
+      return {
+        id: voucher.id,
+        title: title,
+        price: price,
+        description: `Áp dụng cho đơn hàng từ ${new Intl.NumberFormat("vi-VN").format(voucher.minimum_order_value)}đ`,
+        code: voucher.code,
+        expiry: formattedEndDate,
+        ribbonText: ribbonText,
+        // Lưu giữ dữ liệu gốc để sử dụng khi cần
+        originalData: voucher,
+      };
+    });
+  }, [vouchersQuery.data]);
+
+  // Cập nhật danh sách vouchers khi dữ liệu thay đổi
+  useEffect(() => {
+    if (formattedVouchers && formattedVouchers.length > 0) {
+      setFilteredVouchers(formattedVouchers);
+    }
+  }, [formattedVouchers]);
 
   // Cập nhật selectedCouponId khi selectedVoucher thay đổi từ bên ngoài
   useEffect(() => {
@@ -251,11 +220,17 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
       const handleResize = () => {
         setWindowWidth(window.innerWidth);
 
-        // Adjust page size based on screen size
+        // Điều chỉnh kích thước trang dựa trên kích thước màn hình
         if (window.innerWidth < 576) {
-          setPageSize(3);
+          setVoucherParams((prev) => ({
+            ...prev,
+            limit: 3, // Kích thước nhỏ hơn cho mobile
+          }));
         } else {
-          setPageSize(5);
+          setVoucherParams((prev) => ({
+            ...prev,
+            limit: 5, // Kích thước lớn hơn cho desktop
+          }));
         }
       };
 
@@ -266,26 +241,34 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
     }
   }, []);
 
+  const handlePageChange = (page, pageSize) => {
+    setVoucherParams((prev) => ({
+      ...prev,
+      page,
+      limit: pageSize,
+    }));
+  };
+
   // Search functionality
   const handleSearch = () => {
     if (searchText.trim() === "") {
-      setVoucher(VOUCHER);
+      setFilteredVouchers(formattedVouchers || []);
       return;
     }
 
-    const filteredVouchers = VOUCHER.filter(
+    const filtered = (formattedVouchers || []).filter(
       (coupon) =>
         coupon.code.toLowerCase().includes(searchText.toLowerCase()) ||
         coupon.title.toLowerCase().includes(searchText.toLowerCase()) ||
         coupon.description.toLowerCase().includes(searchText.toLowerCase()),
     );
 
-    setVoucher(filteredVouchers);
+    setFilteredVouchers(filtered);
   };
 
   const handleClearSearch = () => {
     setSearchText("");
-    setVoucher(VOUCHER);
+    setFilteredVouchers(formattedVouchers || []);
   };
 
   // Xử lý việc chọn mã giảm giá
@@ -302,7 +285,9 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
       // Ngược lại, chọn mã giảm giá mới
       setSelectedCouponId(couponId);
       // Tìm dữ liệu của mã giảm giá được chọn
-      const selectedCouponData = VOUCHER.find((v) => v.id === couponId);
+      const selectedCouponData = formattedVouchers.find(
+        (v) => v.id === couponId,
+      );
       // Thông báo cho component cha về mã giảm giá được chọn
       if (onApplyCoupon) onApplyCoupon(selectedCouponData);
 
@@ -344,6 +329,29 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
       );
     }
   };
+
+  // Render trạng thái loading
+  if (vouchersQuery.isLoading) {
+    return (
+      <div className="flex h-40 items-center justify-center">
+        <CustomSpin size="large" />
+      </div>
+    );
+  }
+
+  // Render trạng thái lỗi
+  if (vouchersQuery.error) {
+    return (
+      <div className="p-4">
+        <Alert
+          message="Lỗi khi tải mã giảm giá"
+          description={vouchersQuery.error.message || "Vui lòng thử lại sau"}
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="coupon-modal-container">
@@ -418,15 +426,18 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
       {/* Danh sách responsive có checkbox */}
       <List
         itemLayout="horizontal"
-        dataSource={voucher}
+        dataSource={filteredVouchers}
         locale={{
           emptyText: <CustomEmptyComponent />,
         }}
         pagination={{
-          pageSize: pageSize,
-          size: "small",
+          current: voucherParams.page,
+          pageSize: voucherParams.limit,
+          total: vouchersQuery.data?.data?.total_items || 0,
+          onChange: handlePageChange,
           showSizeChanger: false,
           responsive: true,
+          size: "small",
         }}
         renderItem={(coupon) => (
           <List.Item
@@ -518,6 +529,10 @@ CouponModalContent.propTypes = {
   onApplyCoupon: PropTypes.func,
   selectedVoucher: PropTypes.object,
   onCancel: PropTypes.func,
+  vouchers: PropTypes.array,
+  isLoading: PropTypes.bool,
+  error: PropTypes.object,
+  paginationInfo: PropTypes.object,
 };
 
 export default CouponModalContent;
