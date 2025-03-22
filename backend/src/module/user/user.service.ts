@@ -51,4 +51,12 @@ export class UserService {
       throw new InternalServerErrorException("Internal server error");
     }
   }
+
+  async updateUser(user: User) {
+    try {
+      return await this.usersRepository.update(user.id, user);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 }

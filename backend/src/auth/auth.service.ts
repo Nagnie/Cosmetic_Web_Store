@@ -13,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import { ResetpassAuthDto } from './dto/resetpassword-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -74,5 +75,19 @@ export class AuthService {
       console.log(error);
       throw new InternalServerErrorException("Internal server error");
     }
+  }
+
+  async resetPassword(resetPassDto: ResetpassAuthDto) {
+    const user = await this.usersService.findByEmail(resetPassDto.email);
+    
+    if (!user) {
+      throw new HttpException("User does not exist", HttpStatus.BAD_REQUEST);
+    }
+
+    user.password = await hashPassword(resetPassDto.newPassword);
+
+    const res = await this.usersService.updateUser(user);
+    
+    return new ResponseDto(HttpStatus.OK, "Successfully", null);
   }
 }
