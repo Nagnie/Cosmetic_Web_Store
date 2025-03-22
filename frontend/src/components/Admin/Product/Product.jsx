@@ -19,7 +19,6 @@ const Product = () => {
     const [modalOpen, setModalOpen] = useState(false);
 
     // Thêm state để lưu ID của sản phẩm đang xem
-    const [selectedProductId, setSelectedProductId] = useState(null);
     const [currentProduct, setCurrentProduct] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
@@ -87,22 +86,6 @@ const Product = () => {
             return true;
         } catch (err) {
             showActionMessage("Error adding product", err.message || 'Failed to add product', 'error');
-            return false;
-        } finally {
-            setActionLoading(false);
-        }
-    };
-
-    // Update product
-    const updateProduct = async (id, productData) => {
-        try {
-            setActionLoading(true);
-            const response = await productsApi.updateProduct(id, productData);
-
-            showActionMessage(response.data.message || 'Product updated successfully', 'success');
-            return true;
-        } catch (err) {
-            showActionMessage(err.message || 'Failed to update product', 'error');
             return false;
         } finally {
             setActionLoading(false);

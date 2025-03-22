@@ -6,6 +6,13 @@ const loginApi = {
             email,
             password,
         })
+    },
+
+    changePassword: async ({ email, newPassword }) => {
+        return await axios.post("/auth/change-password", {
+            email,
+            newPassword
+        })
     }
 }
 

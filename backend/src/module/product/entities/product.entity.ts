@@ -1,3 +1,4 @@
+import { ComboDetail } from "@/module/combo/entities/combo_detail.entity";
 import { Image } from "@/module/image/entities/image.entity";
 import { OrderDetail } from "@/module/order/entities/order_detail.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -33,4 +34,7 @@ export class Product {
 
     @OneToMany(() => Image, image => image.product)
     images: Image[];
+
+    @OneToMany(() => ComboDetail, (comboDetail) => comboDetail.product)
+    comboDetails: ComboDetail[];
 }
