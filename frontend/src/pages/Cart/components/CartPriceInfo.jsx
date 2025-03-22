@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { formatCurrency } from "@utils/utils";
 import { useCartStore } from "@components/Cart";
 
-const CartPriceInfo = ({ totalPrice = 0 }) => {
+const CartPriceInfo = ({ totalPrice = 0, discountInfo = {} }) => {
   const itemCount = useCartStore((state) => state.itemCount);
 
   return (
@@ -20,17 +20,23 @@ const CartPriceInfo = ({ totalPrice = 0 }) => {
               {formatCurrency({ number: totalPrice })}
             </span>
           </div>
-          {/* <div className="mt-2 flex flex-wrap justify-between">
-            <span className="font-semibold sm:text-lg">Giảm giá:</span>
-            <span className="!text-primary-deepest font-bold sm:text-lg">
-              -100.000đ
-            </span>
-          </div> */}
+          {discountInfo && discountInfo.discount > 0 && (
+            <div className="mt-2 flex flex-wrap justify-between">
+              <span className="font-semibold sm:text-lg">Giảm giá:</span>
+              <span className="!text-primary-deepest font-bold sm:text-lg">
+                -{formatCurrency({ number: discountInfo.discount })}
+              </span>
+            </div>
+          )}
         </div>
         <div className="mt-2 flex flex-wrap justify-between">
           <span className="text-xl font-semibold sm:text-2xl">Tổng cộng:</span>
           <span className="!text-primary-deepest text-xl font-bold sm:text-2xl">
-            {formatCurrency({ number: totalPrice })}
+            {formatCurrency({
+              number: discountInfo?.new_total_prices
+                ? discountInfo.new_total_prices
+                : totalPrice,
+            })}
           </span>
         </div>
 
@@ -94,6 +100,7 @@ const CartPriceInfo = ({ totalPrice = 0 }) => {
 
 CartPriceInfo.propTypes = {
   totalPrice: PropTypes.number,
+  discountInfo: PropTypes.object,
 };
 
 export default CartPriceInfo;

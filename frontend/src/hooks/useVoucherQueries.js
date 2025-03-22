@@ -1,5 +1,5 @@
 import discountsApi from "@apis/discountsApi";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 
 export const useInfiniteVouchers = (
   params = { limit: 10, orderBy: "ASC", sortBy: "id" },
@@ -85,5 +85,23 @@ export const useSearchAndFilterVouchers = (
     },
     staleTime: 5 * 60 * 1000, // 5 phút
     keepPreviousData: true, // Keep previous data while fetching new data
+  });
+};
+
+export const useApplyVoucher = (
+  { onSuccess, onError, onSettled } = {
+    onSuccess: undefined,
+    onError: undefined,
+    onSettled: undefined,
+  },
+) => {
+  return useMutation({
+    mutationFn: async (id) => {
+      const { data } = await discountsApi.applyDiscount(id);
+      return data;
+    },
+    onSuccess,
+    onError,
+    onSettled,
   });
 };

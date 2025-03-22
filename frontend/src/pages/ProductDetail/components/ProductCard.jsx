@@ -134,7 +134,10 @@ const ProductCard = ({ product }) => {
         </h3>
         <div>
           <span className="!mr-2 !text-[10px] font-bold !text-gray-400 !line-through">
-            299.000đ
+            {formatCurrency({
+              number:
+                product.origin_price ?? product.pro_origin_price ?? 299000,
+            }) ?? "299.000 đ"}
           </span>
           <span className="text-primary-dark font-bold">
             {formatCurrency({

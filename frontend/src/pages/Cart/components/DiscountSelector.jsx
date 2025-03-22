@@ -4,6 +4,7 @@ import {
   TagOutlined,
   GiftOutlined,
   CloseCircleFilled,
+  LoadingOutlined,
 } from "@ant-design/icons";
 import PropTypes from "prop-types";
 
@@ -31,23 +32,25 @@ const DiscountSelector = ({
   voucherCode,
   onApplyVoucher,
   onShowCouponModal,
+  isLoading = false,
+  isApplied = false,
 }) => {
   const [inputCode, setInputCode] = useState("");
-  const [isApplied, setIsApplied] = useState(false);
+  const [internalIsApplied, setInternalIsApplied] = useState(false);
 
   // Cập nhật inputCode và trạng thái khi voucherCode từ prop thay đổi
   useEffect(() => {
     setInputCode(voucherCode || "");
-    setIsApplied(!!voucherCode);
-  }, [voucherCode]);
+    setInternalIsApplied(isApplied || !!voucherCode);
+  }, [voucherCode, isApplied]);
 
   // Xử lý khi người dùng thay đổi giá trị trong input
   const handleInputChange = (e) => {
     setInputCode(e.target.value.toUpperCase());
 
     // Nếu đang ở trạng thái đã áp dụng mà người dùng thay đổi input, đặt lại trạng thái
-    if (isApplied) {
-      setIsApplied(false);
+    if (internalIsApplied) {
+      setInternalIsApplied(false);
     }
   };
 
@@ -55,7 +58,7 @@ const DiscountSelector = ({
   const handleApplyClick = () => {
     if (inputCode.trim()) {
       onApplyVoucher(inputCode);
-      setIsApplied(true);
+      // Không set internalIsApplied ngay lập tức, vì cần đợi kết quả từ mutation
     }
   };
 
@@ -68,13 +71,17 @@ const DiscountSelector = ({
 
     // Đặt lại giá trị input và thông báo cho component cha
     setInputCode("");
-    setIsApplied(false);
+    setInternalIsApplied(false);
     onApplyVoucher("");
   };
 
   // Render suffix cho Input tùy thuộc vào trạng thái
   const renderInputSuffix = () => {
-    if (inputCode && isApplied) {
+    if (isLoading) {
+      return <LoadingOutlined style={{ color: colors.primary.DEFAULT }} />;
+    }
+
+    if (inputCode && internalIsApplied) {
       return (
         <Tooltip title="Hủy mã giảm giá">
           <CloseCircleFilled
@@ -104,40 +111,46 @@ const DiscountSelector = ({
           prefix={<TagOutlined style={{ color: colors.primary.DEFAULT }} />}
           suffix={renderInputSuffix()}
           style={{
-            borderColor: isApplied
+            borderColor: internalIsApplied
               ? colors.primary.DEFAULT
               : colors.primary.light,
             color: colors.primary.dark,
-            backgroundColor: isApplied ? "rgba(145, 119, 94, 0.08)" : "inherit",
+            backgroundColor: internalIsApplied
+              ? "rgba(145, 119, 94, 0.08)"
+              : "inherit",
             transition: "all 0.3s ease",
           }}
           value={inputCode}
           onChange={handleInputChange}
-          onPressEnter={handleApplyClick}
-          disabled={isApplied} // Khi đã áp dụng, khóa input để người dùng không thể thay đổi
+          onPressEnter={
+            !isLoading && !internalIsApplied ? handleApplyClick : undefined
+          }
+          disabled={isLoading || internalIsApplied} // Khi đã áp dụng hoặc đang loading, khóa input
         />
         <Button
           className="w-full sm:w-auto"
           size="large"
           type="primary"
-          onClick={isApplied ? handleCancelVoucher : handleApplyClick}
+          onClick={internalIsApplied ? handleCancelVoucher : handleApplyClick}
           style={{
-            backgroundColor: isApplied
+            backgroundColor: internalIsApplied
               ? colors.action.cancel
               : colors.primary.DEFAULT,
-            borderColor: isApplied
+            borderColor: internalIsApplied
               ? colors.action.cancel
               : colors.primary.DEFAULT,
             color: colors.neutral.DEFAULT,
             transition: "all 0.3s ease",
           }}
+          loading={isLoading}
+          disabled={isLoading && !internalIsApplied} // Chỉ disable khi đang loading và chưa áp dụng
         >
-          {isApplied ? "Hủy mã" : "Áp dụng"}
+          {internalIsApplied ? "Hủy mã" : "Áp dụng"}
         </Button>
       </div>
 
       {/* Thông báo mã giảm giá đã được áp dụng */}
-      {isApplied && inputCode && (
+      {internalIsApplied && inputCode && (
         <div
           className="mt-1 flex items-center text-sm"
           style={{ color: colors.action.success }}
@@ -156,6 +169,7 @@ const DiscountSelector = ({
             color: colors.primary.DEFAULT,
             fontWeight: 500,
           }}
+          disabled={isLoading} // Không cho chọn mã giảm giá khi đang loading
         >
           Chọn mã giảm giá
         </Button>
@@ -168,6 +182,8 @@ DiscountSelector.propTypes = {
   voucherCode: PropTypes.string,
   onApplyVoucher: PropTypes.func,
   onShowCouponModal: PropTypes.func,
+  isLoading: PropTypes.bool,
+  isApplied: PropTypes.bool,
 };
 
 export default DiscountSelector;

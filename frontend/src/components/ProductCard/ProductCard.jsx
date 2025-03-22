@@ -25,7 +25,7 @@ const ProductCard = ({ product }) => {
       id_pro: product.id_pro,
       id_class: product.classification[0]?.id_class ?? 0,
       quantity: 1,
-      type: product.pro_type || "product",
+      type: product.type || "product",
     };
 
     addCartItemMutation.mutate(item);
@@ -40,7 +40,7 @@ const ProductCard = ({ product }) => {
       id_pro: product.id_pro,
       id_class: product.classification[0]?.id_class ?? 0,
       quantity: 1,
-      type: product.pro_type || "product",
+      type: product.type || "product",
     };
 
     addCartItemMutation.mutate(item, {

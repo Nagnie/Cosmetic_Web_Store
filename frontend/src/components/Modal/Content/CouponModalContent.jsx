@@ -9,14 +9,21 @@ import {
   Checkbox,
   Empty,
   Alert,
+  Tooltip,
+  message,
 } from "antd";
-import { CloseOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  SearchOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import PropTypes from "prop-types";
 
 import "./CouponModalContent.css";
 import CustomSpin from "@components/Spin/CustomSpin";
 import { useSearchAndFilterVouchers } from "@hooks/useVoucherQueries";
 import { useDebounce } from "@hooks/useDebounce";
+import { useCartStore } from "@components/Cart";
 
 const { Text } = Typography;
 
@@ -32,6 +39,10 @@ const colors = {
   },
   neutral: {
     DEFAULT: "#FFFFFF",
+  },
+  error: {
+    DEFAULT: "#ff4d4f",
+    light: "#fff2f0",
   },
 };
 
@@ -68,6 +79,11 @@ const tagColors = {
     backgroundColor: colors.primary.DEFAULT, // Màu nâu - primary.DEFAULT
     color: colors.neutral.DEFAULT, // Màu trắng - neutral.DEFAULT
     borderColor: colors.primary.dark, // Màu nâu đậm - primary.dark
+  },
+  invalid: {
+    backgroundColor: colors.error.light,
+    color: colors.error.DEFAULT,
+    borderColor: colors.error.DEFAULT,
   },
 };
 
@@ -120,6 +136,27 @@ const getCustomCheckboxStyles = (isMobile) => `
   `
       : ""
   }
+  
+  /* Thêm style cho voucher không hợp lệ */
+  .invalid-coupon {
+    opacity: 0.7;
+    position: relative;
+  }
+  
+  .invalid-coupon:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+  }
+  
+  .invalid-tag {
+    margin-top: 4px;
+  }
 `;
 
 // Component tùy chỉnh Empty cho tiếng Việt
@@ -135,6 +172,8 @@ const CustomEmptyComponent = () => (
 );
 
 const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
+  const totalOrderPrice = useCartStore((state) => state.totalPrice);
+
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebounce(searchText, 500);
 
@@ -157,6 +196,9 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
       sortBy: "id",
     },
   });
+
+  // State để lưu trữ thông báo lỗi
+  const [messageApi, contextHolder] = message.useMessage();
 
   // Theo dõi sự thay đổi của debouncedSearchText và cập nhật voucherParams
   useEffect(() => {
@@ -191,6 +233,9 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
         ribbonText = `${voucher.value}%`;
       }
 
+      // Kiểm tra xem voucher có hợp lệ với giá trị đơn hàng không
+      const isValid = totalOrderPrice >= voucher.minimum_order_value;
+
       return {
         id: voucher.id,
         title: title,
@@ -199,11 +244,14 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
         code: voucher.code,
         expiry: formattedEndDate,
         ribbonText: ribbonText,
+        // Thêm giá trị tối thiểu và trạng thái hợp lệ
+        minimumOrderValue: voucher.minimum_order_value,
+        isValid,
         // Lưu giữ dữ liệu gốc để sử dụng khi cần
         originalData: voucher,
       };
     });
-  }, [vouchersQuery.data]);
+  }, [vouchersQuery.data, totalOrderPrice]);
 
   // Cập nhật danh sách vouchers khi dữ liệu thay đổi
   useEffect(() => {
@@ -292,6 +340,19 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
 
   // Xử lý việc chọn mã giảm giá
   const handleCouponSelect = (couponId) => {
+    // Tìm voucher được chọn
+    const selectedCoupon = filteredVouchers.find((v) => v.id === couponId);
+
+    // Kiểm tra xem voucher có hợp lệ với giá trị đơn hàng không
+    if (selectedCoupon && !selectedCoupon.isValid) {
+      // Hiển thị thông báo lỗi
+      messageApi.error({
+        content: `Đơn hàng của bạn chưa đạt giá trị tối thiểu ${new Intl.NumberFormat("vi-VN").format(selectedCoupon.minimumOrderValue)}đ để sử dụng voucher này`,
+        duration: 3,
+      });
+      return; // Không cho phép chọn
+    }
+
     if (selectedCouponId === couponId) {
       setSelectedCouponId(null);
       if (onApplyCoupon) onApplyCoupon(null);
@@ -308,6 +369,7 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
 
   // Render checkbox phù hợp với desktop hoặc mobile
   const renderCheckbox = (coupon) => {
+    // Tạo checkbox với trạng thái disabled nếu voucher không hợp lệ
     if (isMobile) {
       return (
         <div className="mobile-checkbox-container">
@@ -319,6 +381,7 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
               e.stopPropagation();
               handleCouponSelect(coupon.id);
             }}
+            disabled={!coupon.isValid}
           />
         </div>
       );
@@ -332,6 +395,7 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
             e.stopPropagation();
             handleCouponSelect(coupon.id);
           }}
+          disabled={!coupon.isValid}
           style={{
             marginRight: "12px",
           }}
@@ -365,6 +429,22 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
 
   return (
     <div className="coupon-modal-container">
+      {contextHolder}
+
+      {/* Hiển thị thông tin giá trị đơn hàng hiện tại */}
+      <div style={{ marginBottom: 16 }}>
+        <Alert
+          message={`Giá trị đơn hàng hiện tại: ${new Intl.NumberFormat("vi-VN").format(totalOrderPrice)}đ`}
+          type="info"
+          showIcon
+          icon={<InfoCircleOutlined className="!text-primary" />}
+          style={{
+            backgroundColor: colors.secondary.DEFAULT,
+            borderColor: colors.primary.light,
+          }}
+        />
+      </div>
+
       {/* Responsive search bar */}
       <div className="search-container" style={{ marginBottom: 16 }}>
         {windowWidth > 576 ? (
@@ -450,85 +530,106 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
           size: "small",
         }}
         renderItem={(coupon) => (
-          <List.Item
-            className={`coupon-item cursor-pointer hover:bg-gray-50 ${
-              selectedCouponId === coupon.id ? "selected-coupon" : ""
-            }`}
-            style={{
-              padding: windowWidth < 576 ? "16px 8px 8px 8px" : "16px",
-              transition: "all 0.3s ease",
-              backgroundColor:
-                selectedCouponId === coupon.id ? "#f6f0e8" : "inherit",
-              border:
-                selectedCouponId === coupon.id
-                  ? `1px solid ${colors.primary.DEFAULT}`
-                  : "1px solid transparent",
-              borderRadius: "4px",
-              marginBottom: "4px",
-              cursor: "pointer",
-            }}
-            onClick={() => handleCouponSelect(coupon.id)}
+          <Tooltip
+            title={
+              !coupon.isValid
+                ? `Đơn hàng của bạn cần đạt tối thiểu ${new Intl.NumberFormat("vi-VN").format(coupon.minimumOrderValue)}đ để sử dụng voucher này`
+                : ""
+            }
+            placement="top"
           >
-            {renderCheckbox(coupon)}
-            <List.Item.Meta
-              title={
-                <div
-                  className="coupon-title flex gap-2"
-                  style={{
-                    flexDirection: windowWidth < 576 ? "column" : "row",
-                    marginLeft: windowWidth < 576 ? "0" : "0",
-                  }}
-                >
-                  <Text
-                    strong
-                    style={{
-                      fontSize: windowWidth < 576 ? "14px" : "16px",
-                      color:
-                        selectedCouponId === coupon.id
-                          ? colors.primary.dark
-                          : "inherit",
-                    }}
-                  >
-                    {coupon.code}
-                  </Text>
-                  <Tag
-                    color="green"
-                    className="flex h-6 w-fit items-center justify-center rounded"
-                    style={{
-                      margin: windowWidth < 576 ? "4px 0" : "",
-                      backgroundColor: colors.primary.DEFAULT,
-                      color: colors.neutral.DEFAULT,
-                      borderColor: colors.primary.dark,
-                      boxShadow: "0 2px 4px rgba(103, 87, 70, 0.2)",
-                      fontWeight: "500",
-                      lineHeight: "23px",
-                    }}
-                  >
-                    {coupon.price}
-                  </Tag>
-                  {coupon.category && (
-                    <Tag color="purple">{coupon.category}</Tag>
-                  )}
-                </div>
-              }
-              description={
-                <div style={{ fontSize: windowWidth < 576 ? "12px" : "14px" }}>
-                  <Text>{coupon.description}</Text>
-                  <br />
-                  <Text type="secondary">{coupon.title}</Text>
-                </div>
-              }
-            />
-            <Tag
-              color="blue"
+            <List.Item
+              className={`coupon-item cursor-pointer hover:bg-gray-50 ${
+                selectedCouponId === coupon.id ? "selected-coupon" : ""
+              } ${!coupon.isValid ? "invalid-coupon" : ""}`}
               style={{
-                fontSize: windowWidth < 576 ? "11px" : "14px",
-                ...tagColors.expiry,
+                padding: windowWidth < 576 ? "16px 8px 8px 8px" : "16px",
+                transition: "all 0.3s ease",
+                backgroundColor:
+                  selectedCouponId === coupon.id ? "#f6f0e8" : "inherit",
+                border:
+                  selectedCouponId === coupon.id
+                    ? `1px solid ${colors.primary.DEFAULT}`
+                    : "1px solid transparent",
+                borderRadius: "4px",
+                marginBottom: "4px",
+                cursor: coupon.isValid ? "pointer" : "not-allowed",
               }}
+              onClick={() => coupon.isValid && handleCouponSelect(coupon.id)}
             >
-              HSD: {coupon.expiry}
-            </Tag>
-          </List.Item>
+              {renderCheckbox(coupon)}
+              <List.Item.Meta
+                title={
+                  <div
+                    className="coupon-title flex gap-2"
+                    style={{
+                      flexDirection: windowWidth < 576 ? "column" : "row",
+                      marginLeft: windowWidth < 576 ? "0" : "0",
+                    }}
+                  >
+                    <Text
+                      strong
+                      style={{
+                        fontSize: windowWidth < 576 ? "14px" : "16px",
+                        color:
+                          selectedCouponId === coupon.id
+                            ? colors.primary.dark
+                            : "inherit",
+                      }}
+                    >
+                      {coupon.code}
+                    </Text>
+                    <Tag
+                      color="green"
+                      className="flex h-6 w-fit items-center justify-center rounded"
+                      style={{
+                        margin: windowWidth < 576 ? "4px 0" : "",
+                        backgroundColor: colors.primary.DEFAULT,
+                        color: colors.neutral.DEFAULT,
+                        borderColor: colors.primary.dark,
+                        boxShadow: "0 2px 4px rgba(103, 87, 70, 0.2)",
+                        fontWeight: "500",
+                        lineHeight: "23px",
+                      }}
+                    >
+                      {coupon.price}
+                    </Tag>
+                    {coupon.category && (
+                      <Tag color="purple">{coupon.category}</Tag>
+                    )}
+                    {/* Hiển thị tag không hợp lệ nếu voucher không phù hợp
+                    {!coupon.isValid && (
+                      <Tag
+                        color="red"
+                        className="invalid-tag !h-fit"
+                        style={tagColors.invalid}
+                      >
+                        Chưa đủ điều kiện
+                      </Tag>
+                    )} */}
+                  </div>
+                }
+                description={
+                  <div
+                    style={{ fontSize: windowWidth < 576 ? "12px" : "14px" }}
+                  >
+                    <Text>{coupon.description}</Text>
+                    <br />
+                    <Text type="secondary">{coupon.title}</Text>
+                  </div>
+                }
+              />
+              <Tag
+                color="blue"
+                style={{
+                  fontSize: windowWidth < 576 ? "11px" : "14px",
+                  ...tagColors.expiry,
+                }}
+              >
+                HSD: {coupon.expiry}
+              </Tag>
+            </List.Item>
+          </Tooltip>
         )}
       />
     </div>

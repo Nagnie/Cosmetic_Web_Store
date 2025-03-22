@@ -44,6 +44,12 @@ const discountsApi = {
       },
     });
   },
+
+  applyDiscount: async (id) => {
+    return axios.post(`/discount/apply`, {
+      id: id,
+    });
+  },
 };
 
 export default discountsApi;
