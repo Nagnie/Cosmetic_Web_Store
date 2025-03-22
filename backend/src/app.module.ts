@@ -18,6 +18,7 @@ import { SubcategoryModule } from './module/subcategory/subcategory.module';
 import { OrderModule } from './module/order/order.module';
 import { CartModule } from './module/cart/cart.module';
 import { DiscountModule } from './module/discount/discount.module';
+import { ComboModule } from './module/combo/combo.module';
 
 
 @Module({
@@ -55,7 +56,8 @@ import { DiscountModule } from './module/discount/discount.module';
     SubcategoryModule,
     OrderModule,
     CartModule,
-    DiscountModule
+    DiscountModule,
+    ComboModule,
   ],
   controllers: [AppController],
   providers: [
