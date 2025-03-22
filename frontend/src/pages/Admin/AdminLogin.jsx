@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import "./Admin.css"
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import loginApi from '@apis/loginApi.js'
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -14,23 +14,19 @@ const LoginPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        setError("");
 
         try {
-            const response = await axios.post(
-                "http://localhost:3001/api/auth/login",
-                { email, password },
-                { withCredentials: true, } // Quan trọng: để gửi cookie từ server
-            );
+            const data = await loginApi.login({ email, password }); // Gọi API login
 
-            if (response.status === 201) {
-                // Lưu trạng thái đăng nhập
+            console.log("data", data);
+
+            if (data) { // Kiểm tra response
                 localStorage.setItem("isAdmin", "true");
                 navigate("/admin"); // Chuyển hướng đến trang Admin
             }
-            console.log(response);
         } catch (error) {
-            setError("Sai tài khoản hoặc mật khẩu!");
+            console.log("Error: ", error);
         }
     };
 
