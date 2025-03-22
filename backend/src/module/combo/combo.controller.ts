@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ComboService } from './combo.service';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
+import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { Public } from '@/helpers/decorator/public';
 
 @Controller('combo')
 export class ComboController {
-  constructor(private readonly comboService: ComboService) {}
+  constructor(private readonly comboService: ComboService) { }
 
   @Post()
   create(@Body() createComboDto: CreateComboDto) {
@@ -13,8 +15,16 @@ export class ComboController {
   }
 
   @Get()
-  findAll() {
-    return this.comboService.findAll();
+  @Public()
+  @ApiOperation({ summary: 'Get all combos' })
+  @ApiResponse({ status: 200, description: 'Get all combos' })
+  @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of records per page' })
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10
+  ) {
+    return await this.comboService.findAll(Number(page), Number(limit));
   }
 
   @Get(':id')
