@@ -157,7 +157,12 @@ export class ProductService {
             [id_pro, "product"]
         );
 
-        return productInfo;
+        const res = productInfo.map(item => ({
+            ...item,
+            price: +item.price
+        }));
+
+        return res;
     }
 
     async getProductsByBrand(req: Request) {
