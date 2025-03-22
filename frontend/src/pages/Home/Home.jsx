@@ -10,7 +10,11 @@ import { numberToArray } from "@utils/utils.js";
 import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
 import BrandCard from "@components/BrandCard/BrandCard.jsx";
 import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
+import VoucherCurvedSlider from "./components/VoucherCurvedSlider.jsx";
+import DiscountCard from "./components/DiscountCard.jsx";
 import ComboProductCard from "@components/ComboProductCard/ComboProductCard.jsx";
+import { useCallback, useMemo } from "react";
+import { useInfiniteVouchers } from "@hooks/useVoucherQueries.js";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Homepage = () => {
@@ -25,10 +29,65 @@ const Homepage = () => {
   // Lấy 5 brands đầu tiên
   const topBrands = brands.slice(0, 5);
 
+  // Sử dụng hook useInfiniteVouchers với cấu hình mặc định
+  const vouchersQuery = useInfiniteVouchers({
+    limit: 10,
+    orderBy: "ASC",
+    sortBy: "id",
+  });
+
+  // Lấy tất cả vouchers từ tất cả các trang đã tải
+  const allVouchers = useMemo(() => {
+    if (!vouchersQuery.data) return [];
+    // Gộp vouchers từ tất cả các trang thành một mảng duy nhất
+    return vouchersQuery.data.pages.flatMap((page) => page.data.data || []);
+  }, [vouchersQuery.data]);
+
+  // Hàm tải trang tiếp theo
+  const loadMoreVouchers = useCallback(async () => {
+    if (vouchersQuery.hasNextPage && !vouchersQuery.isFetchingNextPage) {
+      await vouchersQuery.fetchNextPage();
+      return true;
+    }
+    return false;
+  }, [vouchersQuery]);
+
+  // Chuyển đổi vouchers thành định dạng cho VoucherCurvedSlider
+  const formattedVouchers = useMemo(() => {
+    return allVouchers.map((voucher) => {
+      // Chuyển đổi thông tin từ API sang định dạng hiển thị
+      const formattedVoucher = {
+        id: voucher.id,
+        title:
+          voucher.unit === "fixed"
+            ? "Giảm giá cố định"
+            : `Giảm ${voucher.value}%`,
+        price:
+          voucher.unit === "fixed"
+            ? new Intl.NumberFormat("vi-VN").format(voucher.value) + "đ"
+            : `Tối đa ${new Intl.NumberFormat("vi-VN").format(voucher.max_value)}đ`,
+        description: `Áp dụng cho đơn hàng từ ${new Intl.NumberFormat("vi-VN").format(voucher.minimum_order_value)}đ`,
+        code: voucher.code,
+        expiry: new Date(voucher.end_at).toLocaleDateString("vi-VN"),
+        ribbonText:
+          voucher.unit === "fixed"
+            ? new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(
+                voucher.value,
+              ) + "đ"
+            : `${voucher.value}%`,
+      };
+
+      return {
+        id: voucher.id,
+        metadata: formattedVoucher,
+        content: <DiscountCard item={formattedVoucher} />,
+      };
+    });
+  }, [allVouchers]);
   // Animation variants
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    visible: { opacity: 1, y: 0 },
   };
 
   const staggerContainer = {
@@ -36,9 +95,9 @@ const Homepage = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const scaleIn = {
@@ -48,9 +107,9 @@ const Homepage = () => {
       scale: 1,
       transition: {
         type: "spring",
-        stiffness: 100
-      }
-    }
+        stiffness: 100,
+      },
+    },
   };
 
   // Loader animation
@@ -61,36 +120,35 @@ const Homepage = () => {
       transition: {
         duration: 1.5,
         repeat: Infinity,
-        repeatType: "loop"
-      }
-    }
+        repeatType: "loop",
+      },
+    },
   };
 
   return (
     <div className="font-sans">
       <Header />
 
-
       {/* Swiper Section */}
       <motion.section
-          className={"mx-auto mt-50 mb-20 max-w-6xl pt-10"}
-          initial="hidden"
-          animate="visible"
-          variants={fadeInUp}
-          transition={{ duration: 0.5 }}
+        className={"mx-auto mt-50 mb-20 max-w-6xl pt-10"}
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ duration: 0.5 }}
       >
         <div className="my-5 text-center" style={{ color: "#574a3a" }}>
           <motion.h1
-              className="mb-2 text-5xl font-bold"
-              variants={fadeInUp}
-              transition={{ delay: 0.5 }}
+            className="mb-2 text-5xl font-bold"
+            variants={fadeInUp}
+            transition={{ delay: 0.5 }}
           >
             Welcome to Nâu Cosmetic
           </motion.h1>
           <motion.p
-              className="text-2xl"
-              variants={fadeInUp}
-              transition={{ delay: 0.5 }}
+            className="text-2xl"
+            variants={fadeInUp}
+            transition={{ delay: 0.5 }}
           >
             Mỹ phẩm, thực phẩm chức năng, sâm Hàn Quốc
           </motion.p>
@@ -113,47 +171,42 @@ const Homepage = () => {
         </div>
         <div className="flex cursor-pointer flex-wrap justify-center gap-6">
           {brandsQuery.isLoading ? (
-                <>
-                  {[...Array(5)].map((_, index) => (
-                      <BrandCardSkeleton key={index} />
-                  ))}
-                </>
-            ) : (
-            topBrands.map((brand) => (
-              <BrandCard
-                key={brand.id}
-                brand={brand}
-              />
-            ))
+            <>
+              {[...Array(5)].map((_, index) => (
+                <BrandCardSkeleton key={index} />
+              ))}
+            </>
+          ) : (
+            topBrands.map((brand) => <BrandCard key={brand.id} brand={brand} />)
           )}
         </div>
       </section>
 
       {/*Why choose us section*/}
       <motion.section
-          className="mt-10 py-10"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={fadeInUp}
-          transition={{ duration: 0.7 }}
+        className="mt-10 py-10"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeInUp}
+        transition={{ duration: 0.7 }}
       >
         <motion.h2
-            className="mb-8 text-center text-3xl font-bold"
-            variants={fadeInUp}
+          className="mb-8 text-center text-3xl font-bold"
+          variants={fadeInUp}
         >
           Why Choose Us?
         </motion.h2>
 
         <motion.div
-            className="mb-10 grid grid-cols-1 gap-10 md:grid-cols-3"
-            variants={staggerContainer}
+          className="mb-10 grid grid-cols-1 gap-10 md:grid-cols-3"
+          variants={staggerContainer}
         >
           <motion.div
-              className="rounded-2xl px-7 py-10 text-center shadow-xl"
-              style={{ backgroundColor: "#F1DEC9" }}
-              variants={scaleIn}
-              whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
+            className="rounded-2xl px-7 py-10 text-center shadow-xl"
+            style={{ backgroundColor: "#F1DEC9" }}
+            variants={scaleIn}
+            whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
           >
             <h3 className="mb-4 text-xl font-semibold">Chất Lượng Chuẩn Hàn</h3>
             <p className="text-gray-600">
@@ -163,10 +216,10 @@ const Homepage = () => {
           </motion.div>
 
           <motion.div
-              className="rounded-2xl px-7 py-10 text-center shadow-xl"
-              style={{ backgroundColor: "#e0cdbc" }}
-              variants={scaleIn}
-              whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
+            className="rounded-2xl px-7 py-10 text-center shadow-xl"
+            style={{ backgroundColor: "#e0cdbc" }}
+            variants={scaleIn}
+            whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
           >
             <h3 className="mb-4 text-xl font-semibold">
               Khách Hàng Là Thượng Đế
@@ -178,10 +231,10 @@ const Homepage = () => {
           </motion.div>
 
           <motion.div
-              className="rounded-2xl px-7 py-10 text-center shadow-xl"
-              style={{ backgroundColor: "#cbb7a4" }}
-              variants={scaleIn}
-              whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
+            className="rounded-2xl px-7 py-10 text-center shadow-xl"
+            style={{ backgroundColor: "#cbb7a4" }}
+            variants={scaleIn}
+            whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
           >
             <h3 className="mb-4 text-xl font-semibold">
               Vẻ Đẹp Chuẩn Xu Hướng
@@ -193,6 +246,38 @@ const Homepage = () => {
           </motion.div>
         </motion.div>
       </motion.section>
+
+      {/* Vouchers Section */}
+      {vouchersQuery.isLoading ? (
+        <div className="reset-all">
+          <div className="voucher-container">
+            <div className="py-4 text-center">Đang tải vouchers...</div>
+          </div>
+        </div>
+      ) : (
+        <div className="reset-all">
+          <div className="voucher-container">
+            {vouchersQuery.isError ? (
+              <div className="py-4 text-center text-red-500">
+                Có lỗi xảy ra khi tải vouchers, vui lòng thử lại sau.
+              </div>
+            ) : formattedVouchers.length > 0 ? (
+              <VoucherCurvedSlider
+                items={formattedVouchers}
+                itemsToShow={5}
+                itemsToScroll={3}
+                onLoadMore={loadMoreVouchers}
+                hasMoreItems={vouchersQuery.hasNextPage}
+                isLoadingMore={vouchersQuery.isFetchingNextPage}
+              />
+            ) : (
+              <div className="py-4 text-center">
+                Không có voucher nào khả dụng.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <section className="mt-10">
         <ComboProductCard />

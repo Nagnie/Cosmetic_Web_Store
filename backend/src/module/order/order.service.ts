@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseDto } from '@/helpers/utils';
 import { Request } from 'express';
 import { Image } from '../image/entities/image.entity';
-import { OrderStatus } from './order_status.enum';
+import { OrderStatus } from './enum/order_status.enum';
 
 import { cloudinary, setupCloudinary } from '@/config/cloudinary.config';
 import { ConfigService } from '@nestjs/config';

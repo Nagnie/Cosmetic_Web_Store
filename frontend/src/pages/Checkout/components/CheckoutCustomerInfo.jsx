@@ -231,13 +231,14 @@ const CheckoutCustomerInfo = () => {
       }
 
       const order_items = data.data.map((item) => ({
-        id_pro: item.id_pro,
+        id_pro: item?.id_pro ?? item?.id ?? 0,
         pro_image: item.images[0] || "",
-        pro_name: item.pro_name || "",
+        pro_name: item?.pro_name ?? item?.name ?? "",
         id_class: item.id_class ?? 0,
         class_name: item.class_name || "",
         quantity: +item.quantity || 1,
-        price: Number(item.pro_price || 0),
+        price: Number(item?.pro_price ?? item?.price ?? 0),
+        type: item.type || "product",
       }));
 
       const persistData = {

@@ -8,6 +8,7 @@ const useCartStore = create(
       isCartDrawerOpen: false,
       itemCount: 0,
       totalPrice: 0,
+      discountInfo: null,
 
       // Actions
       toggleCartDrawer: () =>
@@ -21,9 +22,17 @@ const useCartStore = create(
       // Cập nhật tổng giá tiền
       setTotalPrice: (price) => set({ totalPrice: price }),
 
+      // Cập nhật thông tin giảm giá
+      setDiscountInfo: (info) => set({ discountInfo: info }),
+
       // Reset giỏ hàng
       clearCart: () =>
-        set({ itemCount: 0, totalPrice: 0, isCartDrawerOpen: false }),
+        set({
+          itemCount: 0,
+          totalPrice: 0,
+          isCartDrawerOpen: false,
+          discountInfo: null,
+        }),
     }),
     {
       name: "cart-storage",

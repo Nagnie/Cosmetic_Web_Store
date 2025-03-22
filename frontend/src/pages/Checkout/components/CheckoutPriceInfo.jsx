@@ -1,9 +1,143 @@
+import { useState } from "react";
+import { message, Space } from "antd";
+import { GiftOutlined } from "@ant-design/icons";
+
 import { useCartStore } from "@components/Cart";
-import { CustomCollapse } from ".";
 import { formatCurrency } from "@utils/utils";
+import { DiscountSelector } from "@pages/Cart/components";
+import { useModalStore } from "@components/Modal";
+import { CouponModalContent } from "@components/Modal/Content";
+import { CustomCollapse } from ".";
+import { useApplyVoucher } from "@hooks/useVoucherQueries";
 
 const CheckoutPriceInfo = () => {
+  const showModal = useModalStore((state) => state.showModal);
+  const hideModal = useModalStore((state) => state.hideModal);
   const totalCartPrice = useCartStore((state) => state.totalPrice);
+  const discountInfo = useCartStore((state) => state.discountInfo);
+  const setDiscountInfo = useCartStore((state) => state.setDiscountInfo);
+
+  const [selectedVoucher, setSelectedVoucher] = useState(() => {
+    return {
+      id: discountInfo?.id || "",
+    };
+  });
+  const [voucherCode, setVoucherCode] = useState(() => {
+    return {
+      id: discountInfo?.id || "",
+    };
+  });
+
+  // Mutation để áp dụng voucher
+  const applyVoucherMutation = useApplyVoucher({
+    onSuccess: (data) => {
+      console.log("Voucher áp dụng thành công:", data);
+
+      setDiscountInfo({
+        ...data,
+        id: selectedVoucher?.id || voucherCode?.id || "",
+      });
+
+      message.success("Áp dụng mã giảm giá thành công!");
+
+      if (selectedVoucher && !voucherCode) {
+        setVoucherCode(selectedVoucher.code);
+      }
+    },
+    onError: (error) => {
+      console.error("Lỗi khi áp dụng voucher:", error);
+
+      message.error(
+        `Không thể áp dụng mã giảm giá: ${error.message || "Vui lòng thử lại sau"}`,
+      );
+
+      setVoucherCode("");
+      setSelectedVoucher(null);
+    },
+  });
+
+  // Hàm xử lý khi voucher được chọn từ modal
+  const handleVoucherSelect = (voucher) => {
+    console.log(voucher);
+
+    setSelectedVoucher(voucher);
+
+    // Nếu voucher được chọn, cập nhật voucherCode và gọi mutation
+    if (voucher) {
+      setVoucherCode({
+        id: voucher.code,
+      });
+
+      // Gọi mutation để áp dụng voucher
+      applyVoucherMutation.mutate(
+        voucher.id,
+        // Thêm các tham số khác nếu cần
+      );
+    } else {
+      setVoucherCode("");
+      setDiscountInfo(null);
+    }
+  };
+
+  // Hàm xử lý khi mã voucher được nhập thủ công
+  const handleVoucherApply = (code) => {
+    if (!code) {
+      // Nếu code rỗng, xóa voucher
+      setVoucherCode("");
+      setSelectedVoucher(null);
+      setDiscountInfo(null);
+      return;
+    }
+
+    setVoucherCode({
+      id: code,
+    });
+
+    // Xóa voucher đã chọn
+    setSelectedVoucher(null);
+
+    // Gọi mutation để áp dụng voucher
+    applyVoucherMutation.mutate(
+      code,
+      // Thêm các tham số khác nếu cần
+    );
+  };
+
+  // Hiển thị modal với CouponModalContent
+  const handleShowCouponModal = () => {
+    showModal(
+      <CouponModalContent
+        onApplyCoupon={handleVoucherSelect}
+        selectedVoucher={selectedVoucher}
+        onCancel={hideModal}
+      />,
+      {
+        title: (
+          <Space>
+            <GiftOutlined />
+            <span>Chọn mã giảm giá</span>
+          </Space>
+        ),
+        styles: {
+          header: {
+            backgroundColor: "",
+            borderBottom: "",
+          },
+          body: {
+            padding: 0,
+            backgroundColor: "",
+          },
+          mask: {
+            backgroundColor: "rgba(145, 119, 94, 0.2)",
+          },
+          content: {
+            borderRadius: "12px",
+            overflow: "hidden",
+          },
+        },
+      },
+    );
+  };
 
   return (
     <div className="rounded-lg bg-white p-4 shadow-sm">
@@ -13,6 +147,21 @@ const CheckoutPriceInfo = () => {
         <CustomCollapse />
       </div>
 
+      <div className="mt-4">
+        {/* Coupon */}
+        <DiscountSelector
+          voucherCode={voucherCode?.id ?? ""}
+          onApplyVoucher={handleVoucherApply}
+          onShowCouponModal={handleShowCouponModal}
+          isLoading={applyVoucherMutation.isLoading}
+          isApplied={!!discountInfo}
+        />
+      </div>
+
+      {/* horizontal separate */}
+      <div className="my-4 border-t border-gray-200"></div>
+
+      {/* Price Info */}
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold">Tạm tính</span>
@@ -20,6 +169,15 @@ const CheckoutPriceInfo = () => {
             {formatCurrency({ number: +totalCartPrice || 0 })}
           </span>
         </div>
+
+        {discountInfo && discountInfo.discount > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold">Giảm giá</span>
+            <span className="text-sm font-semibold">
+              -{formatCurrency({ number: discountInfo.discount })}
+            </span>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold">Phí vận chuyển</span>
@@ -32,7 +190,13 @@ const CheckoutPriceInfo = () => {
 
       <div className="text-secondary-deep flex items-center justify-between text-xl font-semibold">
         <span>Tổng cộng</span>
-        <span>{formatCurrency({ number: +totalCartPrice || 0 })}</span>
+        <span>
+          {formatCurrency({
+            number: discountInfo?.new_total_prices
+              ? discountInfo.new_total_prices
+              : +totalCartPrice || 0,
+          })}
+        </span>
       </div>
     </div>
   );

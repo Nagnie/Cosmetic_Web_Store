@@ -4,6 +4,7 @@ import Header from "../../Header/Header.jsx";
 import Footer from "../../Footer/Footer.jsx";
 import CartDrawer from "@components/Cart/CartDrawer/CartDrawer.jsx";
 import useCartStore from "@components/Cart/ZustandCartStore.js";
+import { GlobalModal } from "@components/Modal/index.js";
 
 const GuestLayout = ({ children }) => {
   const isCartDrawerOpen =
@@ -19,6 +20,7 @@ const GuestLayout = ({ children }) => {
 
       {isCartDrawerOpen && <CartDrawer />}
       <ToastContainer autoClose={2000} position="top-center" />
+      <GlobalModal />
     </div>
   );
 };

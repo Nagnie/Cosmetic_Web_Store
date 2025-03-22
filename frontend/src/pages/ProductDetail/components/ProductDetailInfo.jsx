@@ -23,6 +23,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
       id_class:
         selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
       quantity: quantity,
+      type: product.type || "product",
     };
 
     addCartItemMutation.mutate(item);
@@ -35,12 +36,14 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
       id_class:
         selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
       quantity: quantity,
+      type: product.type || "product",
     };
 
     try {
       const res = await addCartItemMutation.mutateAsync(item);
 
       if (res && res.cart && res.cart.length > 0) {
+        toast.success("Thêm vào giỏ hàng thành công");
         navigate("/cart");
       } else {
         toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
@@ -108,11 +111,35 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
           className="!text-primary-dark !flex w-full !items-center !rounded-full !p-2 !px-4 !text-xl !font-bold"
           color="red"
         >
-          <span className="!text-2xl !font-bold">
-            {formatCurrency({
-              number: product.price ?? 229000,
-            }) ?? "229.000 đ"}
-          </span>
+          {(() => {
+            const originalPrice = product.origin_price ?? 299000;
+            const discountedPrice = product.price ?? 229000;
+            const discountPercentage = Math.round(
+              ((originalPrice - discountedPrice) / originalPrice) * 100,
+            );
+
+            return (
+              <>
+                <span className="!flex !items-center">
+                  <span className="!mr-2 !text-base !text-gray-400 !line-through">
+                    {formatCurrency({
+                      number: originalPrice,
+                    }) ?? "299.000 đ"}
+                  </span>
+                  <span className="!text-2xl !font-bold">
+                    {formatCurrency({
+                      number: discountedPrice,
+                    }) ?? "229.000 đ"}
+                  </span>
+                </span>
+                {discountPercentage > 0 && (
+                  <span className="!bg-secondary-deep !ml-2 !inline-flex !-translate-y-4 !transform !items-center !rounded-md !px-2 !py-1 !text-xs !font-bold !text-white">
+                    -{discountPercentage}%
+                  </span>
+                )}
+              </>
+            );
+          })()}
         </Tag>
       </div>
       {classification.length > 0 && (
