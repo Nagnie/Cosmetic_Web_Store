@@ -43,6 +43,12 @@ export class DiscountController {
     return this.discountService.findOne(+id, code);
   }
 
+  @Get("searchAndFilter")
+  @Public()
+  async searchAndFilter(@Req() req: Request) {
+    return await this.discountService.searchAndFilter(req);
+  }
+
   @Patch(':id')
   @Public()
   @ApiOperation({summary: "Update discount", description: "Only send fields need to update, but except 'unit' field"})
