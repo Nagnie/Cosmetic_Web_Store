@@ -10,7 +10,7 @@ import { numberToArray } from "@utils/utils.js";
 import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
 import BrandCard from "@components/BrandCard/BrandCard.jsx";
 import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
-import ComboProduct from "@pages/ComboProduct/ComboProduct.jsx";
+import ComboProductCard from "@components/ComboProductCard/ComboProductCard.jsx";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -113,7 +113,7 @@ const Homepage = () => {
       </section>
 
       <section className="mt-10">
-        <ComboProduct />
+        <ComboProductCard />
       </section>
 
       {/* Best Sellers Section */}
