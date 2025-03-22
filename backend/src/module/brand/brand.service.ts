@@ -43,20 +43,23 @@ export class BrandService {
       const take = limit as number;
       const skip = ((page as number) - 1) * (limit as number);
 
-      const totalItems = await this.brandRepository.count();
-      const allPage = Math.ceil(totalItems / take);
-
-      const data = await this.brandRepository.find({
+      // const data = await this.brandRepository.find({
+      //   order: {[(sortBy as string).toLowerCase()]: order},
+      //   skip,
+      //   take
+      // });
+      const [items, total] = await this.brandRepository.findAndCount({
         order: {[(sortBy as string).toLowerCase()]: order},
         skip,
         take
       });
+
       return new ResponseDto(HttpStatus.OK, "Successfully", {
-        total_pages: allPage,
-        total_items: totalItems,
+        total_pages: Math.ceil(total / take),
+        total_items: total,
         page,
         limit,
-        data
+        data: items
       });
     } catch (error) {
       if (error instanceof HttpException) {
