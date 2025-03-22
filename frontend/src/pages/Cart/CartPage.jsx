@@ -1,9 +1,9 @@
-import { useEffect, useRef, useMemo } from "react";
-import { Breadcrumb, Empty, List } from "antd";
-import { HomeOutlined } from "@ant-design/icons";
+import { useEffect, useRef, useMemo, useState } from "react";
+import { Breadcrumb, Empty, List, Space } from "antd";
+import { HomeOutlined, GiftOutlined } from "@ant-design/icons";
 import InfiniteScroll from "react-infinite-scroll-component";
 
-import { CartCard, CartPriceInfo } from "./components";
+import { CartCard, CartPriceInfo, DiscountSelector } from "./components";
 import { useInfiniteCartItems } from "@hooks/useCartQueries";
 import { useCartStore } from "@components/Cart";
 import {
@@ -11,8 +11,99 @@ import {
   getUnavailableClassifications,
 } from "@utils/utils";
 import CustomSpin from "@components/Spin/CustomSpin";
+import { useModalStore } from "@components/Modal";
+import { CouponModalContent } from "@components/Modal/Content";
+
+const VOUCHER = [
+  {
+    id: 1,
+    title: "Giảm giá cố định",
+    price: "200.000đ",
+    description: "Áp dụng cho đơn hàng từ 1.000.000đ",
+    code: "HOLIDAY200K",
+    expiry: "30/04/2025",
+    ribbonText: "200K",
+  },
+  {
+    id: 2,
+    title: "Freeship Extra",
+    price: "50.000đ",
+    description: "Miễn phí vận chuyển toàn quốc",
+    code: "FREESHIP50",
+    expiry: "15/04/2025",
+    ribbonText: "SHIP",
+  },
+  {
+    id: 3,
+    title: "Giảm 30%",
+    price: "Tối đa 199.000đ",
+    description: "Đơn hàng từ 300.000đ",
+    code: "FASHION30",
+    expiry: "10/04/2025",
+    ribbonText: "30%",
+  },
+  {
+    id: 4,
+    title: "Voucher Sinh Nhật",
+    price: "300.000đ",
+    description: "Quà tặng đặc biệt cho thành viên",
+    code: "BIRTHDAY300",
+    expiry: "05/04/2025",
+    ribbonText: "GIFT",
+  },
+  {
+    id: 5,
+    title: "Giảm 15%",
+    price: "Tối đa 50.000đ",
+    description: "Đơn hàng từ 200.000đ",
+    code: "NEW15PCT",
+    expiry: "20/04/2025",
+    ribbonText: "15%",
+  },
+  {
+    id: 6,
+    title: "Giảm 20%",
+    price: "Tối đa 500.000đ",
+    description: "Cho sản phẩm điện tử, công nghệ",
+    code: "TECH20PCT",
+    expiry: "25/04/2025",
+    ribbonText: "20%",
+  },
+  {
+    id: 7,
+    title: "Giảm 50%",
+    price: "Tối đa 1.000.000đ",
+    description: "Dành cho khách hàng VIP",
+    code: "VIP50PCT",
+    expiry: "01/05/2025",
+    ribbonText: "50%",
+  },
+  {
+    id: 8,
+    title: "Giảm 15%",
+    price: "Tối đa 100.000đ",
+    description: "Cho tất cả đồ gia dụng",
+    code: "HOME15PCT",
+    expiry: "12/04/2025",
+    ribbonText: "15%",
+  },
+  {
+    id: 9,
+    title: "Giảm 15%",
+    price: "Tối đa 100.000đ",
+    description: "Cho tất cả đồ gia dụng",
+    code: "HOME15PCT",
+    expiry: "12/04/2025",
+    ribbonText: "15%",
+  },
+];
 
 const CartPage = () => {
+  const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const [voucherCode, setVoucherCode] = useState("");
+
+  const showModal = useModalStore((state) => state.showModal);
+  const hideModal = useModalStore((state) => state.hideModal);
   const setItemCount = useCartStore((state) => state.setItemCount);
   const setTotalPrice = useCartStore((state) => state.setTotalPrice);
 
@@ -147,6 +238,70 @@ const CartPage = () => {
     );
   };
 
+  // Hàm xử lý khi voucher được chọn từ modal
+  const handleVoucherSelect = (voucher) => {
+    setSelectedVoucher(voucher);
+
+    // Nếu voucher được chọn, cập nhật voucherCode
+    if (voucher) {
+      setVoucherCode(voucher.code);
+    } else {
+      setVoucherCode("");
+    }
+  };
+
+  // Hàm xử lý khi mã voucher được nhập thủ công
+  const handleVoucherApply = (code) => {
+    setVoucherCode(code);
+
+    // Tìm voucher tương ứng với code để cập nhật selectedVoucher
+    if (code) {
+      // Import VOUCHER từ CouponModalContent hoặc từ service
+      const voucher = VOUCHER.find(
+        (v) => v.code.toLowerCase() === code.toLowerCase(),
+      );
+      setSelectedVoucher(voucher || null);
+    } else {
+      setSelectedVoucher(null);
+    }
+  };
+
+  // Hiển thị modal với CouponModalContent
+  const handleShowCouponModal = () => {
+    showModal(
+      <CouponModalContent
+        onApplyCoupon={handleVoucherSelect}
+        selectedVoucher={selectedVoucher}
+        onCancel={hideModal}
+      />,
+      {
+        title: (
+          <Space>
+            <GiftOutlined />
+            <span>Chọn mã giảm giá</span>
+          </Space>
+        ),
+        styles: {
+          header: {
+            backgroundColor: "",
+            borderBottom: "",
+          },
+          body: {
+            padding: 0,
+            backgroundColor: "",
+          },
+          mask: {
+            backgroundColor: "rgba(145, 119, 94, 0.2)",
+          },
+          content: {
+            borderRadius: "12px",
+            overflow: "hidden",
+          },
+        },
+      },
+    );
+  };
+
   return (
     <div className="mx-auto mt-35 mb-4 pt-10 lg:px-4">
       {/* Breadcrumb */}
@@ -177,8 +332,17 @@ const CartPage = () => {
             </div>
           </div>
         </div>
-        <div className="w-full rounded-md bg-white p-4 px-6 shadow-md lg:w-2/5">
-          <CartPriceInfo totalPrice={totalPrice} />
+        <div className="space-y-4 lg:w-2/5">
+          <div className="w-full rounded-md bg-white p-4 px-6 shadow-md">
+            <CartPriceInfo totalPrice={totalPrice} />
+          </div>
+          <div className="w-full rounded-md bg-white p-4 px-6 shadow-md">
+            <DiscountSelector
+              voucherCode={voucherCode}
+              onApplyVoucher={handleVoucherApply}
+              onShowCouponModal={handleShowCouponModal}
+            />
+          </div>
         </div>
       </div>
     </div>

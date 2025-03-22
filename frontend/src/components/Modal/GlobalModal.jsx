@@ -29,12 +29,12 @@ const GlobalModal = () => {
     footer: null,
     styles: {
       header: {
-        backgroundColor: "#FAF5F0",
-        borderBottom: "1px solid #C8B6A6",
+        // backgroundColor: "#FAF5F0",
+        // borderBottom: "1px solid #C8B6A6",
       },
       body: {
         padding: 0,
-        backgroundColor: "#FAF5F0",
+        // backgroundColor: "#FAF5F0",
       },
       mask: {
         backgroundColor: "rgba(145, 119, 94, 0.2)",

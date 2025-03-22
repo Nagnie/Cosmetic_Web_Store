@@ -48,6 +48,9 @@ const ProductCard = ({ product }) => {
           </Link>
         </h3>
         <div>
+          <span className="!mr-2 !text-[10px] font-bold !text-gray-400 !line-through">
+            299.000đ
+          </span>
           <span className="text-primary-dark font-bold">
             {formatCurrency({
               number:

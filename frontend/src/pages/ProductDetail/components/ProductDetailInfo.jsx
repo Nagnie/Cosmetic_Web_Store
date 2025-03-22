@@ -108,6 +108,9 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
           className="!text-primary-dark !flex w-full !items-center !rounded-full !p-2 !px-4 !text-xl !font-bold"
           color="red"
         >
+          <span className="!mr-2 !text-base !text-gray-400 !line-through">
+            299.000đ
+          </span>
           <span className="!text-2xl !font-bold">
             {formatCurrency({
               number: product.price ?? 229000,
