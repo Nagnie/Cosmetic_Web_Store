@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { Public } from '@/helpers/decorator/public';
 import { ApiBody, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Discount } from './entities/discount.entity';
+import { SortField } from './enum/sort_field.enum';
 
 @Controller('discount')
 export class DiscountController {
@@ -45,6 +46,13 @@ export class DiscountController {
 
   @Get("searchAndFilter")
   @Public()
+  @ApiOperation({summary: "Search And Filter discounts"})
+  @ApiQuery({ name: "code", required: false, example: "FREESHIP", default: "%", description: "Discount code"})
+  @ApiQuery({ name: 'page', required: false, example: 1, default: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 5, default: 5, description: 'Number of records per page' })
+  @ApiQuery({ name: "sortBy", enum: SortField, required: false, example: "id", default: "value", description: "Sort by field"})
+  @ApiQuery({ name: "orderBy", required: false, example: "ACS", default: "ACS", description: "Order by field"})
+  @ApiResponse({status: 200, description: "Successfully"})
   async searchAndFilter(@Req() req: Request) {
     return await this.discountService.searchAndFilter(req);
   }
