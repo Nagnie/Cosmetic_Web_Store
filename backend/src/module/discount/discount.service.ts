@@ -1,11 +1,12 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
-import { Repository } from 'typeorm';
+import { ILike, Like, Repository } from 'typeorm';
 import { Discount } from './entities/discount.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
 import { ResponseDto } from '@/helpers/utils';
+import { SortField } from './enum/sort_field.enum';
 
 @Injectable()
 export class DiscountService {
@@ -74,6 +75,39 @@ export class DiscountService {
     }
 
     return new ResponseDto(HttpStatus.OK, "Successfully", discount);
+  }
+
+  async searchAndFilter(req: Request) {
+    const {
+      code = "%",
+      page = 1,
+      limit = 5,
+      sortBy = "value",
+      orderBy = "ASC"
+    } = req.query;
+
+    const take =  isNaN(Number(limit)) ? 5 : Number(limit);
+    const skip = (isNaN(Number(page)) || isNaN(Number(limit))) ? 0 : (Number(page) - 1) * Number(limit);
+    const sortByValid = Object.values(SortField).filter((item) => item === (sortBy as string).toLowerCase());
+    console.log(code, sortByValid);
+    const [items, totalItems] = await this.discountRepository.findAndCount({
+      where: {
+        code: ILike(`%${code}%`)
+      },
+      order: { 
+        [sortByValid[0]] : orderBy as string
+      },
+      take,
+      skip,
+    })
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", {
+      total_pages: Math.ceil(totalItems / take),
+      total_items: totalItems,
+      page,
+      limit,
+      data: items
+    })
   }
 
   async update(id: number, updateDiscountDto: UpdateDiscountDto) {
