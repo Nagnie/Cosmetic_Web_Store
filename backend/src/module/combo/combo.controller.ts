@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ComboService } from './combo.service';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Public } from '@/helpers/decorator/public';
 
 @Controller('combo')
@@ -27,9 +27,14 @@ export class ComboController {
     return await this.comboService.findAll(Number(page), Number(limit));
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.comboService.findOne(+id);
+  @Get(':id_combo')
+  @Public()
+  @ApiOperation({ summary: 'Get detail combo by ID' })
+  @ApiParam({ name: 'id_combo', required: true, type: Number, description: `Combo's ID` })
+  @ApiResponse({ status: 200, description: 'Detail combo' })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  async findOne(@Param('id_combo') id_combo: string) {
+    return await this.comboService.findOne(Number(id_combo));
   }
 
   @Patch(':id')

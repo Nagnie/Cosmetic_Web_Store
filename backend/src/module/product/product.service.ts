@@ -135,7 +135,7 @@ export class ProductService {
     }
 
     async findOne(id_pro: number) {
-        const productInfo = this.dataSource.query(
+        const productInfo = await this.dataSource.query(
             `
       SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status, $2 AS type,
       COALESCE((
