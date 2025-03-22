@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Button, message, Tag } from "antd";
+import { Button, Tag } from "antd";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { toast } from "react-toastify";
 
 import QuantitySelector from "./QuantitySelector";
 import { formatCurrency } from "@utils/utils";
@@ -27,13 +28,36 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
     addCartItemMutation.mutate(item);
   };
 
+  const navigate = useNavigate();
+  const handleBuyNow = async () => {
+    const item = {
+      id_pro: product.id_pro,
+      id_class:
+        selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
+      quantity: quantity,
+    };
+
+    try {
+      const res = await addCartItemMutation.mutateAsync(item);
+
+      if (res && res.cart && res.cart.length > 0) {
+        navigate("/cart");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
+  };
+
   useEffect(() => {
     if (addCartItemMutation.isSuccess) {
-      message.success("Thêm vào giỏ hàng thành công");
+      toast.success("Thêm vào giỏ hàng thành công");
     }
 
     if (addCartItemMutation.isError) {
-      message.error("Thêm vào giỏ hàng thất bại");
+      toast.error("Thêm vào giỏ hàng thất bại");
     }
   }, [addCartItemMutation.isSuccess, addCartItemMutation.isError]);
 
@@ -134,7 +158,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
             type="primary"
             icon={<ThunderboltOutlined />}
             size="large"
-            // onClick={handleBuyNow}
+            onClick={() => handleBuyNow()}
             className="!bg-primary-dark !border-primary-dark flex flex-1 items-center justify-center !text-white"
           >
             Mua ngay

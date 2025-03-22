@@ -41,11 +41,12 @@ export class SubcategoryService {
     const offset = (page - 1) * limit;
 
     const data = await this.dataSource.query(`
-        SELECT scat.id_subcat AS id_subcat, scat.name AS scat_name, cat.name AS cat_name, COUNT(p.id_pro) AS num_pro
+        SELECT scat.id_subcat AS id_subcat, scat.name AS subcat_name, scat.id_cat AS id_cat, cat.name AS cat_name, COUNT(p.id_pro) AS num_pro
         FROM sub_category AS scat
         JOIN category AS cat ON scat.id_cat = cat.id_cat
         LEFT JOIN product AS p ON p.id_subcat = scat.id_subcat
         GROUP BY scat.id_subcat, scat.name, cat.name
+        ORDER BY scat.id_subcat ASC
         LIMIT $1 OFFSET $2
       `, [limit, offset]);
 

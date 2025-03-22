@@ -1,4 +1,4 @@
-import { Drawer, List, Spin, Empty } from "antd";
+import { Drawer, List, Empty } from "antd";
 import { CartDrawerCart } from "@components/ProductCard";
 import { useInfiniteCartItems } from "@hooks/useCartQueries";
 import useCartStore from "../ZustandCartStore";
@@ -6,11 +6,13 @@ import { CartDrawerFooter } from "..";
 import { useEffect, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useQueryClient } from "@tanstack/react-query";
+import CustomSpin from "@components/Spin/CustomSpin";
 
 const CartDrawer = () => {
   const isCartDrawerOpen = useCartStore((state) => state.isCartDrawerOpen);
   const closeCartDrawer = useCartStore((state) => state.closeCartDrawer);
   const setItemCount = useCartStore((state) => state.setItemCount);
+  const itemCount = useCartStore((state) => state.itemCount);
   const setTotalPrice = useCartStore((state) => state.setTotalPrice);
   const scrollContainerRef = useRef(null);
   const queryClient = useQueryClient(); // Để invalidate query cache
@@ -94,7 +96,9 @@ const CartDrawer = () => {
       closable={true}
       maskClosable={true}
       onClose={() => closeCartDrawer()}
-      footer={<CartDrawerFooter totalPrice={totalPrice} />}
+      footer={
+        <CartDrawerFooter itemCount={itemCount} totalPrice={totalPrice} />
+      }
     >
       <div
         id="scrollableCartContainer"
@@ -106,7 +110,7 @@ const CartDrawer = () => {
       >
         {isLoading ? (
           <div className="flex h-full items-center justify-center">
-            <Spin size="large" />
+            <CustomSpin size="large" />
           </div>
         ) : status === "error" ? (
           <div className="flex h-full items-center justify-center">
@@ -126,7 +130,7 @@ const CartDrawer = () => {
             hasMore={!!hasNextPage}
             loader={
               <div className="py-4 text-center">
-                {isFetchingNextPage && <Spin />}
+                {isFetchingNextPage && <CustomSpin />}
               </div>
             }
             scrollThreshold={0.8}

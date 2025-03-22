@@ -50,6 +50,7 @@ export class CategoryService {
         FROM category AS cat
         LEFT JOIN sub_category AS scat ON cat.id_cat = scat.id_cat
         GROUP BY cat.id_cat, cat.name
+        ORDER BY cat.id_cat ASC
         LIMIT $1 OFFSET $2
       `, [limit, offset])
 

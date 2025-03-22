@@ -15,7 +15,7 @@ const subcategoriesApi = {
     },
 
     updateSubcategoryDetail: async (id, data) => {
-        return axios.patch(`/subcategory/${id}`, data);
+        return axios.patch(`/subcategory/update/${id}`, data);
     },
 
     createSubcategory: async (data) => {

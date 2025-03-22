@@ -10,6 +10,7 @@ import { numberToArray } from "@utils/utils.js";
 import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
 import BrandCard from "@components/BrandCard/BrandCard.jsx";
 import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
+import ComboProduct from "@pages/ComboProduct/ComboProduct.jsx";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -19,21 +20,6 @@ const Homepage = () => {
 
   const brands = brandsQuery.data?.data?.data || [];
   const products = productsQuery.data?.data || [];
-
-  // Mảng chứa các link ảnh cho brands
-  const brandImages = {
-    TheOrdinary:
-      "https://i.pinimg.com/736x/a7/fb/aa/a7fbaa5d55752b8b8b7741555f06c835.jpg",
-    MediAnswer:
-      "https://i.pinimg.com/736x/e9/9d/8b/e99d8b7049f7412efbb187929c1c8a35.jpg",
-    CNP: "https://i.pinimg.com/736x/80/28/22/8028224e3cdb67631d7c432b935c6243.jpg",
-    Abib: "https://i.pinimg.com/736x/6a/e3/ad/6ae3ad1b6c91186d693d44f6156f2b54.jpg",
-    "Mise En Scene":
-      "https://i.pinimg.com/736x/6a/ed/d7/6aedd76bd4ca37cd6c7ead1a63dc2747.jpg",
-    // Thêm ảnh mặc định cho các brand khác nếu cần
-    default:
-      "https://i.pinimg.com/736x/dc/51/61/dc5161dd5e36744d184e0b98e97b9d17.jpg",
-  };
 
   // Lấy 5 brands đầu tiên
   const topBrands = brands.slice(0, 5);
@@ -76,7 +62,6 @@ const Homepage = () => {
               <BrandCard
                 key={brand.id}
                 brand={brand}
-                image={brandImages[brand.name] || brandImages.default}
               />
             ))
           )}
@@ -127,6 +112,10 @@ const Homepage = () => {
         </div>
       </section>
 
+      <section className="mt-10">
+        <ComboProduct />
+      </section>
+
       {/* Best Sellers Section */}
       <div className="px-10 py-10">
         <h2 className="text-center text-3xl font-semibold">Best Sellers</h2>
@@ -150,7 +139,7 @@ const Homepage = () => {
           style={{ backgroundColor: "#675746" }}
           onClick={() => navigate("/all_products")}
         >
-          View all products
+          Xem tất cả sản phẩm
         </button>
       </div>
     </div>

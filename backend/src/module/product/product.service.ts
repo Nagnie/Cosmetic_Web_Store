@@ -92,8 +92,8 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name,
-      pro.price AS price,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.id_cat AS cat_id, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name,
+      pro.price AS price, pro.status AS status, 
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -108,6 +108,7 @@ export class ProductService {
       JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
       JOIN category AS cat ON scat.id_cat = cat.id_cat
       JOIN brand AS bra ON pro.id_bra = bra.id_bra
+      ORDER BY pro.id_pro ASC
       LIMIT $1 OFFSET $2
     `,
             [limit, offset]
@@ -134,9 +135,9 @@ export class ProductService {
     }
 
     async findOne(id_pro: number) {
-        const productInfo = this.dataSource.query(
+        const productInfo = await this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.name AS scat_name, bra.name AS bra_name, pro.status AS pro_status,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -156,7 +157,12 @@ export class ProductService {
             [id_pro]
         );
 
-        return productInfo;
+        const res = productInfo.map(item => ({
+            ...item,
+            price: +item.price
+        }));
+
+        return res;
     }
 
     async getProductsByBrand(req: Request) {
@@ -391,7 +397,7 @@ export class ProductService {
         }
     }
 
-    async findSameBrand(bra_name: string, page: number, limit: number) {
+    async findSameBrand(id_pro: number, bra_name: string, page: number, limit: number) {
         const offset = (page - 1) * limit;
 
         const data = await this.dataSource.query(
@@ -404,10 +410,10 @@ export class ProductService {
         ) AS images
         FROM product AS pro
         JOIN brand AS bra ON pro.id_bra = bra.id_bra
-        WHERE bra.name = $1
-        LIMIT $2 OFFSET $3
+        WHERE bra.name = $1 AND pro.id_pro != $2
+        LIMIT $3 OFFSET $4
       `,
-            [bra_name, limit, offset]
+            [bra_name, id_pro, limit, offset]
         );
 
         const totalQuery = await this.dataSource.query(
@@ -415,9 +421,9 @@ export class ProductService {
         SELECT COUNT(pro.id_pro) AS total_items
         FROM product AS pro
         JOIN brand AS bra ON pro.id_bra = bra.id_bra 
-        WHERE bra.name = $1
+        WHERE bra.name = $1 AND pro.id_pro != $2
       `,
-            [bra_name]
+            [bra_name, id_pro]
         );
         const total_items = Number(totalQuery[0]?.total_items || 0);
         // console.log('TOTAL ITEMS: ', total_items);
@@ -433,12 +439,12 @@ export class ProductService {
         };
     }
 
-    async findSameSubcategory(scat_name: string, page: number, limit: number) {
+    async findSameSubcategory(id_pro: number, scat_name: string, page: number, limit: number) {
         const offset = (page - 1) * limit;
 
         const data = await this.dataSource.query(
             `
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -446,10 +452,11 @@ export class ProductService {
         ) AS images
         FROM product AS pro
         JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
-        WHERE scat.name = $1
-        LIMIT $2 OFFSET $3
+        JOIN brand AS bra ON pro.id_bra = bra.id_bra
+        WHERE scat.name = $1 AND pro.id_pro != $2
+        LIMIT $3 OFFSET $4
       `,
-            [scat_name, limit, offset]
+            [scat_name, id_pro, limit, offset]
         );
 
         const totalQuery = await this.dataSource.query(
@@ -457,9 +464,9 @@ export class ProductService {
       SELECT COUNT(pro.id_pro) AS total_items
       FROM product AS pro
       JOIN sub_category AS scat ON scat.id_subcat = pro.id_subcat 
-      WHERE scat.name = $1
+      WHERE scat.name = $1 AND pro.id_pro != $2
     `,
-            [scat_name]
+            [scat_name, id_pro]
         );
 
         const total_items = Number(totalQuery[0]?.total_items || 0);
@@ -477,7 +484,7 @@ export class ProductService {
     }
 
     async update(id_pro: number, updateProductDto: UpdateProductDto) {
-        const { pro_name, price, id_subcat, id_bra, status, img_url, classification, desc } =
+        const { pro_name, price, id_subcat, id_bra, status, images, classification, description } =
             updateProductDto;
 
         // START TRANSACTION
@@ -493,11 +500,11 @@ export class ProductService {
           SET name = $1, price = $2, id_subcat = $3, id_bra = $4, status = $5, description = $6
           WHERE id_pro = $7;
       `,
-                [pro_name, price, id_subcat, id_bra, status, desc, id_pro]
+                [pro_name, price, id_subcat, id_bra, status, description, id_pro]
             );
 
             // If having new image list
-            if (img_url && img_url.length > 0) {
+            if (images && images.length > 0) {
                 // Xóa ảnh cũ
                 await queryRunner.query(
                     `
@@ -507,7 +514,7 @@ export class ProductService {
                 );
 
                 // Thêm ảnh mới
-                for (const img of img_url) {
+                for (const img of images) {
                     await queryRunner.query(
                         `
                   INSERT INTO product_image (id_pro, link) VALUES ($1, $2);

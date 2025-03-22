@@ -14,8 +14,8 @@ const brandsApi = {
         return axios.get(`/brands/${id}`, { signal });
     },
 
-    updateBrandDDetail: async (id, { signal }) => {
-        return axios.patch(`/brands/${id}`, { signal });
+    updateBrandDDetail: async (id, data, options = {}) => {
+        return axios.patch(`/brands/${id}`, data, options);
     },
 
     createBrandD: async (data) => {

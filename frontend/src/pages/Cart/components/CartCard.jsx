@@ -16,7 +16,7 @@ const SAMPLE_ITEM = {
   price: 229000,
 };
 
-const CartDrawerCart = ({ item }) => {
+const CartDrawerCart = ({ item, availableClassifications }) => {
   const removeCartItemMutation = useRemoveCartItem();
 
   const handleRemoveItem = () => {
@@ -34,7 +34,7 @@ const CartDrawerCart = ({ item }) => {
       id_pro: item.id_pro,
       id_class: newIdClass ?? item.id_class ?? 0,
       quantity,
-      old_id_class: item.id_class,
+      old_id_class: item.id_class ?? item.old_id_class ?? 0,
     });
   };
 
@@ -60,19 +60,31 @@ const CartDrawerCart = ({ item }) => {
           {item?.name || item?.pro_name || SAMPLE_ITEM.name}
         </Link>
 
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-sm font-semibold" style={{ color: "#9b9b9b" }}>
-            Phân loại:
-          </span>
-          <Select
-            defaultValue={item?.class_name || "10ml"}
-            options={[
-              { value: "10ml", label: "10ml" },
-              { value: "20ml", label: "20ml" },
-              { value: "30ml", label: "30ml" },
-            ]}
-          />
-        </div>
+        {availableClassifications && availableClassifications?.length > 0 && (
+          <div className="mt-2 flex items-center gap-2">
+            <span
+              className="text-sm font-semibold"
+              style={{ color: "#9b9b9b" }}
+            >
+              Phân loại:
+            </span>
+            <Select
+              defaultValue={item?.class_name || "10ml"}
+              onChange={(value) => {
+                handleUpdateItem(item?.quantity, value);
+              }}
+            >
+              {availableClassifications.map((classification) => (
+                <Select.Option
+                  key={classification.id_class}
+                  value={classification.id_class}
+                >
+                  {classification.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+        )}
 
         <div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
@@ -101,6 +113,7 @@ const CartDrawerCart = ({ item }) => {
 
 CartDrawerCart.propTypes = {
   item: PropTypes.object,
+  availableClassifications: PropTypes.array,
 };
 
 export default CartDrawerCart;

@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Edit, Trash2, Search, X, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Circles } from "react-loader-spinner";
+import { MoonLoader } from "react-spinners";
 import productsApi from "@apis/productsApi.js";
 import brandsApi from "@apis/brandsApi.js";
 import subcategoriesApi from "@apis/subcategoriesApi.js";
-import ProductDetail from "./ProductDetail";
+import ProductInfo from "./ProductInfo.jsx";
 import ProductModal from "./ProductModal.jsx"
 
 const Product = () => {
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
-    const [brands, setBrands] = useState([]);
-    const [subcategories, setSubcategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
@@ -26,7 +26,7 @@ const Product = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 5;
+    const limit = 15;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
@@ -53,41 +53,8 @@ const Product = () => {
         }
     };
 
-    // Fetch subcategories
-    const fetchSubcategories = async () => {
-        try {
-            const response = await subcategoriesApi.getSubcategories();
-
-            console.log(response);
-
-            if (response.status === 200) {
-                setSubcategories(response.data.data);
-            } else {
-                throw new Error(response.message);
-            }
-        } catch (err) {
-            console.error("Error fetching subcategories:", err);
-        }
-    };
-
-    // Fetch brands
-    const fetchBrands = async () => {
-        try {
-            const response = await brandsApi.getBrands();
-            if (response.status === 200) {
-                setBrands(response.data.data.data);
-            } else {
-                throw new Error(response.data.message);
-            }
-        } catch (err) {
-            console.error("Error fetching brands:", err);
-        }
-    };
-
     useEffect(() => {
         fetchProducts();
-        fetchSubcategories();
-        fetchBrands();
     }, [page]);
 
     // Show action message
@@ -110,6 +77,8 @@ const Product = () => {
             setActionLoading(true);
             const response = await productsApi.createProduct(productData);
 
+            console.log(response);
+
             if(response.status === 200) {
                 throw new Error(response.data.message);
             }
@@ -117,7 +86,7 @@ const Product = () => {
             showActionMessage(response.message || 'Product added successfully', 'success');
             return true;
         } catch (err) {
-            showActionMessage(err.message || 'Failed to add product', 'error');
+            showActionMessage("Error adding product", err.message || 'Failed to add product', 'error');
             return false;
         } finally {
             setActionLoading(false);
@@ -163,29 +132,15 @@ const Product = () => {
         setModalOpen(true);
     };
 
-    // Open modal for editing product
-    const handleEdit = (product) => {
-        setCurrentProduct(product);
-        setIsEditing(true);
-        setModalOpen(true);
-    };
-
     // Handle form submission from modal
     const handleSubmit = async (formData) => {
-        let success = false;
-
-        if (isEditing && currentProduct) {
-            success = await updateProduct(currentProduct.id_pro, formData);
-        } else {
-            success = await addProduct(formData);
-        }
+        const success = await addProduct(formData);
 
         if (success) {
             fetchProducts();
             closeModal();
         }
     };
-
 
     // Delete product
     const handleDelete = async (id) => {
@@ -197,23 +152,19 @@ const Product = () => {
         }
     };
 
-    // View product details
-    const handleView = (product) => {
-        setSelectedProductId(product.id_pro);
-        setViewOpen(true);
+    // Navigate to product details page
+    const handleViewDetails = (productId) => {
+        navigate(`/admin/product/${productId}`);
+    };
+
+    // Navigate to edit page
+    const handleEdit = (productId) => {
+        navigate(`/admin/product/${productId}/update`);
     };
 
     // Close modal
     const closeModal = () => {
         setModalOpen(false);
-        setCurrentProduct(null);
-        setIsEditing(false);
-    };
-
-    // Close view modal
-    const closeViewModal = () => {
-        setViewOpen(false);
-        setSelectedProductId(null);
     };
 
     // Handle pagination
@@ -228,7 +179,7 @@ const Product = () => {
     return (
         <div>
             {/* Main Content */}
-            <main className="container mx-auto px-5">
+            <main className="container mx-auto px-5 mb-20">
                 {/* Action Message */}
                 {actionMessage.text && (
                     <div className={`mb-4 p-3 rounded ${actionMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -271,15 +222,7 @@ const Product = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-80">
-                        <Circles
-                            height="70"
-                            width="70"
-                            color="#c42e57"
-                            ariaLabel="circles-loading"
-                            wrapperStyle={{}}
-                            wrapperClass=""
-                            visible={true}
-                        />
+                        <MoonLoader color={"#c42e57"}  />
                     </div>
                 )}
 
@@ -295,12 +238,13 @@ const Product = () => {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead style={{ backgroundColor: '#D14D72' }}>
                             <tr>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Product</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Category</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Subcategory</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Brand</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Price</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">ID</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Product</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Category</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Subcategory</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Brand</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Price</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider"></th>
                             </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -308,6 +252,13 @@ const Product = () => {
                                 filteredProducts.map(product => (
                                     <tr key={product.id_pro} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div>
+                                                    <div className="font-medium text-gray-900">{product.id_pro}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap cursor-pointer hover:text-bold" onClick={() => handleViewDetails(product.id_pro)}>
                                             <div className="flex items-center">
                                                 <div>
                                                     <div className="font-medium text-gray-900">{product.pro_name}</div>
@@ -330,18 +281,12 @@ const Product = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            ${Number(product.price).toFixed(2)}
+                                            {Number(product.price)} VND
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
                                                 <button
-                                                    onClick={() => handleView(product)}
-                                                    className="text-indigo-600 hover:text-indigo-900"
-                                                >
-                                                    <Eye size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleEdit(product)}
+                                                    onClick={() => handleEdit(product.id_pro)}
                                                     className="text-blue-600 hover:text-blue-900"
                                                 >
                                                     <Edit size={18} />
@@ -415,19 +360,8 @@ const Product = () => {
                 product={currentProduct}
                 isEditing={isEditing}
                 onSubmit={handleSubmit}
-                subcategories={subcategories}
-                brands={brands}
                 isLoading={actionLoading}
             />
-
-            {/* View Product Details Modal */}
-            {viewOpen && selectedProductId && (
-                <ProductDetail
-                    isOpen={viewOpen}
-                    onClose={closeViewModal}
-                    productId={selectedProductId}
-                />
-            )}
         </div>
     );
 };

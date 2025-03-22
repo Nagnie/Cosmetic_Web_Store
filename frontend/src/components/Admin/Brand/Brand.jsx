@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { DNA } from 'react-loader-spinner';
+import { RingLoader } from 'react-spinners';
 import brandsApi from "@apis/brandsApi.js";
 
 const Brand = () => {
@@ -13,7 +13,7 @@ const Brand = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 5;
+    const limit = 8;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
@@ -21,6 +21,7 @@ const Brand = () => {
     const [currentBrand, setCurrentBrand] = useState(null);
     const [newBrand, setNewBrand] = useState({
         name: '',
+        image: '',
     });
     const [isEditing, setIsEditing] = useState(false);
 
@@ -32,7 +33,7 @@ const Brand = () => {
 
             if (response.data.statusCode === 200) {
                 setBrands(response.data.data.data);
-                setTotalPages(response.data.data.allPage);
+                setTotalPages(response.data.data.total_pages);
             } else {
                 throw new Error(response.data.message || 'Failed to fetch brands');
             }
@@ -97,7 +98,11 @@ const Brand = () => {
     const updateBrand = async (id, brandData) => {
         try {
             setActionLoading(true);
-            const response = await brandsApi.updateBrandDDetail(id, { body: brandData });
+
+            console.log("branddata", brandData);
+            const response = await brandsApi.updateBrandDDetail(id, brandData );
+
+            console.log("Response", response);
 
             if (response.data.statusCode !== 200) {
                 throw new Error(response.data.message || 'Failed to update brand');
@@ -140,7 +145,7 @@ const Brand = () => {
         e.preventDefault();
 
         // Extract only the name field for API request
-        const brandData = { name: newBrand.name };
+        const brandData = { name: newBrand.name, image: newBrand.image };
         let success = false;
 
         if (isEditing && currentBrand) {
@@ -163,7 +168,8 @@ const Brand = () => {
     const handleEdit = (brand) => {
         setCurrentBrand(brand);
         setNewBrand({
-            name: brand.name
+            name: brand.name,
+            image: brand.image,
         });
         setIsEditing(true);
         setFormOpen(true);
@@ -183,6 +189,7 @@ const Brand = () => {
     const resetForm = () => {
         setNewBrand({
             name: '',
+            image: '',
         });
         setCurrentBrand(null);
         setIsEditing(false);
@@ -243,14 +250,7 @@ const Brand = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-70">
-                        <DNA
-                            visible={true}
-                            height="100"
-                            width="100"
-                            ariaLabel="dna-loading"
-                            wrapperStyle={{}}
-                            wrapperClass="dna-wrapper"
-                        />
+                        <RingLoader color="#ffa6ae" />
                     </div>
                 )}
 
@@ -266,8 +266,10 @@ const Brand = () => {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead style={{ backgroundColor: '#D14D72' }}>
                             <tr>
+                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">ID</th>
                                 <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Brand Name</th>
                                 <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Product Count</th>
+                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Image</th>
                                 <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Actions</th>
                             </tr>
                             </thead>
@@ -277,11 +279,19 @@ const Brand = () => {
                                     <tr key={brand.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
+                                                <div className="font-medium text-gray-900">{brand.id}</div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
                                                 <div className="font-medium text-gray-900">{brand.name}</div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {brand.numProducts}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <img src={brand.image} alt={brand.name} className={"h-30 rounded-2xl"} />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">
@@ -317,7 +327,7 @@ const Brand = () => {
 
                 {/* Pagination */}
                 {!loading && !error && totalPages > 1 && (
-                    <div className="flex justify-center items-center mt-10 space-x-2">
+                    <div className="flex justify-center items-center my-10 space-x-2">
                         {/* First Page */}
                         <button
                             onClick={() => handlePrevPage()}
@@ -375,6 +385,18 @@ const Brand = () => {
                                             type="text"
                                             name="name"
                                             value={newBrand.name}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            required
+                                            disabled={actionLoading}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-medium text-gray-700 my-3">Image Link</label>
+                                        <input
+                                            type="text"
+                                            name="image"
+                                            value={newBrand.image}
                                             onChange={handleInputChange}
                                             className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
                                             required

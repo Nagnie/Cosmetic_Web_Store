@@ -37,7 +37,7 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     @IsArray({ message: `Link must be an array` })
     @IsString({ each: true, message: `Each link must be a string` })
     @IsOptional()
-    img_url?: string[];
+    images?: string[];
 
     @ApiProperty({
         example: ['20ml', '30ml', '50ml'],
@@ -56,5 +56,5 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     })
     @IsString({ message: `Product's description must be a string` })
     @IsOptional()
-    desc?: string;
+    description?: string;
 }

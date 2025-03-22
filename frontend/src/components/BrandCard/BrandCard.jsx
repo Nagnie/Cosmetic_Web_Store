@@ -1,6 +1,6 @@
 import {useNavigate} from "react-router-dom";
 
-const BrandCard = ({ brand, image }) => {
+const BrandCard = ({ brand }) => {
     const navigate = useNavigate();
 
     const handleClick = () => {
@@ -14,7 +14,7 @@ const BrandCard = ({ brand, image }) => {
         >
             {/* Image */}
             <img
-                src={image}
+                src={brand.image}
                 alt={brand.name}
                 className="h-full w-full object-cover"
             />
@@ -25,7 +25,7 @@ const BrandCard = ({ brand, image }) => {
                     {brand.name}
                 </h3>
                 <p className="mt-1 text-sm text-white">
-                    {brand.numProducts} product{brand.numProducts !== 1 ? "s" : ""}
+                    {brand.numProducts} sản phẩm
                 </p>
             </div>
         </div>

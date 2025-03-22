@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
-import { Empty, List, Spin } from "antd";
+import { Empty, List } from "antd";
 import { DownOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 import { useInfiniteCartItems } from "@hooks/useCartQueries";
 import { CheckoutCard } from ".";
+import CustomSpin from "@components/Spin/CustomSpin";
 
 const CustomCollapse = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,7 +62,7 @@ const CustomCollapse = () => {
         >
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
-              <Spin size="large" />
+              <CustomSpin size="large" />
             </div>
           ) : status === "error" ? (
             <div className="flex h-full items-center justify-center">
@@ -81,7 +82,7 @@ const CustomCollapse = () => {
               hasMore={!!hasNextPage}
               loader={
                 <div className="py-4 text-center">
-                  {isFetchingNextPage && <Spin />}
+                  {isFetchingNextPage && <CustomSpin />}
                 </div>
               }
               scrollThreshold={0.8}

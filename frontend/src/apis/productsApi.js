@@ -30,7 +30,7 @@ const productsApi = {
     });
   },
 
-  getProductAdmin: async ({ page = 1, limit = 9 }) => {
+  getProductAdmin: async ({ page, limit}) => {
     return axios.get(`/product`, {
       params: {
         page,
@@ -39,17 +39,18 @@ const productsApi = {
     });
   },
 
-  getProductDetail: async (id, { signal }) => {
-    return axios.get(`/product/${id}`, { signal });
+  getProductDetail: async (id) => {
+    return axios.get(`/product/${id}`);
   },
 
   getProductsByBrand: (
-    brandName,
+    { brandName, id_pro },
     { pageParam = 1, limit = 8, signal } = {},
   ) => {
     return axios.get("/product/same_brand", {
       signal,
       params: {
+        id_pro: id_pro,
         bra_name: brandName,
         limit: limit,
         page: pageParam,
@@ -58,12 +59,13 @@ const productsApi = {
   },
 
   getProductsByCategory: (
-    categoryName,
+    { categoryName, id_pro },
     { pageParam = 1, limit = 8, signal } = {},
   ) => {
     return axios.get("/product/same_subcategory", {
       signal,
       params: {
+        id_pro: id_pro,
         scat_name: categoryName,
         limit: limit,
         page: pageParam,
@@ -124,6 +126,18 @@ const productsApi = {
         limit,
       },
     });
+  },
+
+  createProduct: async (productData) => {
+    return axios.post(`/product/create`, productData);
+  },
+
+  deleteProduct: async (productId) => {
+    return axios.delete(`/product/delete/${productId}`, {});
+  },
+
+  updateProduct: async (productId, productData) => {
+    return axios.patch(`/product/update/${productId}`, productData);
   },
 };
 

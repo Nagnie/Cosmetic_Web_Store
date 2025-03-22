@@ -7,10 +7,31 @@ import { Public } from '@/helpers/decorator/public';
 import { ApiBody, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Discount } from './entities/discount.entity';
 import { SortField } from './enum/sort_field.enum';
+import { ApplyDiscountDto } from './dto/apply-discount.dto';
+import { ApplicationConfig } from '@nestjs/core';
 
 @Controller('discount')
 export class DiscountController {
-  constructor(private readonly discountService: DiscountService) {}
+  constructor(
+    private readonly discountService: DiscountService
+  ) {}
+
+  @Get('get-in-cart')
+  @Public()
+  @ApiOperation({summary: "Get discounts in cart/order"})
+  @ApiResponse({status: 200, description: "Successfully"})
+  async getDiscountInCart(@Req() req: Request & { session: any }){
+    return this.discountService.getDiscountInCart(req);
+  }
+
+  @Post('apply')
+  @Public()
+  @ApiOperation({summary: "Apply discount"})
+  @ApiResponse({status: 201, description: "Apply discount successfully"})
+  @ApiBody({type: ApplyDiscountDto})
+  async applyDiscount(@Req() req: Request & { session: any }, @Body() applyDiscountDto: ApplyDiscountDto){
+    return await this.discountService.applyDiscount(req, applyDiscountDto);
+  }
 
   @Post()
   @Public()
