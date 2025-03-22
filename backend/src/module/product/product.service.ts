@@ -93,7 +93,7 @@ export class ProductService {
         const data = await this.dataSource.query(
             `
       SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.id_cat AS cat_id, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name,
-      pro.price AS price, pro.status AS status, $3 AS type,
+      pro.price AS price, pro.origin_price AS origin_price, pro.status AS status, $3 AS type,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -137,7 +137,7 @@ export class ProductService {
     async findOne(id_pro: number) {
         const productInfo = await this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status, $2 AS type,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS price, pro.origin_price AS origin_price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status, $2 AS type,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -262,7 +262,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-            SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name, $4 AS type,
+            SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $4 AS type,
             COALESCE((
             SELECT json_agg(img.link)
             FROM product_image AS img
@@ -398,7 +398,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name, $5 AS type,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $5 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -440,7 +440,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name, $5 AS type,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $5 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
