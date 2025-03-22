@@ -21,9 +21,10 @@ const CartDrawerCart = ({ item, availableClassifications }) => {
 
   const handleRemoveItem = () => {
     removeCartItemMutation.mutate({
-      id_pro: item.id_pro,
+      id_pro: item.id_pro ?? item.id,
       id_class: item.id_class ?? 0,
       quantity: item.quantity,
+      type: item.type || "product",
     });
   };
 
@@ -31,10 +32,11 @@ const CartDrawerCart = ({ item, availableClassifications }) => {
 
   const handleUpdateItem = (quantity, newIdClass) => {
     updateCartItemMutation.mutate({
-      id_pro: item.id_pro,
+      id_pro: item.id_pro ?? item.id,
       id_class: newIdClass ?? item.id_class ?? 0,
       quantity,
       old_id_class: item.id_class ?? item.old_id_class ?? 0,
+      type: item.type || "product",
     });
   };
 

@@ -11,6 +11,9 @@ const VoucherCurvedSlider = ({
   itemsToShow = 5,
   autoSlide = false,
   autoSlideInterval = 3000,
+  onLoadMore = null,
+  hasMoreItems = false,
+  isLoadingMore = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -19,6 +22,7 @@ const VoucherCurvedSlider = ({
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const animationTimeoutRef = useRef(null);
+  const loadMoreTriggeredRef = useRef(false);
 
   // Định nghĩa khoảng cách giữa các item
   const itemGap = 20;
@@ -57,6 +61,29 @@ const VoucherCurvedSlider = ({
     };
   }, []);
 
+  useEffect(() => {
+    // Nếu người dùng đã cuộn gần đến cuối danh sách và có thêm dữ liệu để tải
+    if (
+      activeIndex > items.length - currentItemsToShow - 2 && // Còn khoảng 2 items trước khi đến cuối
+      hasMoreItems &&
+      onLoadMore &&
+      !isLoadingMore &&
+      !loadMoreTriggeredRef.current
+    ) {
+      loadMoreTriggeredRef.current = true;
+      onLoadMore().then(() => {
+        loadMoreTriggeredRef.current = false;
+      });
+    }
+  }, [
+    activeIndex,
+    items.length,
+    currentItemsToShow,
+    hasMoreItems,
+    onLoadMore,
+    isLoadingMore,
+  ]);
+
   // Tự động trượt nếu được bật
   useEffect(() => {
     let interval;
@@ -73,24 +100,6 @@ const VoucherCurvedSlider = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoSlide, autoSlideInterval, isAnimating, items.length]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "ArrowLeft") {
-        handlePrev();
-      } else if (e.key === "ArrowRight") {
-        handleNext();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAnimating]);
 
   // Reset trạng thái animation sau khi hoàn tất
   useEffect(() => {
@@ -216,6 +225,18 @@ const VoucherCurvedSlider = ({
     );
   };
 
+  // Hiển thị loading indicator nếu đang tải thêm
+  const renderLoadingIndicator = () => {
+    if (isLoadingMore) {
+      return (
+        <div className="voucher-loading-indicator">
+          <div className="voucher-loading-spinner"></div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Kiểm tra nếu không có items hoặc chỉ có 1 item
   if (!items.length) {
     return (
@@ -337,6 +358,9 @@ const VoucherCurvedSlider = ({
               })}
             </div>
           </div>
+
+          {/* Hiển thị loading indicator */}
+          {renderLoadingIndicator()}
         </div>
 
         {items.length > 1 && (
@@ -391,6 +415,9 @@ VoucherCurvedSlider.propTypes = {
   itemsToShow: PropTypes.number,
   autoSlide: PropTypes.bool,
   autoSlideInterval: PropTypes.number,
+  onLoadMore: PropTypes.func,
+  hasMoreItems: PropTypes.bool,
+  isLoadingMore: PropTypes.bool,
 };
 
 export default VoucherCurvedSlider;

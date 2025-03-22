@@ -20,20 +20,23 @@ export const updateCartItem = async ({
   id_class,
   quantity,
   old_id_class,
+  type,
 }) => {
   const res = await axios.patch("/cart/update", {
     id_pro,
     id_class,
     quantity,
     old_id_class,
+    type,
   });
 
   return res.data;
 };
 
-export const removeCartItem = async ({ id_pro, id_class }) => {
+export const removeCartItem = async ({ id_pro, id_class, type }) => {
+  console.log("removeCartItem", { id_pro, id_class, type });
   const res = await axios.delete(`/cart/delete`, {
-    data: { id_pro, id_class },
+    data: { id_pro, id_class, type },
   });
 
   return res.data;

@@ -23,6 +23,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
       id_class:
         selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
       quantity: quantity,
+      type: product.type || "product",
     };
 
     addCartItemMutation.mutate(item);
@@ -35,12 +36,14 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
       id_class:
         selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
       quantity: quantity,
+      type: product.type || "product",
     };
 
     try {
       const res = await addCartItemMutation.mutateAsync(item);
 
       if (res && res.cart && res.cart.length > 0) {
+        toast.success("Thêm vào giỏ hàng thành công");
         navigate("/cart");
       } else {
         toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
