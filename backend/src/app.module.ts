@@ -11,7 +11,6 @@ import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { ImageModule } from './module/image/image.module';
-import { MinioService } from './minio/minio.service';
 import { RolesGuard } from './auth/guard/role.guard';
 import { BrandModule } from './module/brand/brand.module';
 import { ProductModule } from './module/product/product.module';
@@ -68,7 +67,6 @@ import { CartModule } from './module/cart/cart.module';
       provide: APP_GUARD,
       useClass: RolesGuard
     },
-    MinioService,
   ],
 })
 export class AppModule implements NestModule {

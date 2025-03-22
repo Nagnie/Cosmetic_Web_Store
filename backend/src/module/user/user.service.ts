@@ -9,7 +9,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { MinioService } from '@/minio/minio.service';
 
 @Injectable()
 export class UserService {
@@ -17,7 +16,6 @@ export class UserService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private dataSource: DataSource,
-    private readonly minioService: MinioService,
   ) {}
 
   async findByEmail(email: string) {

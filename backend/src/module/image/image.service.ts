@@ -4,7 +4,6 @@ import { UpdateImageDto } from './dto/update-image.dto';
 import { DataSource, Repository } from 'typeorm';
 import { Image } from './entities/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MinioService } from '@/minio/minio.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -15,8 +14,6 @@ export class ImageService {
 
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
-
-    private readonly minioService: MinioService,
     private readonly configService : ConfigService
   ) {
 
