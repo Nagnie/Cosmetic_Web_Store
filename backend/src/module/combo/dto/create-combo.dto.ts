@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-import { ComboStatus } from "../enum/status_enum.enum";
+import { ComboStatus } from "../enum/combo_status.enum";
 import { Type } from "class-transformer";
 
 export class CreateComboDto {
