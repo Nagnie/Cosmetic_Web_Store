@@ -93,7 +93,7 @@ export class ProductService {
         const data = await this.dataSource.query(
             `
       SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.id_cat AS cat_id, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name,
-      pro.price AS price, pro.status AS status, 
+      pro.price AS price, pro.origin_price AS origin_price, pro.status AS status, $3 AS type,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -111,7 +111,7 @@ export class ProductService {
       ORDER BY pro.id_pro ASC
       LIMIT $1 OFFSET $2
     `,
-            [limit, offset]
+            [limit, offset, "product"]
         );
 
         const totalQuery = await this.dataSource.query(`
@@ -137,7 +137,7 @@ export class ProductService {
     async findOne(id_pro: number) {
         const productInfo = await this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS price, pro.origin_price AS origin_price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status, $2 AS type,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -154,7 +154,7 @@ export class ProductService {
       JOIN brand AS bra ON pro.id_bra = bra.id_bra
       WHERE pro.id_pro = $1
     `,
-            [id_pro]
+            [id_pro, "product"]
         );
 
         const res = productInfo.map(item => ({
@@ -181,7 +181,7 @@ export class ProductService {
             const allPage = Math.ceil(allItems.length / (limit as number));
             const products = await this.dataSource.query(
                 `
-        SELECT p.*,
+        SELECT p.*, $4 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -197,7 +197,7 @@ export class ProductService {
         WHERE LOWER(b.name) LIKE CONCAT('%', $1::TEXT, '%')
         LIMIT $2 OFFSET $3
       `,
-                [brandName, limit, ((page as number) - 1) * (limit as number)]
+                [brandName, limit, ((page as number) - 1) * (limit as number), "product"]
             );
             return new ResponseDto(HttpStatus.OK, "Successfully", {
                 total_pages: allPage,
@@ -231,7 +231,7 @@ export class ProductService {
             const allPage = Math.ceil(allItems.length / (limit as number));
             const products = await this.dataSource.query(
                 `
-        SELECT p.*,
+        SELECT p.*, $5 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -248,7 +248,7 @@ export class ProductService {
         WHERE ($1::TEXT IS NULL OR LOWER(c.name) LIKE CONCAT('%', $1::TEXT, '%')) AND ($2::TEXT IS NULL OR LOWER(sc.name) LIKE CONCAT('%', $2::TEXT, '%'))
         LIMIT $3 OFFSET $4
       `,
-                [cateName, subCateName, limit, ((page as number) - 1) * (limit as number)]
+                [cateName, subCateName, limit, ((page as number) - 1) * (limit as number), "product"]
             );
             return new ResponseDto(HttpStatus.OK, "Successfully", {
                 total_pages: allPage,
@@ -267,7 +267,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-            SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name,
+            SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $4 AS type,
             COALESCE((
             SELECT json_agg(img.link)
             FROM product_image AS img
@@ -279,7 +279,7 @@ export class ProductService {
             WHERE scat.name = $1
             LIMIT $2 OFFSET $3
         `,
-            [scat_name, limit, offset]
+            [scat_name, limit, offset, "product"]
         );
 
         const totalQuery = await this.dataSource.query(
@@ -348,7 +348,7 @@ export class ProductService {
 
             const products = await this.dataSource.query(
                 `
-        SELECT p.*,
+        SELECT p.*, $9 AS type,
           COALESCE((
             SELECT json_agg(img.link)
             FROM product_image AS img
@@ -381,6 +381,7 @@ export class ProductService {
                     maxPrice,
                     limit,
                     ((page as number) - 1) * (limit as number),
+                    "product"
                 ]
             );
 
@@ -402,7 +403,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $5 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -413,7 +414,7 @@ export class ProductService {
         WHERE bra.name = $1 AND pro.id_pro != $2
         LIMIT $3 OFFSET $4
       `,
-            [bra_name, id_pro, limit, offset]
+            [bra_name, id_pro, limit, offset, "product"]
         );
 
         const totalQuery = await this.dataSource.query(
@@ -444,7 +445,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, bra.name AS bra_name,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $5 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -456,7 +457,7 @@ export class ProductService {
         WHERE scat.name = $1 AND pro.id_pro != $2
         LIMIT $3 OFFSET $4
       `,
-            [scat_name, id_pro, limit, offset]
+            [scat_name, id_pro, limit, offset, "product"]
         );
 
         const totalQuery = await this.dataSource.query(

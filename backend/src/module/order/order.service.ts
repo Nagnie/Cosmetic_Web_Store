@@ -39,22 +39,60 @@ export class OrderService {
       }
     }
 
-    const cartItemsJson = JSON.stringify(req.session.cart);
-    const data = await this.dataSource.query(`
+    const cartJson = JSON.stringify(req.session.cart);
+    const data = await this.dataSource.query(
+      `
       WITH cart_items AS (
           SELECT * FROM jsonb_to_recordset($1::jsonb) 
-          AS x(id_pro INT, id_class INT, quantity INT)
+          AS x(id_pro INT, id_class INT, quantity INT, type TEXT)
       )
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, class.id_class AS id_class, class.name AS class_name, (ci.quantity * pro.price) AS pro_price, ci.quantity AS quantity,
-      COALESCE((
-        SELECT json_agg(img.link)
-        FROM product_image AS img
-        WHERE img.id_pro = pro.id_pro), '[]'::json
-      ) AS images
+      SELECT 
+          pro.id_pro AS id, 
+          pro.name AS name, 
+          class.id_class AS id_class, 
+          class.name AS class_name, 
+          pro.price AS price, 
+          ci.quantity AS quantity,
+          'product' AS type,
+          COALESCE((
+              SELECT json_agg(img.link)
+              FROM product_image AS img
+              WHERE img.id_pro = pro.id_pro), '[]'::json
+          ) AS images,
+          COALESCE(
+              (SELECT json_agg(DISTINCT jsonb_build_object('id_class', class.id_class, 'name', class.name)) 
+              FROM classification AS class 
+              WHERE class.id_pro = pro.id_pro), '[]'::json
+          ) AS classification
       FROM cart_items AS ci
       JOIN product AS pro ON pro.id_pro = ci.id_pro
       LEFT JOIN classification AS class ON class.id_class = ci.id_class
-    `, [cartItemsJson])
+      WHERE ci.type = 'product'
+      
+      UNION ALL
+      
+      SELECT 
+          com.id_combo AS id, 
+          com.name AS name, 
+          NULL AS id_class, 
+          NULL AS class_name, 
+          com.price AS price, 
+          ci.quantity AS quantity,
+          'combo' AS type,
+          COALESCE((
+              SELECT json_agg(img.link)
+              FROM combo_image AS img
+              WHERE img.id_combo = com.id_combo), '[]'::json
+          ) AS images,
+          NULL AS classification
+      FROM cart_items AS ci
+      JOIN combo AS com ON com.id_combo = ci.id_pro
+      WHERE ci.type = 'combo'
+  
+      ORDER BY name ASC
+  `,
+      [cartJson]
+    );
 
     return {
       data: data
@@ -83,10 +121,10 @@ export class OrderService {
       // INSERT ORDER DETAIL
       for (const item of order_items) {
         await queryRunner.query(`
-          INSERT INTO order_detail(order_id, pro_id, pro_name, pro_image, class_id, class_name, quantity, price)
-          VALUES($1, $2, $3, $4, $5, $6, $7, $8)
+          INSERT INTO order_detail(order_id, pro_id, pro_name, pro_image, class_id, class_name, quantity, price, type)
+          VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
           RETURNING *;
-          `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price]);
+          `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price, item.type]);
       }
 
       // Create invoice's image

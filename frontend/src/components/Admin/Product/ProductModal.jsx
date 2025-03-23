@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import {Save, X} from 'lucide-react';
 
 const ProductModal = ({
                           isOpen,
@@ -106,7 +106,7 @@ const ProductModal = ({
                                 value={formData.pro_name}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
 
@@ -121,7 +121,7 @@ const ProductModal = ({
                                 value={formData.id_subcat}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
 
@@ -136,7 +136,7 @@ const ProductModal = ({
                                 value={formData.id_bra}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
 
@@ -152,7 +152,7 @@ const ProductModal = ({
                                 onChange={handleChange}
                                 required
                                 step="0.01"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
 
@@ -165,7 +165,7 @@ const ProductModal = ({
                                 name="status"
                                 value={formData.status}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
                             >
                                 <option value="Available">Available</option>
                                 <option value="Out of Stock">Ordering</option>
@@ -182,7 +182,7 @@ const ProductModal = ({
                                 value={formData.img_url}
                                 onChange={handleChange}
                                 rows="2"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
                                 placeholder="/link1, /link2, /link3"
                             />
                             <p className="text-xs text-gray-500 mt-1">
@@ -200,7 +200,7 @@ const ProductModal = ({
                                 name="classification"
                                 value={formData.classification}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
                                 placeholder="20ml, 30ml, 50ml"
                             />
                             <p className="text-xs text-gray-500 mt-1">
@@ -218,7 +218,7 @@ const ProductModal = ({
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows="4"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
                     </div>
@@ -227,18 +227,31 @@ const ProductModal = ({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                            className="px-4 py-2 border border-gray-700 rounded-md text-gray-700 hover:bg-gray-50"
                         >
                             Cancel
                         </button>
                         <button
-                            type="submit"
+                            type="submit" style={{ background: '#D14D72' }}
                             disabled={isLoading}
-                            className={`px-4 py-2 rounded-md text-white bg-pink-600 hover:bg-pink-700 ${
+                            className={`px-4 py-2 rounded-md flex items-center text-white hover:bg-pink-700 ${
                                 isLoading ? 'opacity-75 cursor-not-allowed' : ''
                             }`}
                         >
-                            {isLoading ? 'Processing...' : isEditing ? 'Update Product' : 'Add Product'}
+                            {isLoading ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Processing...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="inline mr-2" size={16} />
+                                    { isEditing ? 'Update Product' : 'Add Product' }
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>

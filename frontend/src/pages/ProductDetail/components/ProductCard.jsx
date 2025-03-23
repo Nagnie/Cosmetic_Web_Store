@@ -1,7 +1,14 @@
 import { Image } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useState } from "react";
+import { BsCartPlus } from "react-icons/bs";
+import { FaShoppingBag } from "react-icons/fa";
+import { motion } from "framer-motion";
+
 import { formatCurrency } from "@utils/utils";
+import { useAddCartItem } from "@hooks/useCartQueries";
+import { toast } from "react-toastify";
 
 const SAMPLE_PRODUCT = {
   images: [
@@ -13,9 +20,65 @@ const SAMPLE_PRODUCT = {
 };
 
 const ProductCard = ({ product }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  const classification = product.classification ?? [];
+
+  const addCartItemMutation = useAddCartItem();
+
+  const handleAddToCart = async () => {
+    const item = {
+      id_pro: product.id_pro,
+      id_class: classification[0]?.id_class ?? 0,
+      quantity: 1,
+      type: product.type || "product",
+    };
+
+    try {
+      const res = await addCartItemMutation.mutateAsync(item);
+
+      if (res && res.cart && res.cart.length > 0) {
+        toast.success("Thêm vào giỏ hàng thành công");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
+  };
+
+  const navigate = useNavigate();
+  const handleBuyNow = async () => {
+    const item = {
+      id_pro: product.id_pro,
+      id_class: classification[0]?.id_class ?? 0,
+      quantity: 1,
+      type: product.type || "product",
+    };
+
+    try {
+      const res = await addCartItemMutation.mutateAsync(item);
+
+      if (res && res.cart && res.cart.length > 0) {
+        toast.success("Thêm vào giỏ hàng thành công");
+        navigate("/cart");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
+  };
+
   return (
     <div>
-      <div className="product-image relative aspect-square p-1">
+      <div
+        className="product-image relative aspect-square p-1"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Link
           to={`/products/${encodeURIComponent(product.pro_name)}/${product.id_pro}`}
           className="aspect-square w-full"
@@ -29,7 +92,29 @@ const ProductCard = ({ product }) => {
             className="aspect-square w-full cursor-pointer object-contain"
           />
         </Link>
-        <div></div>
+        {isHovered && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center gap-2 overflow-hidden rounded-lg"
+            initial={{ opacity: 0, y: 20 }} // Bắt đầu ở dưới (y: 20px)
+            animate={{ opacity: 1, y: 0 }} // Di chuyển lên vị trí gốc
+            exit={{ opacity: 0, y: 20 }} // Khi mất đi, trượt xuống lại
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            <button
+              className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2 transition-colors hover:bg-amber-100"
+              onClick={() => handleBuyNow()}
+            >
+              <FaShoppingBag size={18} />
+              <span>Mua ngay</span>
+            </button>
+            <button
+              className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2 transition-colors hover:bg-amber-50"
+              onClick={() => handleAddToCart()}
+            >
+              <BsCartPlus size={22} />
+            </button>
+          </motion.div>
+        )}
       </div>
       <div className="product-info p-2 text-left">
         <div>
@@ -48,6 +133,12 @@ const ProductCard = ({ product }) => {
           </Link>
         </h3>
         <div>
+          <span className="!mr-2 !text-[10px] font-bold !text-gray-400 !line-through">
+            {formatCurrency({
+              number:
+                product.origin_price ?? product.pro_origin_price ?? 299000,
+            }) ?? "299.000 đ"}
+          </span>
           <span className="text-primary-dark font-bold">
             {formatCurrency({
               number:

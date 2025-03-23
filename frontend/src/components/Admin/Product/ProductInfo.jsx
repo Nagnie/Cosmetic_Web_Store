@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import productsApi from '@apis/productsApi';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation"
-import { HashLoader } from "react-spinners";
+import { PulseLoader } from "react-spinners";
+import {Edit, Trash2} from "lucide-react";
 
 const ProductInfo = () => {
     const { id } = useParams();
@@ -62,21 +63,11 @@ const ProductInfo = () => {
 
     if (loading) {
         return (
-            <div className={"container pt-30 mx-auto"}>
-                <HashLoader
-                    strokeColor={"#D14D72"}
-                    visible={true}
-                    height="96"
-                    width="96"
-                    color="grey"
-                    strokeWidth="5"
-                    animationDuration="0.75"
-                    ariaLabel="rotating-lines-loading"
-                    wrapperStyle={{}}
-                    wrapperClass=""
+            <div className={"container pt-30 mt-20 mx-auto"}>
+                <PulseLoader
+                    color={"#D14D72"}
                 />
             </div>
-
         );
     }
 
@@ -123,15 +114,16 @@ const ProductInfo = () => {
                 <div className="flex space-x-2">
                     <button
                         onClick={handleEdit}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                        className="px-4 py-2 bg-teal-600 flex items-center text-white rounded-md hover:bg-teal-700"
                     >
-                        Edit Product
+                        <Edit size={18} className={"me-2"} />
+                        Edit
                     </button>
                     <button
                         onClick={handleDelete}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                        className="px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700"
                     >
-                        Delete
+                        <Trash2 size={18} />
                     </button>
                 </div>
             </div>
@@ -157,7 +149,7 @@ const ProductInfo = () => {
                                         </SwiperSlide>
                                     ))}
                             </Swiper>
-                            <div className={"mt-5"}>Tổng cộng: {product.images.length} hình ảnh</div>
+                            <div className={"mt-5"}><strong>Tổng cộng:</strong> {product.images.length} hình ảnh</div>
                         </div>
                     )}
 
@@ -165,15 +157,15 @@ const ProductInfo = () => {
                     <div className="md:col-span-3 text-left px-10">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <p className="text-gray-500">Product ID</p>
+                                <p className="text-gray-800">Product ID</p>
                                 <p className="font-medium">{product.id_pro}</p>
                             </div>
                             <div className="space-y-2">
-                                <p className="text-gray-500">Price</p>
+                                <p className="text-gray-800">Price</p>
                                 <p className="font-semibold text-xl text-pink-600">{Number(product.price).toLocaleString()} VND</p>
                             </div>
                             <div className="space-y-2">
-                                <p className="text-gray-500">Category</p>
+                                <p className="text-gray-800">Category</p>
                                 <p className="font-medium">
                                     <span className="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-pink-100 text-pink-800">
                                         {product.cat_name}
@@ -181,7 +173,7 @@ const ProductInfo = () => {
                                 </p>
                             </div>
                             <div className="space-y-2">
-                                <p className="text-gray-500">Subcategory</p>
+                                <p className="text-gray-800">Subcategory</p>
                                 <p className="font-medium">
                                     <span className="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                                         {product.scat_name}
@@ -189,7 +181,7 @@ const ProductInfo = () => {
                                 </p>
                             </div>
                             <div className="space-y-2">
-                                <p className="text-gray-500">Brand</p>
+                                <p className="text-gray-800">Brand</p>
                                 <p className="font-medium">
                                     <span className="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800">
                                         {product.bra_name}
@@ -197,7 +189,7 @@ const ProductInfo = () => {
                                 </p>
                             </div>
                             <div className="space-y-2">
-                                <p className="text-gray-500">Status</p>
+                                <p className="text-gray-800">Status</p>
                                 <p className="font-medium">
                                     <span className="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
                                         {product.pro_status}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {ChevronLeft, ChevronRight, Edit, PlusCircle, Save, Search, Trash2, X} from "lucide-react";
-import { RingLoader } from 'react-spinners';
+import { MoonLoader } from 'react-spinners';
 import brandsApi from "@apis/brandsApi.js";
 
 const Brand = () => {
@@ -250,7 +250,7 @@ const Brand = () => {
                 {/* Loading and Error States */}
                 {loading && (
                     <div className="flex justify-center items-center h-70">
-                        <RingLoader color="#ffa6ae" />
+                        <MoonLoader color="#ffa6ae" />
                     </div>
                 )}
 
@@ -266,11 +266,11 @@ const Brand = () => {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead style={{ backgroundColor: '#D14D72' }}>
                             <tr>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Brand Name</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Product Count</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Image</th>
-                                <th className="px-6 py-3 font-medium text-white uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">ID</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Brand Name</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Product Count</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Image</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Actions</th>
                             </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">

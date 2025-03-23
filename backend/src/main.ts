@@ -17,7 +17,7 @@ async function bootstrap() {
         cors: {
             origin: "http://localhost:3000",
             methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-            allowedHeaders: 'Content-Type, Accept, Authorization, credentials',
+            allowedHeaders: "Content-Type, Accept, Authorization, credentials",
             credentials: true,
         },
     });

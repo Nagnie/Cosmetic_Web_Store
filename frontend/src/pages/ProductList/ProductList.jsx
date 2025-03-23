@@ -61,7 +61,8 @@ const ProductListingPage = () => {
 
       {/* Nút hiện/ẩn filter cho mobile */}
       <button
-        className="mb-4 w-full rounded-lg bg-pink-100 px-4 py-2 font-semibold text-pink-800 lg:hidden"
+        className="mb-4 w-full rounded-lg px-4 py-2 font-semibold text-primary-dark lg:hidden"
+        style={{ backgroundColor: "#fff3e7" }}
         onClick={toggleFilter}
       >
         {showFilter ? "Ẩn bộ lọc" : "Hiển thị bộ lọc"}

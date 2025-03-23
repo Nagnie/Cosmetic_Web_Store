@@ -11,9 +11,6 @@ body {
   padding-top: 50px; /* Điều chỉnh theo chiều cao của header */
 }
 
-nav {
-}
-
 .category {
   margin: 0;
   color: #42392f;
@@ -51,9 +48,6 @@ nav {
   nav {
     display: none;
   }
-  /*header {*/
-  /*  box-shadow: #8e785f 1px 1px 5px;*/
-  /*}*/
 }
 
 @media (max-width: 760px) {

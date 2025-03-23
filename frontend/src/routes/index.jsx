@@ -74,7 +74,7 @@ const PublicRoutes = [
     layout: GuestLayout,
   },
   {
-    path: "/combo",
+    path: "/combo/:name",
     component: ComboProduct,
     layout: GuestLayout,
   }
