@@ -42,13 +42,13 @@ export class DiscountService {
   }
 
   async applyDiscount(@Req() req: Request & { session: any }, applyDiscountDto: ApplyDiscountDto) {
-    const { id } = applyDiscountDto;
+    const { code } = applyDiscountDto;
 
     const data = await this.dataSource.query(`
         SELECT * 
         FROM discount AS dis
-        WHERE dis.id = $1
-      `, [id]);
+        WHERE dis.code = $1
+      `, [code]);
     const voucher = data[0];
 
     console.log('VOUCHER: ', voucher);
