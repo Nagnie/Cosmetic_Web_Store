@@ -14,9 +14,13 @@ const SAMPLE_ITEM = {
 
 const CheckoutCard = ({ item }) => {
   return (
-    <div className="flex items-center justify-between gap-2 sm:gap-3">
+    <div className="flex w-full items-center justify-between gap-2 sm:gap-3">
       <Link
-        to={`/products/${encodeURIComponent(item.pro_name || item.name)}/${item.id_pro}`}
+        to={
+          item.type === "product"
+            ? `/products/${encodeURIComponent(item?.pro_name ?? item?.name)}/${item?.id_pro ?? item?.id}`
+            : `/combo/${encodeURIComponent(item.name)}/${item.id}`
+        }
         className="relative w-1/6 cursor-pointer"
       >
         <div className="absolute -top-2.5 -right-3 z-10 flex items-center justify-center rounded bg-black/25 p-1 px-2 py-0.5 text-sm text-white shadow-md">
@@ -27,12 +31,17 @@ const CheckoutCard = ({ item }) => {
           preview={false}
           loading="lazy"
           src={item?.images?.[0] || item?.image || SAMPLE_ITEM.image}
+          fallback="https://placehold.co/499x499?text=Not+found"
         />
       </Link>
 
       <div className="w-5/6">
         <Link
-          to={`/products/${encodeURIComponent(item.pro_name || item.name)}/${item.id_pro}`}
+          to={
+            item.type === "product"
+              ? `/products/${encodeURIComponent(item?.pro_name ?? item?.name)}/${item?.id_pro ?? item?.id}`
+              : `/combo/${encodeURIComponent(item.name)}/${item.id}`
+          }
           className="cursor-pointer text-[12px] font-semibold !text-black sm:text-sm"
         >
           {item?.name || item?.pro_name || SAMPLE_ITEM.name}

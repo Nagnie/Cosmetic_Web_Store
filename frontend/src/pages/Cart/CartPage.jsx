@@ -54,9 +54,9 @@ const CartPage = () => {
     const unavailableClasses = getUnavailableClassifications(allItems);
 
     return allItems.map((item) => ({
-      id_pro: item.id_pro,
-      id_class: item.id_class,
-      quantity: item.quantity,
+      id_pro: item.id_pro ?? item.id ?? item?.id_combo,
+      id_class: item.id_class ?? item.old_id_class ?? 0,
+      quantity: item.quantity ?? 1,
       availableClassifications: getAvailableClassifications(
         item,
         unavailableClasses,

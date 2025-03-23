@@ -5,6 +5,8 @@ import { Button, Spin, message } from "antd";
 import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import comboApi from "@apis/comboApi.js";
+import { useAddCartItem } from "@hooks/useCartQueries";
+import { toast } from "react-toastify";
 
 const CosmeticComboPage = () => {
   const navigate = useNavigate();
@@ -12,12 +14,7 @@ const CosmeticComboPage = () => {
   const [activeImage, setActiveImage] = useState(0);
 
   // Query to fetch combo details using the id from URL params
-  const {
-    data: comboData,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["comboDetail", id],
     queryFn: ({ signal }) =>
       comboApi
@@ -27,37 +24,63 @@ const CosmeticComboPage = () => {
     staleTime: 60 * 60 * 1000, // 1 hour
   });
 
+  const comboData = data?.[0];
+
+  console.log(comboData);
+
   // Format price with dots as thousand separators and add VNĐ
   const formatPrice = (price) => {
     if (!price) return "";
     return `${price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} VNĐ`;
   };
 
-  const handleAddToCart = () => {
-    if (!comboData) return;
+  const addCartItemMutation = useAddCartItem();
 
+  const handleAddToCart = async () => {
     const item = {
-      id: comboData.id_combo,
-      type: "combo",
+      id_pro: comboData.id_pro ?? comboData?.id_combo ?? 0,
+      id_class: comboData?.id_class ?? 0,
       quantity: 1,
+      type: comboData.type || "combo",
     };
 
-    // Add cart logic here
-    message.success("Đã thêm vào giỏ hàng");
+    try {
+      const res = await addCartItemMutation.mutateAsync(item);
+
+      if (res && res.cart && res.cart.length > 0) {
+        toast.success("Thêm vào giỏ hàng thành công");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
   };
 
   const handleBuyNow = async () => {
-    if (!comboData) return;
-
     const item = {
-      id: comboData.id_combo,
-      type: "combo",
+      id_pro: comboData.id_pro ?? comboData?.id_combo ?? 0,
+      id_class: comboData?.id_class ?? 0,
       quantity: 1,
+      type: comboData.type || "combo",
     };
 
-    // Add to cart first
-    // Then navigate to checkout
-    navigate("/checkout");
+    try {
+      const res = await addCartItemMutation.mutateAsync({
+        ...item,
+        isBuyNow: true,
+      });
+
+      if (res && res.cart && res.cart.length > 0) {
+        navigate("/checkout");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
   };
 
   // Prepare images for gallery component
@@ -75,7 +98,10 @@ const CosmeticComboPage = () => {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Spin size="large" tip="Đang tải..." />
+        <Spin
+          size="large"
+          // tip="Đang tải..." thư viện đang bị lỗi nên không sử dụng được
+        />
       </div>
     );
   }

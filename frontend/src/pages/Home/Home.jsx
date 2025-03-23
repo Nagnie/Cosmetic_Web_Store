@@ -273,22 +273,24 @@ const Homepage = () => {
         </div>
       )}
 
-      {/*<section className="mt-10">*/}
-      {/*    <h2 className="text-3xl font-bold text-center text-black mb-10">Combo Mới Nhất</h2>*/}
-      {/*    {comboQuery.isLoading ? (*/}
-      {/*        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">*/}
-      {/*          {numberToArray(3).map((index) => (*/}
-      {/*              <ProductCardSkeleton key={index} />*/}
-      {/*          ))}*/}
-      {/*        </div>*/}
-      {/*    ) : (*/}
-      {/*        <div className="flex flex-wrap justify-center gap-8">*/}
-      {/*          {newestCombos.map((combo) => (*/}
-      {/*              <ComboProductCard key={combo.id_combo} combo={combo} />*/}
-      {/*          ))}*/}
-      {/*        </div>*/}
-      {/*    )}*/}
-      {/*</section>*/}
+      <section className="mt-10">
+        <h2 className="mb-10 text-center text-3xl font-bold text-black">
+          Combo Mới Nhất
+        </h2>
+        {comboQuery.isLoading ? (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {numberToArray(3).map((index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-wrap justify-center gap-8">
+            {newestCombos.map((combo) => (
+              <ComboProductCard key={combo.id_combo} combo={combo} />
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Best Sellers Section */}
       <div className="px-10 py-10">

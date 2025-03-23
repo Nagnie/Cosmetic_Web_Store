@@ -41,9 +41,13 @@ const CartDrawerCart = ({ item, availableClassifications }) => {
   };
 
   return (
-    <div className="flex justify-between gap-2 sm:gap-3">
+    <div className="flex w-full justify-between gap-2 sm:gap-3">
       <Link
-        to={`/products/${encodeURIComponent(item.pro_name || item.name)}/${item.id_pro}`}
+        to={
+          item.type === "product"
+            ? `/products/${encodeURIComponent(item?.pro_name ?? item?.name)}/${item?.id_pro ?? item?.id}`
+            : `/combo/${encodeURIComponent(item.name)}/${item.id}`
+        }
         className="w-1/5 cursor-pointer"
       >
         <Image
@@ -51,12 +55,17 @@ const CartDrawerCart = ({ item, availableClassifications }) => {
           preview={false}
           loading="lazy"
           src={item?.images?.[0] || item?.image || SAMPLE_ITEM.image}
+          fallback="https://placehold.co/499x499?text=Not+found"
         />
       </Link>
 
       <div className="w-4/5">
         <Link
-          to={`/products/${encodeURIComponent(item.pro_name || item.name)}/${item.id_pro}`}
+          to={
+            item.type === "product"
+              ? `/products/${encodeURIComponent(item?.pro_name ?? item?.name)}/${item?.id_pro ?? item?.id}`
+              : `/combo/${encodeURIComponent(item.name)}/${item.id}`
+          }
           className="!hover:text-primary !sm:text-lg cursor-pointer !text-[14px] !font-semibold !text-black"
         >
           {item?.name || item?.pro_name || SAMPLE_ITEM.name}
