@@ -38,38 +38,30 @@ const DiscountSelector = ({
   const [inputCode, setInputCode] = useState("");
   const [internalIsApplied, setInternalIsApplied] = useState(false);
 
-  // Cập nhật inputCode và trạng thái khi voucherCode từ prop thay đổi
   useEffect(() => {
     setInputCode(voucherCode || "");
     setInternalIsApplied(isApplied || !!voucherCode);
   }, [voucherCode, isApplied]);
 
-  // Xử lý khi người dùng thay đổi giá trị trong input
   const handleInputChange = (e) => {
     setInputCode(e.target.value.toUpperCase());
 
-    // Nếu đang ở trạng thái đã áp dụng mà người dùng thay đổi input, đặt lại trạng thái
     if (internalIsApplied) {
       setInternalIsApplied(false);
     }
   };
 
-  // Xử lý khi người dùng nhấn nút "Áp dụng"
   const handleApplyClick = () => {
     if (inputCode.trim()) {
       onApplyVoucher(inputCode);
-      // Không set internalIsApplied ngay lập tức, vì cần đợi kết quả từ mutation
     }
   };
 
-  // Xử lý khi người dùng nhấn nút hủy mã giảm giá
   const handleCancelVoucher = (e) => {
-    // Ngăn sự kiện click lan truyền đến các phần tử cha
     if (e) {
       e.stopPropagation();
     }
 
-    // Đặt lại giá trị input và thông báo cho component cha
     setInputCode("");
     setInternalIsApplied(false);
     onApplyVoucher("");
@@ -125,7 +117,7 @@ const DiscountSelector = ({
           onPressEnter={
             !isLoading && !internalIsApplied ? handleApplyClick : undefined
           }
-          disabled={isLoading || internalIsApplied} // Khi đã áp dụng hoặc đang loading, khóa input
+          disabled={isLoading || internalIsApplied}
         />
         <Button
           className="w-full sm:w-auto"
@@ -143,7 +135,7 @@ const DiscountSelector = ({
             transition: "all 0.3s ease",
           }}
           loading={isLoading}
-          disabled={isLoading && !internalIsApplied} // Chỉ disable khi đang loading và chưa áp dụng
+          disabled={isLoading && !internalIsApplied}
         >
           {internalIsApplied ? "Hủy mã" : "Áp dụng"}
         </Button>
@@ -169,7 +161,7 @@ const DiscountSelector = ({
             color: colors.primary.DEFAULT,
             fontWeight: 500,
           }}
-          disabled={isLoading} // Không cho chọn mã giảm giá khi đang loading
+          disabled={isLoading}
         >
           Chọn mã giảm giá
         </Button>

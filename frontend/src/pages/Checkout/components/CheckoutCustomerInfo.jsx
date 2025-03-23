@@ -3,35 +3,33 @@ import { useCartStore } from "@components/Cart";
 import CustomSpin from "@components/Spin/CustomSpin";
 import useFormPersistence from "@hooks/useFormPersistence";
 import { useFinishOrder } from "@hooks/useOrderQueries";
-import LocationService from "@services/LocationService";
+import {
+  useProvinces,
+  useDistricts,
+  useWards,
+} from "@hooks/useLocationQueries";
 import { Form, Input, Select } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CheckoutCustomerInfo = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
-  // Location states
-  const [locationData, setLocationData] = useState({
-    cities: [],
-    districts: [],
-    wards: [],
-  });
+  // State cho selected values
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
 
+  // State cho location availability
   const [locationAvailability, setLocationAvailability] = useState({
     hasDistricts: true,
     hasWards: true,
   });
 
-  // Loading states
-  const [loading, setLoading] = useState({
-    cities: false,
-    districts: false,
-    wards: false,
-    submit: false,
-  });
+  // State cho loading submit
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Tracking initial render for restoring
   const initialRender = useRef({
@@ -43,151 +41,143 @@ const CheckoutCustomerInfo = () => {
   // Form persistence
   const { saveFormData } = useFormPersistence(form, "checkoutFormData");
 
-  // Load initial data (cities)
-  useEffect(() => {
-    const loadCities = async () => {
-      setLoading((prev) => ({ ...prev, cities: true }));
-      try {
-        const data = await LocationService.fetchProvinces();
-        if (data.data && Array.isArray(data.data)) {
-          setLocationData((prev) => ({ ...prev, cities: data.data }));
-        } else {
-          toast.error("Không thể tải danh sách tỉnh/thành phố");
-        }
-      } catch (error) {
-        console.error("Error fetching provinces:", error);
-        toast.error("Không thể tải danh sách tỉnh/thành phố");
-      } finally {
-        setLoading((prev) => ({ ...prev, cities: false }));
-      }
-    };
+  // Fetch locations sử dụng React Query
+  const {
+    data: cities = [],
+    isLoading: loadingCities,
+    error: citiesError,
+  } = useProvinces();
 
-    loadCities();
+  const {
+    data: districts = [],
+    isLoading: loadingDistricts,
+    error: districtsError,
+  } = useDistricts(selectedCity);
+
+  const {
+    data: wards = [],
+    isLoading: loadingWards,
+    error: wardsError,
+  } = useWards(selectedDistrict);
+
+  // lên đầu trang khi vừa vào trang
+  useEffect(() => {
+    window.scrollTo(0, 0);
   }, []);
+
+  // Xử lý lỗi
+  useEffect(() => {
+    if (citiesError) {
+      toast.error("Không thể tải danh sách tỉnh/thành phố");
+      console.error("Error fetching provinces:", citiesError);
+    }
+    if (districtsError) {
+      toast.error("Không thể tải danh sách quận/huyện");
+      console.error("Error fetching districts:", districtsError);
+    }
+    if (wardsError) {
+      toast.error("Không thể tải danh sách phường/xã");
+      console.error("Error fetching wards:", wardsError);
+    }
+  }, [citiesError, districtsError, wardsError]);
+
+  // Xử lý khi data districts và wards về
+  useEffect(() => {
+    if (selectedCity && districts) {
+      if (!districts.length) {
+        setLocationAvailability((prev) => ({ ...prev, hasDistricts: false }));
+        form.setFieldsValue({
+          district: "N/A",
+          ward: "N/A",
+        });
+      } else {
+        setLocationAvailability((prev) => ({ ...prev, hasDistricts: true }));
+
+        // Restore district value nếu là first render
+        if (initialRender.current.districts) {
+          initialRender.current.districts = false;
+          const savedData = localStorage.getItem("checkoutFormData");
+          if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            if (parsedData.district) {
+              form.setFieldsValue({ district: parsedData.district });
+              setSelectedDistrict(parsedData.district);
+            }
+          }
+        }
+      }
+    }
+  }, [districts, selectedCity, form]);
+
+  useEffect(() => {
+    if (selectedDistrict && wards) {
+      if (!wards.length) {
+        setLocationAvailability((prev) => ({ ...prev, hasWards: false }));
+        form.setFieldsValue({
+          ward: "N/A",
+        });
+      } else {
+        setLocationAvailability((prev) => ({ ...prev, hasWards: true }));
+
+        // Restore ward value nếu là first render
+        if (initialRender.current.wards) {
+          initialRender.current.wards = false;
+          const savedData = localStorage.getItem("checkoutFormData");
+          if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            if (parsedData.ward) {
+              form.setFieldsValue({ ward: parsedData.ward });
+            }
+          }
+        }
+      }
+    }
+  }, [wards, selectedDistrict, form]);
 
   // Restore saved location data (if any)
   useEffect(() => {
-    if (!initialRender.current.isFirstLoad) return;
+    if (!initialRender.current.isFirstLoad || !cities.length) return;
 
-    const restoreSavedLocationData = async () => {
+    const restoreSavedLocationData = () => {
       const savedFormData = localStorage.getItem("checkoutFormData");
       if (!savedFormData) return;
 
       const parsedData = JSON.parse(savedFormData);
 
-      // Restore location data in sequence
+      // Restore city
       if (parsedData.city) {
-        await handleCityChange(parsedData.city);
-
-        if (parsedData.district && parsedData.district !== "N/A") {
-          await handleDistrictChange(parsedData.district);
-        }
+        form.setFieldsValue({ city: parsedData.city });
+        setSelectedCity(parsedData.city);
+        initialRender.current.isFirstLoad = false;
       }
-
-      initialRender.current.isFirstLoad = false;
     };
 
     restoreSavedLocationData();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [cities, form]);
 
   // Handle city selection
   const handleCityChange = useCallback(
-    async (cityId) => {
+    (cityId) => {
+      setSelectedCity(cityId);
       // Reset dependent fields
       form.setFieldsValue({
         district: undefined,
         ward: undefined,
       });
-
-      setLoading((prev) => ({ ...prev, districts: true }));
-
-      try {
-        const data = await LocationService.fetchDistricts(cityId);
-
-        if (!data.data || data.data.length === 0) {
-          setLocationAvailability((prev) => ({ ...prev, hasDistricts: false }));
-          setLocationData((prev) => ({ ...prev, districts: [], wards: [] }));
-
-          // Set N/A values
-          form.setFieldsValue({
-            district: "N/A",
-            ward: "N/A",
-          });
-        } else {
-          setLocationAvailability((prev) => ({ ...prev, hasDistricts: true }));
-          setLocationData((prev) => ({ ...prev, districts: data.data }));
-
-          // Restore district value if first render
-          if (initialRender.current.districts) {
-            initialRender.current.districts = false;
-            const savedData = localStorage.getItem("checkoutFormData");
-            if (savedData) {
-              const parsedData = JSON.parse(savedData);
-              form.setFieldsValue({
-                district: parsedData.district,
-              });
-            }
-          }
-        }
-
-        return data.data;
-      } catch (error) {
-        console.error("Error fetching districts:", error);
-        toast.error("Không thể tải danh sách quận/huyện");
-      } finally {
-        setLoading((prev) => ({ ...prev, districts: false }));
-      }
+      setSelectedDistrict(null);
     },
     [form],
   );
 
   // Handle district selection
   const handleDistrictChange = useCallback(
-    async (districtId) => {
+    (districtId) => {
       if (districtId === "N/A") return;
 
+      setSelectedDistrict(districtId);
       form.setFieldsValue({
         ward: undefined,
       });
-
-      setLoading((prev) => ({ ...prev, wards: true }));
-
-      try {
-        const data = await LocationService.fetchWards(districtId);
-
-        if (!data.data || data.data.length === 0) {
-          setLocationAvailability((prev) => ({ ...prev, hasWards: false }));
-          setLocationData((prev) => ({ ...prev, wards: [] }));
-
-          form.setFieldsValue({
-            ward: "N/A",
-          });
-        } else {
-          setLocationAvailability((prev) => ({ ...prev, hasWards: true }));
-          setLocationData((prev) => ({ ...prev, wards: data.data }));
-
-          // Restore ward value if first render
-          if (initialRender.current.wards) {
-            initialRender.current.wards = false;
-            const savedData = localStorage.getItem("checkoutFormData");
-            if (savedData) {
-              const parsedData = JSON.parse(savedData);
-              form.setFieldsValue({
-                ward: parsedData.ward,
-              });
-            }
-          }
-        }
-
-        return data.data;
-      } catch (error) {
-        console.error("Error fetching wards:", error);
-        toast.error("Không thể tải danh sách phường/xã");
-      } finally {
-        setLoading((prev) => ({ ...prev, wards: false }));
-      }
     },
     [form],
   );
@@ -198,30 +188,32 @@ const CheckoutCustomerInfo = () => {
   const itemCount = useCartStore((state) => state.itemCount);
   const discountInfo = useCartStore((state) => state.discountInfo);
 
+  const queryClient = useQueryClient();
+
   // Handle form submission
   const handleSubmit = async (values) => {
-    setLoading((prev) => ({ ...prev, submit: true }));
+    setIsSubmitting(true);
 
     try {
       // Save form data
       saveFormData(values);
 
+      // Get location names
+      const cityName =
+        cities.find((city) => city.id === values.city)?.name || "";
+      const districtName =
+        districts.find((district) => district.id === values.district)?.name ||
+        "N/A";
+      const wardName =
+        wards.find((ward) => ward.id === values.ward)?.name || "N/A";
+
       // Format location data for submission
       const formattedAddress = {
         ...values,
-        cityName:
-          locationData.cities.find((city) => city.id === values.city)?.name ||
-          "",
-        districtName:
-          locationData.districts.find(
-            (district) => district.id === values.district,
-          )?.name || "N/A",
-        wardName:
-          locationData.wards.find((ward) => ward.id === values.ward)?.name ||
-          "N/A",
+        cityName,
+        districtName,
+        wardName,
       };
-
-      // console.log("Submitting form data:", formattedAddress);
 
       // Submit order
       const data = await fetchListOrderItems();
@@ -254,8 +246,6 @@ const CheckoutCustomerInfo = () => {
           : +totalCartPrice || 0,
       };
 
-      // console.log("Submitting order:", JSON.stringify(persistData, null, 2));
-
       const res = await finishOrderMutation.mutateAsync({
         ...persistData,
       });
@@ -265,6 +255,7 @@ const CheckoutCustomerInfo = () => {
 
         // Clear cart
         clearCart();
+        queryClient.invalidateQueries("infiniteCartItems");
 
         navigate("/payment-confirmation", {
           state: {
@@ -277,13 +268,11 @@ const CheckoutCustomerInfo = () => {
       } else {
         toast.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
       }
-
-      // Navigate to next step
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
     } finally {
-      setLoading((prev) => ({ ...prev, submit: false }));
+      setIsSubmitting(false);
     }
   };
 
@@ -386,13 +375,13 @@ const CheckoutCustomerInfo = () => {
                 filterOption={(input, option) =>
                   option.children.toLowerCase().includes(input.toLowerCase())
                 }
-                loading={loading.cities}
-                disabled={loading.cities}
+                loading={loadingCities}
+                disabled={loadingCities}
                 notFoundContent={
-                  loading.cities ? <CustomSpin size="small" /> : null
+                  loadingCities ? <CustomSpin size="small" /> : null
                 }
               >
-                {locationData.cities.map((city) => (
+                {cities.map((city) => (
                   <Select.Option key={city.id} value={city.id}>
                     {city.name}
                   </Select.Option>
@@ -416,7 +405,7 @@ const CheckoutCustomerInfo = () => {
                   <Select
                     placeholder="Chọn quận/huyện"
                     onChange={handleDistrictChange}
-                    disabled={!getFieldValue("city") || loading.districts}
+                    disabled={!getFieldValue("city") || loadingDistricts}
                     className="w-full rounded-md"
                     showSearch
                     filterOption={(input, option) =>
@@ -424,13 +413,13 @@ const CheckoutCustomerInfo = () => {
                         .toLowerCase()
                         .includes(input.toLowerCase())
                     }
-                    loading={loading.districts}
+                    loading={loadingDistricts}
                     notFoundContent={
-                      loading.districts ? <CustomSpin size="small" /> : null
+                      loadingDistricts ? <CustomSpin size="small" /> : null
                     }
                   >
                     {locationAvailability.hasDistricts ? (
-                      locationData.districts.map((district) => (
+                      districts.map((district) => (
                         <Select.Option key={district.id} value={district.id}>
                           {district.name}
                         </Select.Option>
@@ -464,7 +453,7 @@ const CheckoutCustomerInfo = () => {
                     disabled={
                       !getFieldValue("district") ||
                       !locationAvailability.hasDistricts ||
-                      loading.wards
+                      loadingWards
                     }
                     className="w-full rounded-md"
                     showSearch
@@ -473,13 +462,13 @@ const CheckoutCustomerInfo = () => {
                         .toLowerCase()
                         .includes(input.toLowerCase())
                     }
-                    loading={loading.wards}
+                    loading={loadingWards}
                     notFoundContent={
-                      loading.wards ? <CustomSpin size="small" /> : null
+                      loadingWards ? <CustomSpin size="small" /> : null
                     }
                   >
                     {locationAvailability.hasWards ? (
-                      locationData.wards.map((ward) => (
+                      wards.map((ward) => (
                         <Select.Option key={ward.id} value={ward.id}>
                           {ward.name}
                         </Select.Option>
@@ -513,15 +502,15 @@ const CheckoutCustomerInfo = () => {
             </Link>
             <button
               type="submit"
-              disabled={loading.submit || !itemCount}
+              disabled={isSubmitting || !itemCount}
               className={`bg-primary hover:bg-primary-dark flex w-full items-center justify-center rounded-md py-3 text-white transition-colors duration-300 ${
-                loading.submit || !itemCount
+                isSubmitting || !itemCount
                   ? "!cursor-not-allowed opacity-70"
                   : ""
               }`}
             >
-              {loading.submit ? <CustomSpin size="small" /> : null}
-              {loading.submit ? "Đang xử lý..." : "Đặt hàng"}
+              {isSubmitting ? <CustomSpin size="small" /> : null}
+              {isSubmitting ? "Đang xử lý..." : "Đặt hàng"}
             </button>
           </div>
         </Form>

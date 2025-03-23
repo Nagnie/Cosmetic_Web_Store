@@ -14,7 +14,6 @@ import { useCallback, useMemo } from "react";
 import { useInfiniteVouchers } from "@hooks/useVoucherQueries.js";
 import { useAllCombo } from "@hooks/useComboQueries.js";
 import { motion } from "framer-motion";
-import { PiFlowerLotusFill } from "react-icons/pi";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -80,6 +79,7 @@ const Homepage = () => {
                 voucher.value,
               ) + "đ"
             : `${voucher.value}%`,
+        minOrderValue: voucher.minimum_order_value,
       };
 
       return {
@@ -248,12 +248,7 @@ const Homepage = () => {
         </div>
       ) : (
         <div className="reset-all">
-          <div>
-            <PiFlowerLotusFill width={"100"} color={"black"}/>
-            <h2 className="text-center text-5xl font-semibold">PHIẾU GIẢM GIÁ</h2>
-            <PiFlowerLotusFill />
-          </div>
-
+          <h2 className="text-center text-primary-dark text-5xl font-semibold">NEW VOUCHERS</h2>
           <div className="voucher-container">
             {vouchersQuery.isError ? (
               <div className="py-4 text-center text-red-500">
@@ -262,7 +257,8 @@ const Homepage = () => {
             ) : formattedVouchers.length > 0 ? (
               <VoucherCurvedSlider
                 items={formattedVouchers}
-                itemsToShow={5}
+                itemsToShow={formattedVouchers.length < 6 ? 3 : 5}
+                // {formattedVouchers % 2 !== 0 ? 3 : 5}
                 itemsToScroll={3}
                 onLoadMore={loadMoreVouchers}
                 hasMoreItems={vouchersQuery.hasNextPage}
@@ -278,7 +274,7 @@ const Homepage = () => {
       )}
 
       <section className="my-10">
-          <h2 className="text-3xl font-bold text-center text-black mb-10">Combo Mới Nhất</h2>
+          <h2 className="text-5xl text-primary-dark font-bold text-center uppercase text-black mb-10">Combo Mới Nhất</h2>
           {comboQuery.isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {numberToArray(3).map((index) => (
@@ -303,8 +299,8 @@ const Homepage = () => {
 
       {/* Best Sellers Section */}
       <div className="px-10 py-10">
-        <h2 className="text-center text-5xl font-semibold">BEST SELLERS</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <h2 className="text-center my-5 text-primary-dark text-5xl font-semibold">BEST SELLERS</h2>
+        <div className="mt-15 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {productsQuery.isLoading &&
             numberToArray(8).map((index) => (
               <ProductCardSkeleton key={index} />

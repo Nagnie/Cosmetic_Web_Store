@@ -46,7 +46,7 @@ export const getUnavailableClassifications = (cartItems) => {
 
       // Duyệt qua từng item trong nhóm
       items.forEach((currentItem) => {
-        const key = `${currentItem.id_pro}_${currentItem.id_class || "null"}`;
+        const key = `${currentItem?.id_pro ?? currentItem?.id ?? currentItem?.id_combo}_${currentItem.id_class || "null"}`;
         result[key] = [];
 
         // Thêm tất cả id_class đã chọn vào danh sách không thể chọn,
@@ -64,11 +64,11 @@ export const getUnavailableClassifications = (cartItems) => {
 };
 
 export const getAvailableClassifications = (product, unavailableClasses) => {
-  const key = `${product.id_pro}_${product.id_class || "null"}`;
+  const key = `${product?.id_pro ?? product?.id ?? product?.id_combo}_${product.id_class || "null"}`;
   const unavailableClassIds = unavailableClasses[key] || [];
 
   // Lọc ra các phân loại còn có thể chọn
-  return product.classification.filter(
+  return product?.classification?.filter(
     (cls) => !unavailableClassIds.includes(cls.id_class),
   );
 };
