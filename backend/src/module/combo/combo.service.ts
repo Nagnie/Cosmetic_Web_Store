@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
 import { DataSource, Repository } from 'typeorm';
@@ -38,13 +38,15 @@ export class ComboService {
       combo,
       product: {id_pro: productId}
     }));
-    await this.comboDetailRepository.save(products);
 
     const images = imageLinks.map((item) => ({
       combo,
       link: item
     }));
-    await this.comboImageRepository.save(images);
+    await Promise.all([
+      this.comboDetailRepository.save(products),
+      this.comboImageRepository.save(images)
+    ]);
 
     return new ResponseDto(HttpStatus.OK, "Successfully", combo);
   }
@@ -156,11 +158,77 @@ export class ComboService {
     };
   }
 
-  update(id: number, updateComboDto: UpdateComboDto) {
-    return `This action updates a #${id} combo`;
+  async update(id: number, updateComboDto: UpdateComboDto) {
+    const existingCombo = await this.comboRepository.findOneOrFail({
+      where: {
+        id
+      }
+    });
+
+    if (!existingCombo) {
+      throw new HttpException("Combo has not existed", HttpStatus.BAD_REQUEST);
+    }
+
+    if (!updateComboDto) {
+      return new HttpException("Failed to update because body has not defined", HttpStatus.BAD_REQUEST);
+    }
+
+    const { productIds, imageLinks, ...comboInfo } = updateComboDto;
+
+    if (productIds) {
+      this.updateComboItems(this.comboDetailRepository, existingCombo, productIds, "product");
+    }
+
+    if (imageLinks) {
+      this.updateComboItems(this.comboImageRepository, existingCombo, imageLinks, "image");
+    }
+    
+    if (Object.keys(comboInfo).length === 0) {
+      return new ResponseDto(HttpStatus.OK, "Successfully", null);
+    }
+
+    await this.comboRepository.update(id, comboInfo);
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", null);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} combo`;
+  async  updateComboItems(
+    entityRepository: any,
+    combo: Combo,
+    items: any[],
+    itemType: 'product' | 'image',
+  ): Promise<void> {
+    if (items) {
+      const entities = items.map((item) => {
+        if (itemType === 'product') {
+          return {
+            combo,
+            product: { id_pro: item }, 
+          };
+        } else if (itemType === 'image') {
+          return {
+            combo,
+            link: item, 
+          };
+        }
+      });
+  
+      await Promise.all([
+        entityRepository.delete({combo}), 
+        entityRepository.save(entities),
+      ]);
+    }
+  }
+
+  async remove(id: number) {
+    try {
+      const combo = await this.comboRepository.findOneByOrFail({});
+
+      await this.comboRepository.delete(id);
+
+      return new ResponseDto(HttpStatus.OK, "Successfully", null);
+    } catch (error) {
+      throw new HttpException("Combo has not exited", HttpStatus.BAD_REQUEST);
+    }
   }
 }
