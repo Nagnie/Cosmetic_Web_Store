@@ -28,9 +28,7 @@ const Homepage = () => {
 
   // 3 newest combo
   const newestCombos = useMemo(() => {
-    return [...allCombos]
-        .sort((a, b) => b.id_combo - a.id_combo)
-        .slice(0, 3);
+    return [...allCombos].sort((a, b) => b.id_combo - a.id_combo).slice(0, 3);
   }, [allCombos]);
   // Lấy 5 brands đầu tiên
   const topBrands = brands.slice(0, 5);
@@ -302,12 +300,19 @@ const Homepage = () => {
             products.map((product) => (
               <ProductCard key={product.id_pro} product={product} />
             ))}
-          {!productsQuery.isLoading && products.length === 0 && (
+        </div>
+        {!productsQuery.isLoading &&
+          products.length === 0 &&
+          productsQuery.status === "success" && (
             <div className="w-full py-10 text-center">
               Không có sản phẩm nào
             </div>
           )}
-        </div>
+        {!productsQuery.isLoading && productsQuery.status === "error" && (
+          <div className="w-full py-10 text-center text-red-500">
+            Có lỗi xảy ra khi tải sản phẩm, vui lòng thử lại sau
+          </div>
+        )}
         <button
           className="mx-auto my-10 block rounded-lg px-4 py-2 text-white"
           style={{ backgroundColor: "#675746" }}

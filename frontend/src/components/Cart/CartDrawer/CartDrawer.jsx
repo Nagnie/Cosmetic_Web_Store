@@ -5,7 +5,7 @@ import useCartStore from "../ZustandCartStore";
 import { CartDrawerFooter } from "..";
 import { useEffect, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { useQueryClient } from "@tanstack/react-query";
+// import { useQueryClient } from "@tanstack/react-query";
 import CustomSpin from "@components/Spin/CustomSpin";
 
 const CartDrawer = () => {
@@ -15,7 +15,7 @@ const CartDrawer = () => {
   const itemCount = useCartStore((state) => state.itemCount);
   const setTotalPrice = useCartStore((state) => state.setTotalPrice);
   const scrollContainerRef = useRef(null);
-  const queryClient = useQueryClient(); // Để invalidate query cache
+  // const queryClient = useQueryClient(); // Để invalidate query cache
 
   const {
     data,
@@ -31,14 +31,14 @@ const CartDrawer = () => {
   });
 
   // Always refetch when drawer opens, regardless of whether data exists
-  useEffect(() => {
-    if (isCartDrawerOpen) {
-      // Invalidate cache và refetch khi drawer mở
-      queryClient.invalidateQueries({
-        queryKey: ["infiniteCartItems", { limit: 10 }],
-      });
-    }
-  }, [isCartDrawerOpen, queryClient]);
+  // useEffect(() => {
+  //   if (isCartDrawerOpen) {
+  //     // Invalidate cache và refetch khi drawer mở
+  //     queryClient.invalidateQueries({
+  //       queryKey: ["infiniteCartItems", { limit: 10 }],
+  //     });
+  //   }
+  // }, [isCartDrawerOpen, queryClient]);
 
   useEffect(() => {
     if (data) {
