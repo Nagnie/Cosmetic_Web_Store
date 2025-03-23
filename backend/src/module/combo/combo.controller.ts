@@ -42,11 +42,22 @@ export class ComboController {
   }
 
   @Patch(':id')
+  @Public()
+  @ApiOperation({summary: "Update combo", description: "Only send fields need to update"})
+  @ApiParam({name: "id", required: true, example: 1, description: "Combo id"})
+  @ApiBody({type: UpdateComboDto})
+  @ApiResponse({status: 200, description: "Successfully"})
+  @ApiResponse({status: 500, description: "Combo not existed"})
   update(@Param('id') id: string, @Body() updateComboDto: UpdateComboDto) {
     return this.comboService.update(+id, updateComboDto);
   }
 
   @Delete(':id')
+  @Public()
+  @ApiOperation({summary: "Delete combo"})
+  @ApiParam({name: "id", required: true, example: 7, description: "Combo id"})
+  @ApiResponse({status: 200, description: "Successfully"})
+  @ApiResponse({status: 400, description: "Combo not existed"})
   remove(@Param('id') id: string) {
     return this.comboService.remove(+id);
   }
