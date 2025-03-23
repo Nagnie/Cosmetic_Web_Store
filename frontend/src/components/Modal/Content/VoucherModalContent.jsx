@@ -1,11 +1,19 @@
 import PropTypes from "prop-types";
 import { CopyOutlined } from "@ant-design/icons";
-import { message, Typography } from "antd";
+import { Typography } from "antd";
 import { useEffect, useState } from "react";
+import { useCartStore } from "@components/Cart";
+import { toast } from "react-toastify";
 
 const { Text } = Typography;
 
 const VoucherModalContent = ({ item }) => {
+  const totalPrice = useCartStore((state) => state.totalPrice);
+  const minOrderValue = item.minOrderValue || 300000; // Giá trị mặc định nếu không có minOrderValue
+
+  // Kiểm tra xem tổng giá trị đơn hàng có đạt điều kiện không
+  const isEligible = totalPrice >= minOrderValue;
+
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 0,
   );
@@ -24,11 +32,16 @@ const VoucherModalContent = ({ item }) => {
   const isMobile = windowWidth < 640;
 
   const copyVoucherCode = () => {
-    const code = item.code ?? "FASHION30";
-    navigator.clipboard.writeText(code);
-    message.success({
-      content: `Đã sao chép mã ${code}`,
-    });
+    // Chỉ cho phép sao chép nếu đạt điều kiện
+    if (isEligible) {
+      const code = item.code ?? "FASHION30";
+      navigator.clipboard.writeText(code);
+      toast.success(`Đã sao chép mã ${code}`);
+    } else {
+      toast.error(
+        `Đơn hàng chưa đạt giá trị tối thiểu ${new Intl.NumberFormat("vi-VN").format(minOrderValue)}đ`,
+      );
+    }
   };
 
   return (
@@ -55,8 +68,16 @@ const VoucherModalContent = ({ item }) => {
           <p
             className={`${isMobile ? "text-base" : "text-lg"} text-primary-deepest`}
           >
-            {item.description ?? "Đơn hàng từ 300.000đ"}
+            {item.description ??
+              `Đơn hàng từ ${new Intl.NumberFormat("vi-VN").format(minOrderValue)}đ`}
           </p>
+          {!isEligible && (
+            <p className="mt-1 text-sm text-red-500">
+              Đơn hàng hiện tại (
+              {new Intl.NumberFormat("vi-VN").format(totalPrice)}đ ) chưa đạt
+              giá trị tối thiểu
+            </p>
+          )}
         </div>
 
         <div>
@@ -77,13 +98,18 @@ const VoucherModalContent = ({ item }) => {
             className={`flex ${isMobile ? "flex-col" : "flex-row"} items-stretch`}
           >
             <div
-              className={`${isMobile ? "mb-0 rounded-t-md" : "rounded-l-md"} bg-background-light border-secondary-medium text-primary-deepest flex-1 border border-dashed p-3 text-center font-mono text-lg font-bold`}
+              className={`${isMobile ? "mb-0 rounded-t-md" : "rounded-l-md"} bg-background-light border-secondary-medium text-primary-deepest flex-1 border border-dashed p-3 text-center font-mono text-lg font-bold ${!isEligible ? "opacity-50" : ""}`}
             >
-              {item.code ?? "FASHION30"}
+              {isEligible ? (item.code ?? "FASHION30") : "********"}
             </div>
             <button
               onClick={copyVoucherCode}
-              className={`${isMobile ? "w-full rounded-b-md" : "rounded-r-md"} bg-primary-dark hover:bg-primary-deepest flex items-center justify-center px-3 py-2 text-white transition-colors`}
+              disabled={!isEligible}
+              className={`${isMobile ? "w-full rounded-b-md" : "rounded-r-md"} flex items-center justify-center px-3 py-2 text-white transition-colors ${
+                isEligible
+                  ? "bg-primary-dark hover:bg-primary-deepest"
+                  : "cursor-not-allowed bg-gray-400"
+              }`}
             >
               <CopyOutlined className="text-xl" />
               <span className="ml-2">Sao chép</span>
@@ -112,7 +138,7 @@ const VoucherModalContent = ({ item }) => {
         </div>
       </div>
 
-      {/* Nút sử dụng ngay */}
+      {/* Nút sử dụng ngay - đã bị comment trong code gốc */}
       {/* <div className={`mt-6 ${isMobile ? "px-4 pb-4" : "px-6 pb-6"}`}>
         <button
           onClick={onCancel}
@@ -127,7 +153,7 @@ const VoucherModalContent = ({ item }) => {
 
 VoucherModalContent.propTypes = {
   item: PropTypes.object.isRequired,
-  onCancel: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
 };
 
 export default VoucherModalContent;

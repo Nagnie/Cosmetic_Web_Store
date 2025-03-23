@@ -26,7 +26,9 @@ const ProductCard = ({ product }) => {
 
   const addCartItemMutation = useAddCartItem();
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+
     const item = {
       id_pro: product.id_pro,
       id_class: classification[0]?.id_class ?? 0,
@@ -49,7 +51,8 @@ const ProductCard = ({ product }) => {
   };
 
   const navigate = useNavigate();
-  const handleBuyNow = async () => {
+  const handleBuyNow = async (e) => {
+    e.preventDefault();
     const item = {
       id_pro: product.id_pro,
       id_class: classification[0]?.id_class ?? 0,
@@ -62,7 +65,7 @@ const ProductCard = ({ product }) => {
 
       if (res && res.cart && res.cart.length > 0) {
         toast.success("Thêm vào giỏ hàng thành công");
-        navigate("/cart");
+        navigate("/checkout");
       } else {
         toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
       }
@@ -102,14 +105,14 @@ const ProductCard = ({ product }) => {
           >
             <button
               className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2 transition-colors hover:bg-amber-100"
-              onClick={() => handleBuyNow()}
+              onClick={(e) => handleBuyNow(e)}
             >
               <FaShoppingBag size={18} />
               <span>Mua ngay</span>
             </button>
             <button
               className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2 transition-colors hover:bg-amber-50"
-              onClick={() => handleAddToCart()}
+              onClick={(e) => handleAddToCart(e)}
             >
               <BsCartPlus size={22} />
             </button>

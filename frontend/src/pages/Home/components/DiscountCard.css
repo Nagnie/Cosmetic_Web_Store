@@ -1,0 +1,61 @@
+.voucher-tooltip-content p {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.voucher-tooltip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.voucher-tooltip-info div {
+  display: flex;
+  justify-content: space-between;
+  min-width: 220px;
+}
+
+.voucher-tooltip-info span {
+  font-weight: 500;
+}
+
+.voucher-tooltip-info .amount-needed {
+  color: #ff4d4f;
+}
+
+/* Style cho phần bị vô hiệu hóa */
+.voucher-disabled {
+  opacity: 0.8;
+  position: relative;
+}
+
+.voucher-disabled::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.voucher-code-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  cursor: pointer;
+}
+
+.voucher-lock-icon {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.voucher-lock-text {
+  font-size: 12px;
+  font-weight: 500;
+}
