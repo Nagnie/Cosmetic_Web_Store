@@ -577,7 +577,13 @@ const CouponModalContent = ({ onApplyCoupon, selectedVoucher, onCancel }) => {
                             : "inherit",
                       }}
                     >
-                      {coupon.code}
+                      {!coupon.isValid ? (
+                        <span className="text-red-500">
+                          {"*".repeat(coupon.code.length)}
+                        </span>
+                      ) : (
+                        coupon.code
+                      )}
                     </Text>
                     <Tag
                       color="green"

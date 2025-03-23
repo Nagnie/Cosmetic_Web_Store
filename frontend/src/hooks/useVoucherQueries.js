@@ -96,8 +96,8 @@ export const useApplyVoucher = (
   },
 ) => {
   return useMutation({
-    mutationFn: async (id) => {
-      const { data } = await discountsApi.applyDiscount(id);
+    mutationFn: async (code) => {
+      const { data } = await discountsApi.applyDiscount(code);
       return data;
     },
     onSuccess,

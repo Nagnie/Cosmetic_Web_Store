@@ -9,6 +9,8 @@ import { useEffect } from "react";
 function App() {
   const itemCount = useCartStore((state) => state.itemCount);
   const setItemCount = useCartStore((state) => state.setItemCount);
+  const totalPrice = useCartStore((state) => state.totalPrice);
+  const setTotalPrice = useCartStore((state) => state.setTotalPrice);
   const clearCart = useCartStore((state) => state.clearCart);
 
   const { data, status } = useInfiniteCartItems({
@@ -19,14 +21,27 @@ function App() {
   useEffect(() => {
     if (status === "success" && data) {
       const totalItems = data?.pages[0]?.total_items || 0;
+      const totalPrices = data?.pages[0]?.total_prices || 0;
 
       if (totalItems !== itemCount) {
         setItemCount(totalItems);
       }
+
+      if (totalPrices !== totalPrice) {
+        setTotalPrice(totalPrices);
+      }
     } else if (status === "error") {
       clearCart();
     }
-  }, [data, setItemCount, status, clearCart, itemCount]);
+  }, [
+    data,
+    setItemCount,
+    status,
+    clearCart,
+    itemCount,
+    totalPrice,
+    setTotalPrice,
+  ]);
 
   useEffect(() => {
     window.addEventListener("beforeunload", clearCart);

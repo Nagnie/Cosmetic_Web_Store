@@ -79,6 +79,7 @@ const Homepage = () => {
                 voucher.value,
               ) + "đ"
             : `${voucher.value}%`,
+        minOrderValue: voucher.minimum_order_value,
       };
 
       return {
@@ -256,7 +257,7 @@ const Homepage = () => {
             ) : formattedVouchers.length > 0 ? (
               <VoucherCurvedSlider
                 items={formattedVouchers}
-                itemsToShow={5}
+                itemsToShow={formattedVouchers.length < 6 ? 3 : 5}
                 // {formattedVouchers % 2 !== 0 ? 3 : 5}
                 itemsToScroll={3}
                 onLoadMore={loadMoreVouchers}
