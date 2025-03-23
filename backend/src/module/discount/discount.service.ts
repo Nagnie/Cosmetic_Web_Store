@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, Req } from '@nestjs/common';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
-import { ILike, Like, Repository, DataSource } from 'typeorm';
+import { ILike, Repository, DataSource } from 'typeorm';
 import { Discount } from './entities/discount.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
