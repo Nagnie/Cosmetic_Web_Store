@@ -257,6 +257,7 @@ const Homepage = () => {
               <VoucherCurvedSlider
                 items={formattedVouchers}
                 itemsToShow={5}
+                // {formattedVouchers % 2 !== 0 ? 3 : 5}
                 itemsToScroll={3}
                 onLoadMore={loadMoreVouchers}
                 hasMoreItems={vouchersQuery.hasNextPage}
