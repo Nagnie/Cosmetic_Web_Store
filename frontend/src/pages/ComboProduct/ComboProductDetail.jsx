@@ -6,9 +6,10 @@ import { ShoppingCartOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import comboApi from "@apis/comboApi.js";
 
-const CosmeticComboPage = () => {
+const CosmeticComboDetail = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id_combo, name } = useParams();
+  console.log(id_combo, name);
   const [activeImage, setActiveImage] = useState(0);
 
   // Query to fetch combo details using the id from URL params
@@ -18,12 +19,12 @@ const CosmeticComboPage = () => {
     isError,
     error,
   } = useQuery({
-    queryKey: ["comboDetail", id],
+    queryKey: ["comboDetail", id_combo],
     queryFn: ({ signal }) =>
       comboApi
-        .getComboDetail(id, { signal })
+        .getComboDetail(id_combo, { signal })
         .then((response) => response.data.data),
-    enabled: !!id,
+    enabled: !!id_combo,
     staleTime: 60 * 60 * 1000, // 1 hour
   });
 
@@ -100,7 +101,7 @@ const CosmeticComboPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <h2 className="mb-4 text-2xl text-gray-700">Không tìm thấy combo</h2>
-        <Button type="primary" onClick={() => navigate("/combos")}>
+        <Button type="primary" onClick={() => navigate("/all_combos")}>
           Xem danh sách combo
         </Button>
       </div>
@@ -227,4 +228,4 @@ const CosmeticComboPage = () => {
   );
 };
 
-export default CosmeticComboPage;
+export default CosmeticComboDetail;

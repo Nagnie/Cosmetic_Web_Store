@@ -40,7 +40,7 @@ const ComboProductCard = ({ combo }) => {
             </div>
             <div className="p-6">
                 <Link
-                    to={`/combo/${combo.name}`}
+                    to={`/combo/${combo.name}/${combo.id_combo}`}
                     className="text-2xl font-bold text-primary-dark mb-2 block">
                     {combo.name}
                 </Link>
