@@ -1,12 +1,15 @@
 import { useAddCartItem } from "@hooks/useCartQueries";
 import { formatCurrency } from "@utils/utils";
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BsCartPlus } from "react-icons/bs";
 import { FaShoppingBag } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 const ProductCard = ({ product }) => {
+  const navigate = useNavigate();
+
   // console.log(product);
   const addCartItemMutation = useAddCartItem();
   const [isHovered, setIsHovered] = useState(false);
@@ -18,7 +21,7 @@ const ProductCard = ({ product }) => {
     return product.images;
   }, [product.images]);
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.preventDefault();
 
     const item = {
@@ -28,14 +31,23 @@ const ProductCard = ({ product }) => {
       type: product.type || "product",
     };
 
-    addCartItemMutation.mutate(item);
+    try {
+      const res = await addCartItemMutation.mutateAsync(item);
+
+      if (res && res.cart && res.cart.length > 0) {
+        toast.success("Thêm vào giỏ hàng thành công");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
   };
 
-  const handleBuyNow = (e) => {
+  const handleBuyNow = async (e) => {
     e.preventDefault();
-    e.stopPropagation();
 
-    // Add to cart first
     const item = {
       id_pro: product.id_pro,
       id_class: product.classification[0]?.id_class ?? 0,
@@ -43,12 +55,21 @@ const ProductCard = ({ product }) => {
       type: product.type || "product",
     };
 
-    addCartItemMutation.mutate(item, {
-      onSuccess: () => {
-        // Navigate to checkout page
-        window.location.href = "/checkout";
-      },
-    });
+    try {
+      const res = await addCartItemMutation.mutateAsync({
+        ...item,
+        isBuyNow: true,
+      });
+
+      if (res && res.cart && res.cart.length > 0) {
+        navigate("/checkout");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
   };
 
   // Determine product status

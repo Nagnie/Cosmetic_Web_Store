@@ -64,6 +64,11 @@ const CartPage = () => {
     }));
   }, [allItems]);
 
+  // cuộn lên đầu trang khi vào trang
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Cập nhật số lượng item trong store
   useEffect(() => {
     setItemCount(totalItems);

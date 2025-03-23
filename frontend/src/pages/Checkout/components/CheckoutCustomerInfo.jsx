@@ -60,6 +60,11 @@ const CheckoutCustomerInfo = () => {
     error: wardsError,
   } = useWards(selectedDistrict);
 
+  // lên đầu trang khi vừa vào trang
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Xử lý lỗi
   useEffect(() => {
     if (citiesError) {
