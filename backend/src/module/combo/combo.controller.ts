@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
 import { ComboService } from './combo.service';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Public } from '@/helpers/decorator/public';
+import { SortField } from './enum/sort_field.enum';
+import { Request } from 'express';
+import { ComboStatus } from './enum/combo_status.enum';
 
 @Controller('combo')
 export class ComboController {
@@ -16,6 +19,19 @@ export class ComboController {
   @ApiBody({type: CreateComboDto})
   create(@Body() createComboDto: CreateComboDto) {
     return this.comboService.create(createComboDto);
+  }
+
+  @Get("searchAndFilter")
+  @Public()
+  @ApiOperation({summary: "Search And Filter combo"})
+  @ApiQuery({ name: "name", required: false, example: "Combo 1", default: "", description: "Combo name"})
+  @ApiQuery({ name: "status", enum: ComboStatus, required: false, example: "available", default: "available", description: "Combo status"})
+  @ApiQuery({ name: 'page', required: false, example: 1, default: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 5, default: 5, description: 'Number of records per page' })
+  @ApiQuery({ name: "sortBy", enum: SortField, required: false, example: "id", default: "value", description: "Sort by field"})
+  @ApiQuery({ name: "orderBy", required: false, example: "ACS", default: "ACS", description: "Order by field"})
+  async searchAndFilter(@Req() req: Request) {
+    return await this.comboService.searchAndFilter(req);
   }
 
   @Get()

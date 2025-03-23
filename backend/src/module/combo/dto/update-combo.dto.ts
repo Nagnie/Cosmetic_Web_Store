@@ -3,7 +3,7 @@ import { CreateComboDto } from './create-combo.dto';
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ComboStatus } from '../enum/status_enum.enum';
+import { ComboStatus } from '../enum/combo_status.enum';
 
 export class UpdateComboDto extends PartialType(CreateComboDto) {
     @ApiProperty({

@@ -1,12 +1,15 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Combo } from './entities/combo.entity';
 import { ComboDetail } from './entities/combo_detail.entity';
 import { ComboImage } from './entities/combo_image.entity';
 import { ResponseDto } from '@/helpers/utils';
+import { Request } from 'express';
+import { SortField } from './enum/sort_field.enum';
+import { ComboStatus } from './enum/combo_status.enum';
 
 @Injectable()
 export class ComboService {
@@ -190,6 +193,43 @@ export class ComboService {
     await this.comboRepository.update(id, comboInfo);
 
     return new ResponseDto(HttpStatus.OK, "Successfully", null);
+  }
+
+  async searchAndFilter(req: Request) {
+    const {
+      name = "",
+      status = "available",
+      page = 1,
+      limit = 5,
+      sortBy = "price",
+      orderBy = "ASC"
+    } = req.query;
+
+    const take =  isNaN(Number(limit)) ? 5 : Number(limit);
+    const skip = (isNaN(Number(page)) || isNaN(Number(limit))) ? 0 : (Number(page) - 1) * Number(limit);
+    const statusValid = Object.values(ComboStatus).filter((item) => item === (status as string).toLowerCase());
+    const sortByValid = Object.values(SortField).filter((item) => item === (sortBy as string).toLowerCase());
+
+    const [items, totalItems] = await this.comboRepository.findAndCount({
+      where: {
+        name: ILike(`%${name}%`),
+        status: ILike(`%${statusValid[0] ? statusValid : ""}%`)
+      },
+      relations: ["comboDetails", "comboDetails.product", "images"],
+      order: {
+        [sortByValid[0]]: orderBy as string
+      },
+      take,
+      skip
+    });
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", {
+      total_pages: Math.ceil(totalItems / take),
+      total_items: totalItems,
+      page,
+      limit,
+      data: items
+    });
   }
 
   async  updateComboItems(

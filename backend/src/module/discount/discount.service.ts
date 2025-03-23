@@ -145,7 +145,7 @@ export class DiscountService {
 
   async searchAndFilter(req: Request) {
     const {
-      code = "%",
+      code = "",
       page = 1,
       limit = 5,
       sortBy = "value",
@@ -155,7 +155,7 @@ export class DiscountService {
     const take =  isNaN(Number(limit)) ? 5 : Number(limit);
     const skip = (isNaN(Number(page)) || isNaN(Number(limit))) ? 0 : (Number(page) - 1) * Number(limit);
     const sortByValid = Object.values(SortField).filter((item) => item === (sortBy as string).toLowerCase());
-    console.log(code, sortByValid);
+
     const [items, totalItems] = await this.discountRepository.findAndCount({
       where: {
         code: ILike(`%${code}%`)
@@ -165,7 +165,7 @@ export class DiscountService {
       },
       take,
       skip,
-    })
+    });
 
     return new ResponseDto(HttpStatus.OK, "Successfully", {
       total_pages: Math.ceil(totalItems / take),
