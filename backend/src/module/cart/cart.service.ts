@@ -198,10 +198,10 @@ export class CartService {
     }
 
     if (!req.session.total) {
-      req.session.total = {}; // Khởi tạo object thay vì mảng
+      req.session.total = {}; 
     }
 
-    req.session.total.total_prices = total_prices; // Gán key-value đúng cách
+    req.session.total.total_prices = total_prices; 
     console.log(req.session.total);
 
     return {

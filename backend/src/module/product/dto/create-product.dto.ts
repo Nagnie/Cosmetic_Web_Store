@@ -11,6 +11,11 @@ export class CreateProductDto {
     @IsNotEmpty({ message: `Product's price must not be empty` })
     @IsNumber({}, { message: `Products's price must be number` })
     price: number
+    
+    @ApiProperty({ example: '20000', description: `Product's original price` })
+    @IsNotEmpty({ message: `Product's original price must not be empty` })
+    @IsNumber({}, { message: `Products's original price must be number` })
+    origin_price: number
 
     @ApiProperty({ example: 1, description: `Subcategory ID this product belongs to` })
     @IsNotEmpty({ message: `Subcategory ID must not be empty` })

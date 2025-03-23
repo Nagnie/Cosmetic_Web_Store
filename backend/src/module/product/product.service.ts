@@ -22,7 +22,7 @@ export class ProductService {
     ) { }
 
     async create(createProductDto: CreateProductDto) {
-        const { pro_name, price, id_subcat, id_bra, status, img_url, classification, desc } =
+        const { pro_name, price, origin_price, id_subcat, id_bra, status, img_url, classification, desc } =
             createProductDto;
 
         const queryRunner = this.dataSource.createQueryRunner();
@@ -35,11 +35,11 @@ export class ProductService {
             // INSERT PRODUCT
             const insertProduct = await queryRunner.query(
                 `
-        INSERT INTO product(name, price, description, status, id_subcat, id_bra)
-        VALUES($1, $2, $3, $4, $5, $6)
+        INSERT INTO product(name, price, origin_price, description, status, id_subcat, id_bra)
+        VALUES($1, $2, $3, $4, $5, $6, $7)
         RETURNING *
         `,
-                [pro_name, price, desc, status, id_subcat, id_bra]
+                [pro_name, price, origin_price, desc, status, id_subcat, id_bra]
             );
 
             const id_pro = insertProduct[0]?.id_pro;
@@ -93,7 +93,7 @@ export class ProductService {
         const data = await this.dataSource.query(
             `
       SELECT pro.id_pro AS id_pro, pro.name AS pro_name, cat.id_cat AS cat_id, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name,
-      pro.price AS price, pro.origin_price AS origin_price, pro.status AS status, $3 AS type,
+      (pro.price::NUMERIC)::FLOAT AS price, (pro.origin_price::NUMERIC)::FLOAT AS origin_price, pro.status AS status, $3 AS type,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -137,7 +137,7 @@ export class ProductService {
     async findOne(id_pro: number) {
         const productInfo = await this.dataSource.query(
             `
-      SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS price, pro.origin_price AS origin_price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status, $2 AS type,
+      SELECT pro.id_pro AS id_pro, pro.name AS pro_name,  (pro.price::NUMERIC)::FLOAT AS price, (pro.origin_price::NUMERIC)::FLOAT AS origin_price, pro.description, cat.name AS cat_name, scat.id_subcat AS id_subcat, scat.name AS scat_name, bra.id_bra AS id_bra, bra.name AS bra_name, pro.status AS pro_status, $2 AS type,
       COALESCE((
         SELECT json_agg(img.link)
         FROM product_image AS img
@@ -267,7 +267,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-            SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $4 AS type,
+            SELECT pro.id_pro AS id_pro, pro.name AS pro_name, (pro.price::NUMERIC)::FLOAT AS price, (pro.origin_price::NUMERIC)::FLOAT AS origin_price, bra.name AS bra_name, $4 AS type,
             COALESCE((
             SELECT json_agg(img.link)
             FROM product_image AS img
@@ -403,7 +403,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $5 AS type,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name,  (pro.price::NUMERIC)::FLOAT AS price, (pro.origin_price::NUMERIC)::FLOAT AS origin_price, bra.name AS bra_name, $5 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -445,7 +445,7 @@ export class ProductService {
 
         const data = await this.dataSource.query(
             `
-        SELECT pro.id_pro AS id_pro, pro.name AS pro_name, pro.price AS pro_price, pro.origin_price AS pro_origin_price, bra.name AS bra_name, $5 AS type,
+        SELECT pro.id_pro AS id_pro, pro.name AS pro_name,  (pro.price::NUMERIC)::FLOAT AS price, (pro.origin_price::NUMERIC)::FLOAT AS origin_price, bra.name AS bra_name, $5 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM product_image AS img
@@ -485,7 +485,7 @@ export class ProductService {
     }
 
     async update(id_pro: number, updateProductDto: UpdateProductDto) {
-        const { pro_name, price, id_subcat, id_bra, status, images, classification, description } =
+        const { pro_name, price, origin_price, id_subcat, id_bra, status, images, classification, description } =
             updateProductDto;
 
         // START TRANSACTION
@@ -498,10 +498,10 @@ export class ProductService {
             await queryRunner.query(
                 `
           UPDATE product 
-          SET name = $1, price = $2, id_subcat = $3, id_bra = $4, status = $5, description = $6
+          SET name = $1, price = $2, id_subcat = $3, id_bra = $4, status = $5, description = $6, origin_price = $8
           WHERE id_pro = $7;
       `,
-                [pro_name, price, id_subcat, id_bra, status, description, id_pro]
+                [pro_name, price, id_subcat, id_bra, status, description, id_pro, origin_price]
             );
 
             // If having new image list
