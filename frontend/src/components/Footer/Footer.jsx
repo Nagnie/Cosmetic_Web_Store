@@ -15,34 +15,32 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {/* Contact Information */}
           <div className="space-y-4">
-            <h2 className="text-brown-600 text-lg font-semibold">Contact Us</h2>
-            <div className="ms-25 justify-center space-y-2 text-black md:ms-10">
-              <div className="flex items-center gap-2">
-                <Phone size={18} style={{ color: "#41372d" }} />
-                <span>097 311 3685</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail size={18} style={{ color: "#41372d" }} />
-                <span>naucosmeticbmt@gmail.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin size={18} style={{ color: "#41372d" }} />
-                <span className={"text-start"}>
-                  부산 서구 서대신동1가 26-4
-                </span>
-              </div>
+            <h2 className="text-brown-600 text-lg font-semibold">About Us - NÂU Cosmetic</h2>
+            <div className="text-start space-y-2 text-black max-w-200 px-20 lg:px-8 md:px-10 ">
+              <span>NÂU COSMETIC tự hào là địa chỉ tin cậy cung cấp mỹ phẩm Hàn Quốc xách tay, cam kết chính hãng 100%, chất lượng cao và giá cả hợp lý.</span>
             </div>
           </div>
 
           {/* Opening Hours */}
           <div className="space-y-4">
             <h2 className="text-brown-600 text-lg font-semibold">
-              Opening Hours
+              Contact Us
             </h2>
             <div className="space-y-2 text-black">
-              <p>Monday - Friday: 9:00 AM - 8:00 PM</p>
-              <p>Saturday: 10:00 AM - 6:00 PM</p>
-              <p>Sunday: 11:00 AM - 5:00 PM</p>
+              <div className="flex justify-center items-center gap-2">
+                <Phone size={18} style={{ color: "#41372d" }} />
+                <span>097 311 3685</span>
+              </div>
+              <div className="flex justify-center items-center gap-2">
+                <Mail size={18} style={{ color: "#41372d" }} />
+                <span>naucosmeticbmt@gmail.com</span>
+              </div>
+              <div className="flex justify-center items-center gap-2">
+                <MapPin size={18} style={{ color: "#41372d" }} />
+                <span className={"text-start"}>
+                  부산 서구 서대신동1가 26-4
+                </span>
+              </div>
             </div>
           </div>
 

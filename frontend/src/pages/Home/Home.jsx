@@ -1,6 +1,3 @@
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
 import Header from "../../components/Header/Header.jsx";
 import { useNavigate } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
@@ -15,17 +12,26 @@ import DiscountCard from "./components/DiscountCard.jsx";
 import ComboProductCard from "@components/ComboProductCard/ComboProductCard.jsx";
 import { useCallback, useMemo } from "react";
 import { useInfiniteVouchers } from "@hooks/useVoucherQueries.js";
-import { motion, AnimatePresence } from "framer-motion";
+import { useAllCombo } from "@hooks/useComboQueries.js";
+import { motion } from "framer-motion";
 
 const Homepage = () => {
   const navigate = useNavigate();
 
   const brandsQuery = useBrands();
   const productsQuery = useProducts({ page: 1, limit: 8 });
+  const comboQuery = useAllCombo();
 
   const brands = brandsQuery.data?.data?.data || [];
   const products = productsQuery.data?.data || [];
+  const allCombos = comboQuery.data || [];
 
+  // 3 newest combo
+  const newestCombos = useMemo(() => {
+    return [...allCombos]
+        .sort((a, b) => b.id_combo - a.id_combo)
+        .slice(0, 3);
+  }, [allCombos]);
   // Lấy 5 brands đầu tiên
   const topBrands = brands.slice(0, 5);
 
@@ -112,19 +118,6 @@ const Homepage = () => {
     },
   };
 
-  // Loader animation
-  const loaderVariants = {
-    animate: {
-      scale: [1, 1.2, 1],
-      opacity: [0.5, 1, 0.5],
-      transition: {
-        duration: 1.5,
-        repeat: Infinity,
-        repeatType: "loop",
-      },
-    },
-  };
-
   return (
     <div className="font-sans">
       <Header />
@@ -162,7 +155,7 @@ const Homepage = () => {
             Thương hiệu nổi tiếng
           </h2>
           <button
-            className="z-100 cursor-pointer text-sm font-medium hover:underline"
+            className="z-10 cursor-pointer text-sm font-medium hover:underline"
             style={{ color: "#91775e" }}
             onClick={() => navigate("/brands")}
           >
@@ -256,6 +249,7 @@ const Homepage = () => {
         </div>
       ) : (
         <div className="reset-all">
+          <h2 className="text-center text-3xl font-semibold">New Voucher</h2>
           <div className="voucher-container">
             {vouchersQuery.isError ? (
               <div className="py-4 text-center text-red-500">
@@ -279,9 +273,22 @@ const Homepage = () => {
         </div>
       )}
 
-      <section className="mt-10">
-        <ComboProductCard />
-      </section>
+      {/*<section className="mt-10">*/}
+      {/*    <h2 className="text-3xl font-bold text-center text-black mb-10">Combo Mới Nhất</h2>*/}
+      {/*    {comboQuery.isLoading ? (*/}
+      {/*        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">*/}
+      {/*          {numberToArray(3).map((index) => (*/}
+      {/*              <ProductCardSkeleton key={index} />*/}
+      {/*          ))}*/}
+      {/*        </div>*/}
+      {/*    ) : (*/}
+      {/*        <div className="flex flex-wrap justify-center gap-8">*/}
+      {/*          {newestCombos.map((combo) => (*/}
+      {/*              <ComboProductCard key={combo.id_combo} combo={combo} />*/}
+      {/*          ))}*/}
+      {/*        </div>*/}
+      {/*    )}*/}
+      {/*</section>*/}
 
       {/* Best Sellers Section */}
       <div className="px-10 py-10">
