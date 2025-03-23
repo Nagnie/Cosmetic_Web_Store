@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Tag } from "antd";
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,20 +17,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
 
   const addCartItemMutation = useAddCartItem();
 
-  const handleAddToCart = () => {
-    const item = {
-      id_pro: product.id_pro,
-      id_class:
-        selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
-      quantity: quantity,
-      type: product.type || "product",
-    };
-
-    addCartItemMutation.mutate(item);
-  };
-
-  const navigate = useNavigate();
-  const handleBuyNow = async () => {
+  const handleAddToCart = async () => {
     const item = {
       id_pro: product.id_pro,
       id_class:
@@ -44,7 +31,6 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
 
       if (res && res.cart && res.cart.length > 0) {
         toast.success("Thêm vào giỏ hàng thành công");
-        navigate("/cart");
       } else {
         toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
       }
@@ -54,15 +40,32 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
     }
   };
 
-  useEffect(() => {
-    if (addCartItemMutation.isSuccess) {
-      toast.success("Thêm vào giỏ hàng thành công");
-    }
+  const navigate = useNavigate();
+  const handleBuyNow = async () => {
+    const item = {
+      id_pro: product.id_pro,
+      id_class:
+        selectedClassification?.id_class ?? classification[0]?.id_class ?? 0,
+      quantity: quantity,
+      type: product.type || "product",
+    };
 
-    if (addCartItemMutation.isError) {
-      toast.error("Thêm vào giỏ hàng thất bại");
+    try {
+      const res = await addCartItemMutation.mutateAsync({
+        ...item,
+        isBuyNow: true,
+      });
+
+      if (res && res.cart && res.cart.length > 0) {
+        navigate("/checkout");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
     }
-  }, [addCartItemMutation.isSuccess, addCartItemMutation.isError]);
+  };
 
   return (
     <div className="text-left">
