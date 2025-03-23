@@ -89,12 +89,12 @@ export class DiscountService {
         }
       });
 
-      if (!existingDiscount) {
+      if (existingDiscount) {
         throw new InternalServerErrorException("Discount has existed");
       }
 
       const newDiscount = await this.discountRepository.save(createDiscountDto);
-
+      
       return new ResponseDto(HttpStatus.CREATED, "Successfully", newDiscount);
     } catch (error) {
       throw new InternalServerErrorException(error.message);

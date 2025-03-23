@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestj
 import { ComboService } from './combo.service';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Public } from '@/helpers/decorator/public';
 
 @Controller('combo')
@@ -10,6 +10,10 @@ export class ComboController {
   constructor(private readonly comboService: ComboService) { }
 
   @Post()
+  @Public()
+  @ApiOperation({summary: "Create combo"})
+  @ApiResponse({status: 201, description: "Successfully"})
+  @ApiBody({type: CreateComboDto})
   create(@Body() createComboDto: CreateComboDto) {
     return this.comboService.create(createComboDto);
   }

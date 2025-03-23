@@ -2,6 +2,7 @@ import { Brand } from "@/module/brand/entities/brand.entity";
 import { Category } from "@/module/category/entities/category.entity";
 import { Combo } from "@/module/combo/entities/combo.entity";
 import { ComboDetail } from "@/module/combo/entities/combo_detail.entity";
+import { ComboImage } from "@/module/combo/entities/combo_image.entity";
 import { Discount } from "@/module/discount/entities/discount.entity";
 import { Order } from "@/module/order/entities/order.entity";
 import { OrderDetail } from "@/module/order/entities/order_detail.entity";
@@ -31,5 +32,6 @@ export default new DataSource({
     Discount,
     Combo,
     ComboDetail,
+    ComboImage,
   ],
 });
