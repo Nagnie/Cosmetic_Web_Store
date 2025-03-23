@@ -91,6 +91,7 @@ export const useInfiniteCartItems = ({ limit = 10, enabled = true } = {}) => {
       const data = await fetchCartItems({ page: pageParam, limit, signal });
       return data;
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes
     getNextPageParam: (lastPage) => {
       // Check if there's actually a next page
       if (

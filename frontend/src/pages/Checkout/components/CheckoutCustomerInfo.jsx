@@ -196,6 +196,7 @@ const CheckoutCustomerInfo = () => {
   const totalCartPrice = useCartStore((state) => state.totalPrice);
   const clearCart = useCartStore((state) => state.clearCart);
   const itemCount = useCartStore((state) => state.itemCount);
+  const discountInfo = useCartStore((state) => state.discountInfo);
 
   // Handle form submission
   const handleSubmit = async (values) => {
@@ -248,7 +249,9 @@ const CheckoutCustomerInfo = () => {
         address: `${formattedAddress.address}, ${formattedAddress.wardName}, ${formattedAddress.districtName}, ${formattedAddress.cityName}`,
         note: formattedAddress.note || "",
         order_items: order_items,
-        total_price: totalCartPrice,
+        total_price: discountInfo?.new_total_prices
+          ? +discountInfo.new_total_prices
+          : +totalCartPrice || 0,
       };
 
       // console.log("Submitting order:", JSON.stringify(persistData, null, 2));
