@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FaShoppingBag } from "react-icons/fa";
 import { BsCartPlus } from "react-icons/bs";
+import { useAddCartItem } from "@hooks/useCartQueries";
+import { toast } from "react-toastify";
 
 const ComboProductCard = ({ combo }) => {
   const navigate = useNavigate();
@@ -18,6 +20,55 @@ const ComboProductCard = ({ combo }) => {
     combo.images && combo.images.length > 0
       ? combo.images[0]
       : "https://placehold.co/400x400/png?text=No+Image";
+
+  const addCartItemMutation = useAddCartItem();
+
+  const handleAddToCart = async () => {
+    const item = {
+      id_pro: combo.id_pro ?? combo?.id_combo ?? 0,
+      id_class: combo?.id_class ?? 0,
+      quantity: 1,
+      type: combo.type || "combo",
+    };
+
+    try {
+      const res = await addCartItemMutation.mutateAsync(item);
+
+      if (res && res.cart && res.cart.length > 0) {
+        toast.success("Thêm vào giỏ hàng thành công");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
+  };
+
+  const handleBuyNow = async () => {
+    const item = {
+      id_pro: combo.id_pro ?? combo?.id_combo ?? 0,
+      id_class: combo?.id_class ?? 0,
+      quantity: 1,
+      type: combo.type || "combo",
+    };
+
+    try {
+      const res = await addCartItemMutation.mutateAsync({
+        ...item,
+        isBuyNow: true,
+      });
+
+      if (res && res.cart && res.cart.length > 0) {
+        navigate("/checkout");
+      } else {
+        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+      }
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
+    }
+  };
 
   return (
     <div className="max-w-98 overflow-hidden rounded-lg bg-white shadow-lg">
@@ -73,11 +124,17 @@ const ComboProductCard = ({ combo }) => {
           )}
 
           <div className="mt-6 flex justify-center text-center">
-            <button className="bg-primary hover:bg-primary-medium mx-2 flex items-center rounded-full px-6 py-2 font-bold text-white transition duration-300">
+            <button
+              onClick={handleBuyNow}
+              className="bg-primary hover:bg-primary-medium mx-2 flex items-center rounded-full px-6 py-2 font-bold text-white transition duration-300"
+            >
               <FaShoppingBag size={18} />
               <span className={"mx-2"}>Mua ngay</span>
             </button>
-            <button className="bg-primary-light hover:bg-primary-light rounded-full px-6 py-2 font-bold text-white transition duration-300">
+            <button
+              onClick={handleAddToCart}
+              className="bg-primary-light hover:bg-primary-light rounded-full px-6 py-2 font-bold text-white transition duration-300"
+            >
               <BsCartPlus size={22} />
             </button>
           </div>
