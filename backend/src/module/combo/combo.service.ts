@@ -1,15 +1,52 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Combo } from './entities/combo.entity';
+import { ComboDetail } from './entities/combo_detail.entity';
+import { ComboImage } from './entities/combo_image.entity';
+import { ResponseDto } from '@/helpers/utils';
 
 @Injectable()
 export class ComboService {
   constructor(
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
+    @InjectRepository(Combo)
+    private readonly comboRepository: Repository<Combo>,
+    @InjectRepository(ComboDetail)
+    private readonly comboDetailRepository: Repository<ComboDetail>,
+    @InjectRepository(ComboImage)
+    private readonly comboImageRepository: Repository<ComboImage>
   ) { }
-  create(createComboDto: CreateComboDto) {
-    return 'This action adds a new combo';
+
+  async create(createComboDto: CreateComboDto) {
+    const existingCombo = await this.comboRepository.findOne({
+      where: {
+        name: createComboDto.name
+      }
+    });
+
+    if (existingCombo) {
+      throw new HttpException("Combo (name) has existed", HttpStatus.BAD_REQUEST);
+    }
+
+    const {productIds, imageLinks, ...comboBasicInfo} = createComboDto;
+    const combo = await this.comboRepository.save(comboBasicInfo);
+
+    const products = productIds.map((productId) => ({
+      combo,
+      product: {id_pro: productId}
+    }));
+    await this.comboDetailRepository.save(products);
+
+    const images = imageLinks.map((item) => ({
+      combo,
+      link: item
+    }));
+    await this.comboImageRepository.save(images);
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", combo);
   }
 
   async findAll(page: number = 1, limit: number = 10) {

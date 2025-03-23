@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ComboDetail } from "./combo_detail.entity";
+import { ComboImage } from "./combo_image.entity";
 
 @Entity({name: "combo"})
 export class Combo {
@@ -15,7 +16,7 @@ export class Combo {
     @Column({name: "origin_price"})
     origin_price: number;
 
-    @Column()
+    @Column({default: ""})
     description: string;
 
     @Column({default: "available"})
@@ -24,5 +25,6 @@ export class Combo {
     @OneToMany(() => ComboDetail, (comboDetail) => comboDetail.combo)
     comboDetails: ComboDetail[];
 
-
+    @OneToMany(() => ComboImage, (comboImage) => comboImage.combo)
+    images: ComboImage[];
 }
