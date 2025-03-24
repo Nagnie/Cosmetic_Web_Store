@@ -65,7 +65,7 @@ const CheckoutPriceInfo = () => {
         code: voucher.code,
       });
 
-      applyVoucherMutation.mutate(voucher.id);
+      applyVoucherMutation.mutate(voucher.code);
     } else {
       setVoucherCode("");
       setDiscountInfo(null);
