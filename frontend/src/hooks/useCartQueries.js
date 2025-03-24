@@ -18,14 +18,21 @@ export const useAddCartItem = () => {
 
   return useMutation({
     mutationFn: (item) => addItemToCart(item),
-    onSuccess: (_, variables) => {
+    onMutate: (variables) => {
+      return {
+        isBuyNow: variables.isBuyNow,
+      };
+    },
+    onSuccess: (_, variables, context) => {
       queryClient.invalidateQueries({
         queryKey: ["infiniteCartItems", { limit: 10 }],
       });
 
       setItemCount(itemCount + variables.quantity);
 
-      openCartDrawer();
+      if (!context?.isBuyNow) {
+        openCartDrawer();
+      }
     },
   });
 };
@@ -91,6 +98,7 @@ export const useInfiniteCartItems = ({ limit = 10, enabled = true } = {}) => {
       const data = await fetchCartItems({ page: pageParam, limit, signal });
       return data;
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes
     getNextPageParam: (lastPage) => {
       // Check if there's actually a next page
       if (

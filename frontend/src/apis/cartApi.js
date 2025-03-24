@@ -1,6 +1,7 @@
 import axios from "@utils/axios";
 
 export const addItemToCart = async (item) => {
+  delete item.isBuyNow;
   const res = await axios.post("/cart/add", item);
 
   return res.data;

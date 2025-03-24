@@ -15,13 +15,17 @@ const ProductActionMobile = ({ onCartClick, product }) => {
       id_pro: product.id_pro,
       id_class: classification[0]?.id_class ?? 0,
       quantity: 1,
+      type: product.type ?? "product",
     };
 
     try {
-      const res = await addCartItemMutation.mutateAsync(item);
+      const res = await addCartItemMutation.mutateAsync({
+        ...item,
+        isBuyNow: true,
+      });
 
       if (res && res.cart && res.cart.length > 0) {
-        navigate("/cart");
+        navigate("/checkout");
       } else {
         toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
       }

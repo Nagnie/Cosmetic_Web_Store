@@ -43,9 +43,13 @@ const CartDrawerCart = ({ item }) => {
   };
 
   return (
-    <div className="flex justify-between gap-2 sm:gap-3">
+    <div className="flex w-full justify-between gap-2 sm:gap-3">
       <Link
-        to={`/products/${encodeURIComponent(item.pro_name || item.name)}/${item.id_pro}`}
+        to={
+          item.type === "product"
+            ? `/products/${encodeURIComponent(item?.pro_name ?? item?.name)}/${item?.id_pro ?? item?.id}`
+            : `/combo/${encodeURIComponent(item.name)}/${item.id}`
+        }
         className="w-1/5 cursor-pointer"
       >
         <Image
@@ -53,12 +57,17 @@ const CartDrawerCart = ({ item }) => {
           preview={false}
           loading="lazy"
           src={item?.images?.[0] || item?.image || SAMPLE_ITEM.image}
+          fallback="https://placehold.co/499x499?text=Not+found"
         />
       </Link>
 
       <div className="w-4/5">
         <Link
-          to={`/products/${encodeURIComponent(item.pro_name || item.name)}/${item.id_pro}`}
+          to={
+            item.type === "product"
+              ? `/products/${encodeURIComponent(item?.pro_name ?? item?.name)}/${item?.id_pro ?? item?.id}`
+              : `/combo/${encodeURIComponent(item.name)}/${item.id}`
+          }
           className="cursor-pointer text-[12px] font-semibold !text-black sm:text-sm"
         >
           {item?.name || item?.pro_name || SAMPLE_ITEM.name}
@@ -66,10 +75,10 @@ const CartDrawerCart = ({ item }) => {
 
         <p className="text-xs">{item?.class_name}</p>
 
-        <div className="mt-2 flex items-center justify-between gap-2">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           <QuantitySelector
             initialValue={item?.quantity || 1}
-            width={28 * 3}
+            width={28 * 4.5}
             height={28}
             value={item?.quantity || 1}
             onChange={handleUpdateItem}

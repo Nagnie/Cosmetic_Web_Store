@@ -54,15 +54,20 @@ const CartPage = () => {
     const unavailableClasses = getUnavailableClassifications(allItems);
 
     return allItems.map((item) => ({
-      id_pro: item.id_pro,
-      id_class: item.id_class,
-      quantity: item.quantity,
+      id_pro: item.id_pro ?? item.id ?? item?.id_combo,
+      id_class: item.id_class ?? item.old_id_class ?? 0,
+      quantity: item.quantity ?? 1,
       availableClassifications: getAvailableClassifications(
         item,
         unavailableClasses,
       ),
     }));
   }, [allItems]);
+
+  // cuộn lên đầu trang khi vào trang
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Cập nhật số lượng item trong store
   useEffect(() => {
@@ -157,14 +162,13 @@ const CartPage = () => {
     );
   };
 
-  // Mutation để áp dụng voucher
   const applyVoucherMutation = useApplyVoucher({
     onSuccess: (data) => {
       console.log("Voucher áp dụng thành công:", data);
 
       setDiscountInfo({
         ...data,
-        id: selectedVoucher?.id || voucherCode?.id || "",
+        code: selectedVoucher?.code || voucherCode?.code || "",
       });
 
       message.success("Áp dụng mã giảm giá thành công!");
@@ -185,33 +189,25 @@ const CartPage = () => {
     },
   });
 
-  // Hàm xử lý khi voucher được chọn từ modal
   const handleVoucherSelect = (voucher) => {
     console.log(voucher);
 
     setSelectedVoucher(voucher);
 
-    // Nếu voucher được chọn, cập nhật voucherCode và gọi mutation
     if (voucher) {
       setVoucherCode({
-        id: voucher.id,
+        code: voucher.code,
       });
 
-      // Gọi mutation để áp dụng voucher
-      applyVoucherMutation.mutate(
-        voucher.id,
-        // Thêm các tham số khác nếu cần
-      );
+      applyVoucherMutation.mutate(voucher.code);
     } else {
       setVoucherCode("");
       setDiscountInfo(null);
     }
   };
 
-  // Hàm xử lý khi mã voucher được nhập thủ công
   const handleVoucherApply = (code) => {
     if (!code) {
-      // Nếu code rỗng, xóa voucher
       setVoucherCode("");
       setSelectedVoucher(null);
       setDiscountInfo(null);
@@ -219,17 +215,12 @@ const CartPage = () => {
     }
 
     setVoucherCode({
-      id: code,
+      code: code,
     });
 
-    // Xóa voucher đã chọn
     setSelectedVoucher(null);
 
-    // Gọi mutation để áp dụng voucher
-    applyVoucherMutation.mutate(
-      code,
-      // Thêm các tham số khác nếu cần
-    );
+    applyVoucherMutation.mutate(code);
   };
 
   // Hiển thị modal với CouponModalContent
@@ -307,7 +298,7 @@ const CartPage = () => {
           </div>
           <div className="w-full rounded-md bg-white p-4 px-6 shadow-md">
             <DiscountSelector
-              voucherCode={voucherCode?.id ?? ""}
+              voucherCode={voucherCode?.code ?? ""}
               onApplyVoucher={handleVoucherApply}
               onShowCouponModal={handleShowCouponModal}
               isLoading={applyVoucherMutation.isLoading}

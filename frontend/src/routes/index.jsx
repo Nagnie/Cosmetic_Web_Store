@@ -74,10 +74,10 @@ const PublicRoutes = [
     layout: GuestLayout,
   },
   {
-    path: "/combo/:name",
+    path: "/combo/:name/:id",
     component: ComboProduct,
     layout: GuestLayout,
-  }
+  },
 ];
 
 export { PublicRoutes };
