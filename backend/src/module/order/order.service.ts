@@ -169,11 +169,11 @@ export class OrderService {
 
   async findAll(req: Request) {
     try {
-      const { page = 1, limit = 5, sortBy = "created_at", order = "ASC" } = req.query;
+      const { page = 1, limit = 5, sortBy = "created_at", orderBy = "desc" } = req.query;
       const allItems = await this.orderRepository.count();
       const allPage = Math.ceil(allItems / (limit as number));
       const orders = await this.orderRepository.find({
-        order: { [(sortBy as string).toLowerCase()]: order },
+        order: { [(sortBy as string).toLowerCase()]: orderBy },
         take: (limit as unknown as number),
         skip: ((page as unknown as number) - 1) * (limit as unknown as number)
       });
