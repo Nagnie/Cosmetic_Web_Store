@@ -192,31 +192,29 @@ export class OrderService {
   async findOne(orderId: number, req: Request) {
     try {
       const { page = 1, limit = 5 } = req.query;
-      const order = await this.orderRepository.findOne({
-        where: {
-          id: orderId
-        }
-      });
 
-      if (!order) {
-        return new ResponseDto(HttpStatus.BAD_REQUEST, "Order not found", null);
-      }
-
-      const allOrderDetails = await this.orderDetailRepository.find({
+      const [items, totalItems] = await this.orderDetailRepository.findAndCount({
         where: {
-          order
+          order: {
+            id: orderId
+          }
         },
         order: { id: "ASC" },
         take: (limit as number),
         skip: ((page as number) - 1) * (limit as number),
       });
-      const allPage = Math.ceil(allOrderDetails.length / (limit as number));
+      
+      if (totalItems === 0) {
+        throw new HttpException("Order does not exist", HttpStatus.BAD_REQUEST);
+      }
+
+      const allPage = Math.ceil(totalItems / (limit as number));
       return new ResponseDto(HttpStatus.OK, "Successfully", {
         total_pages: allPage,
-        total_items: allOrderDetails.length,
+        total_items: totalItems,
         page,
         limit,
-        allProducts: allOrderDetails
+        allProducts: items
       })
     } catch (error) {
       throw new InternalServerErrorException(error.message);
