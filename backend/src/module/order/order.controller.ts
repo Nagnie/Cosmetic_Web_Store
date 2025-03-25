@@ -52,7 +52,7 @@ export class OrderController {
   @Get("searchAndFilter")
   @Public()
   @ApiOperation({summary: "Search And Filter order"})
-  @ApiQuery({ name: "key", required: false, example: "Combo 1", default: "", description: "Key(customer, email, phone, addr)"})
+  @ApiQuery({ name: "key", required: false, example: "nam", default: "", description: "Key(customer)"})
   @ApiQuery({ name: "status", enum: OrderStatus, required: false, example: "ordered", default: "", description: "Order status"})
   @ApiQuery({ name: 'page', required: false, example: 1, default: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, example: 5, default: 5, description: 'Number of records per page' })
