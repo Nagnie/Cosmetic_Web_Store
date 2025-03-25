@@ -58,7 +58,7 @@ export class ComboService {
     const offset = (page - 1) * limit;
     const data = await this.dataSource.query(
       `
-        SELECT com.*, $3 AS type,
+        SELECT com.id_combo AS id_combo, com.name AS name, (com.price::NUMERIC)::FLOAT AS price, (com.origin_price::NUMERIC)::FLOAT AS origin_price, com.description AS description, com.status AS status, $3 AS type,
         COALESCE((
           SELECT json_agg(img.link)
           FROM combo_image AS img
@@ -119,7 +119,7 @@ export class ComboService {
   async findOne(id_combo: number) {
     const data = await this.dataSource.query(
       `
-      SELECT com.*, $2 AS type,
+      SELECT com.id_combo AS id_combo, com.name AS name, (com.price::NUMERIC)::FLOAT AS price, (com.origin_price::NUMERIC)::FLOAT AS origin_price, com.description AS description, com.status AS status, $2 AS type,
       COALESCE((
         SELECT json_agg(img.link)
         FROM combo_image AS img

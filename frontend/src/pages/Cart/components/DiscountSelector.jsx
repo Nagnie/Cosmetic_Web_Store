@@ -95,7 +95,7 @@ const DiscountSelector = ({
   return (
     <div className="w-full">
       {/* Input và Apply Button - responsive với Tailwind */}
-      <div className="flex w-full flex-col sm:flex-row sm:space-x-0">
+      <div className="flex w-full flex-col sm:flex-row sm:space-x-2">
         <Input
           className="mb-2 w-full flex-grow uppercase sm:mb-0"
           size="large"
