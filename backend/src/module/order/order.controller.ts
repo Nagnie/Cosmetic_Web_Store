@@ -6,6 +6,8 @@ import { Public } from '@/helpers/decorator/public';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Response, Request } from 'express';
 import axios from 'axios';
+import { OrderStatus } from './enum/order_status.enum';
+import { OrderSortField } from './enum/order_sortfield.enum';
 
 @Controller('order')
 export class OrderController {
@@ -45,6 +47,19 @@ export class OrderController {
     } catch (error) {
       res.status(500).json({ message: 'Download failed' });
     }
+  }
+
+  @Get("searchAndFilter")
+  @Public()
+  @ApiOperation({summary: "Search And Filter order"})
+  @ApiQuery({ name: "key", required: false, example: "nam", default: "", description: "Key(customer)"})
+  @ApiQuery({ name: "status", enum: OrderStatus, required: false, example: "ordered", default: "", description: "Order status"})
+  @ApiQuery({ name: 'page', required: false, example: 1, default: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, example: 5, default: 5, description: 'Number of records per page' })
+  @ApiQuery({ name: "sortBy", enum: OrderSortField, required: false, example: "created_at", default: "created_at", description: "Sort by field"})
+  @ApiQuery({ name: "orderBy", required: false, example: "ACS", default: "ACS", description: "Order by field"})
+  async searchAndFilter(@Req() req: Request) {
+    return await this.orderService.searchAndFilter(req);
   }
 
   @Get()
