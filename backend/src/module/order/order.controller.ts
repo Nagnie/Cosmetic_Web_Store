@@ -68,6 +68,8 @@ export class OrderController {
   @ApiResponse({ status: 200, description: 'Get all orders' })
   @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Number of records per page' })
+  @ApiQuery({ name: "sortBy", enum: OrderSortField, required: false, example: "created_at", default: "created_at", description: "Sort by field"})
+  @ApiQuery({ name: "orderBy", required: false, example: "ACS", default: "DESC", description: "Order by field"})
   async findAll(@Req() req: Request) {
     return this.orderService.findAll(req);
   }
