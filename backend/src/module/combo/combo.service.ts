@@ -8,7 +8,7 @@ import { ComboDetail } from './entities/combo_detail.entity';
 import { ComboImage } from './entities/combo_image.entity';
 import { ResponseDto } from '@/helpers/utils';
 import { Request } from 'express';
-import { SortField } from './enum/sort_field.enum';
+import { SortField } from './enum/combo_sortfield.enum';
 import { ComboStatus } from './enum/combo_status.enum';
 
 @Injectable()

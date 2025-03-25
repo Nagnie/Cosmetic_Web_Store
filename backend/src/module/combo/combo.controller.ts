@@ -4,7 +4,7 @@ import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Public } from '@/helpers/decorator/public';
-import { SortField } from './enum/sort_field.enum';
+import { SortField } from './enum/combo_sortfield.enum';
 import { Request } from 'express';
 import { ComboStatus } from './enum/combo_status.enum';
 
