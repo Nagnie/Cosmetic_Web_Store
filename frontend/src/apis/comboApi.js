@@ -10,8 +10,8 @@ const comboApi = {
         });
     },
 
-    getComboDetail: async (id, { signal }) => {
-        return axios.get(`/combo/${id}`, { signal });
+    getComboDetail: async (id) => {
+        return axios.get(`/combo/${id}`);
     },
 
     updateCombo: async (id, data, options = {}) => {

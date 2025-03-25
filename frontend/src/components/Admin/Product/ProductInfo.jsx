@@ -22,7 +22,7 @@ const ProductInfo = () => {
             console.log(id);
             const response = await productsApi.getProductDetail(id);
 
-            console.log("Response:  ", response);
+            // console.log("Response:  ", response);
 
             if (response.status === 200) {
                 setProduct(response.data[0]);
