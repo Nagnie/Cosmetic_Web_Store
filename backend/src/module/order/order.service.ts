@@ -168,7 +168,7 @@ export class OrderService {
 
   async findAll(req: Request) {
     try {
-      const { page = 1, limit = 5, sortBy = "id", order = "ASC" } = req.query;
+      const { page = 1, limit = 5, sortBy = "created_at", order = "ASC" } = req.query;
       const allItems = await this.orderRepository.count();
       const allPage = Math.ceil(allItems / (limit as number));
       const orders = await this.orderRepository.find({
@@ -210,17 +210,6 @@ export class OrderService {
         skip: ((page as number) - 1) * (limit as number),
       });
       const allPage = Math.ceil(allOrderDetails.length / (limit as number));
-      // console.log(allOrderDetails);
-      // const idPros = allOrderDetails.flatMap(item => item.product.id_pro);
-      // const images = await this.imageRepository.find({
-      //   where: {
-      //     product: In(idPros)
-      //   },
-      //   relations: ["product"]
-      // });
-      // allOrderDetails.forEach(item => {
-      //   item.product.images = images.filter(image => image.product.id_pro === item.product.id_pro);
-      // });
       return new ResponseDto(HttpStatus.OK, "Successfully", {
         total_pages: allPage,
         total_items: allOrderDetails.length,

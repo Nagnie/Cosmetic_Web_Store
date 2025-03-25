@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { OrderStatus } from "../enum/order_status.enum";
 import { OrderDetail } from "./order_detail.entity";
+import * as moment from "moment";
 
 @Entity({name: "orders"})
 export class Order {
@@ -30,6 +31,9 @@ export class Order {
     
     @Column({name: "note"})
     note: string;
+
+    @Column({name: "created_at", default: moment().toDate()})
+    created_at: Date;
 
     @OneToMany(() => OrderDetail, orderDetail => orderDetail.order)
     orderDetails: OrderDetail[];
