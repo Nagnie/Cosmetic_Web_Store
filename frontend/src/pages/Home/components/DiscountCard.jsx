@@ -81,7 +81,8 @@ const DiscountCard = ({ item, onClick }) => {
       <p className="voucher-expiry">HSD: {item.expiry || "10/04/2025"}</p>
 
       <div className="voucher-ribbon">
-        <span className="voucher-ribbon-text">{item.ribbonText ?? "30%"}</span>
+        {/* <span className="voucher-ribbon-text">{item.ribbonText ?? "30%"}</span> */}
+        <span className="voucher-ribbon-text">Voucher</span>
       </div>
       <div className="voucher-pattern"></div>
     </div>

@@ -126,7 +126,7 @@ const SubCategoryTable = () => {
         try {
             setActionLoading(true);
 
-            console.log(subcategoryData);
+            // console.log(subcategoryData);
             const response = await subcategoriesApi.updateSubcategoryDetail(id, subcategoryData);
 
             if (response.status !== 200) {
@@ -151,7 +151,7 @@ const SubCategoryTable = () => {
             // Use the API function
             const response = await subcategoriesApi.deleteSubcategory(id);
 
-            console.log(response);
+            // console.log(response);
 
             if (response.status !== 200) {
                 throw new Error(response.data.message || 'Failed to delete subcategory');

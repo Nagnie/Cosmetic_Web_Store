@@ -40,8 +40,8 @@ const Order = () => {
 
     // Status options for the dropdown
     const statusOptions = [
-        { value: 'not_ordered', label: 'Chưa đặt hàng' },
-        { value: 'ordered', label: 'Đã đặt hàng' },
+        { value: 'not_ordered', label: 'Chưa order' },
+        { value: 'ordered', label: 'Đã order' },
         { value: 'delivering', label: 'Đang giao' },
         { value: 'delivered', label: 'Đã giao' }
     ];
@@ -129,8 +129,8 @@ const Order = () => {
     // Translate API status to Vietnamese display text
     const translateStatus = (status) => {
         const statusMap = {
-            'not_ordered': 'Chưa đặt hàng',
-            'ordered': 'Đã đặt hàng',
+            'not_ordered': 'Chưa order',
+            'ordered': 'Đã order',
             'delivering': 'Đang giao',
             'delivered': 'Đã giao',
         };

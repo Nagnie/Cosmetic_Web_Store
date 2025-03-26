@@ -78,7 +78,7 @@ const CategoryTable = () => {
             setActionLoading(true);
             const response = await categoriesApi.createCategory(categoryData);
 
-            console.log(response);
+            // console.log(response);
             if (response.status === 200) {
                 throw new Error(response.data.message || 'Failed to update category');
             }
@@ -100,7 +100,7 @@ const CategoryTable = () => {
             setActionLoading(true);
             const response = await categoriesApi.updateCategoryDetail(id, categoryData );
 
-            console.log(response);
+            // console.log(response);
             if (response.status !== 200) {
                 throw new Error(response.data.message || 'Failed to update category');
             }

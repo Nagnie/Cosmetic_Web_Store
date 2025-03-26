@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, Req } from '@nestjs/common';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
-import { ILike, Like, Repository, DataSource } from 'typeorm';
+import { ILike, Repository, DataSource } from 'typeorm';
 import { Discount } from './entities/discount.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
@@ -83,18 +83,18 @@ export class DiscountService {
 
   async create(createDiscountDto: CreateDiscountDto) {
     try {
-      const existingDiscount = this.discountRepository.findOne({
+      const existingDiscount = await this.discountRepository.findOne({
         where: {
           code: createDiscountDto.code
         }
       });
 
-      if (!existingDiscount) {
+      if (existingDiscount) {
         throw new InternalServerErrorException("Discount has existed");
       }
 
       const newDiscount = await this.discountRepository.save(createDiscountDto);
-
+      
       return new ResponseDto(HttpStatus.CREATED, "Successfully", newDiscount);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
@@ -145,7 +145,7 @@ export class DiscountService {
 
   async searchAndFilter(req: Request) {
     const {
-      code = "%",
+      code = "",
       page = 1,
       limit = 5,
       sortBy = "value",
@@ -155,7 +155,7 @@ export class DiscountService {
     const take =  isNaN(Number(limit)) ? 5 : Number(limit);
     const skip = (isNaN(Number(page)) || isNaN(Number(limit))) ? 0 : (Number(page) - 1) * Number(limit);
     const sortByValid = Object.values(SortField).filter((item) => item === (sortBy as string).toLowerCase());
-    console.log(code, sortByValid);
+
     const [items, totalItems] = await this.discountRepository.findAndCount({
       where: {
         code: ILike(`%${code}%`)
@@ -165,7 +165,7 @@ export class DiscountService {
       },
       take,
       skip,
-    })
+    });
 
     return new ResponseDto(HttpStatus.OK, "Successfully", {
       total_pages: Math.ceil(totalItems / take),

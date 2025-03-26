@@ -14,10 +14,11 @@ const ProductModal = ({
         id_subcat: '',
         id_bra: '',
         price: '',
+        origin_price: '',
         img_url: '',
         desc: '',
         classification: '',
-        status: 'Available'
+        status: 'Hàng có sẵn'
     });
 
     // Initialize form data when editing
@@ -28,11 +29,12 @@ const ProductModal = ({
                 id_subcat: product.id_subcat || '',
                 id_bra: product.id_bra || '',
                 price: product.price || '',
+                origin_price: product.origin_price || '',
                 img_url: Array.isArray(product.img_url) ? product.img_url.join(', ') : product.img_url || '',
                 desc: product.desc || '',
                 classification: Array.isArray(product.classification) ?
                     product.classification.join(', ') : product.classification || '',
-                status: product.status || 'Available'
+                status: product.status || 'Hàng có sẵn'
             });
         } else {
             // Reset form when adding new product
@@ -41,10 +43,11 @@ const ProductModal = ({
                 id_subcat: '',
                 id_bra: '',
                 price: '',
+                origin_price: '',
                 img_url: '',
                 desc: '',
                 classification: '',
-                status: 'Available'
+                status: 'Hàng có sẵn'
             });
         }
     }, [isEditing, product]);
@@ -65,13 +68,14 @@ const ProductModal = ({
             id_subcat: parseInt(formData.id_subcat),
             id_bra: parseInt(formData.id_bra),
             price: parseFloat(formData.price),
+            origin_price: parseFloat(formData.origin_price),
             status: formData.status,
             img_url: formData.img_url.split(',').map(url => url.trim()), // Chuyển chuỗi thành mảng
             classification: formData.classification.split(',').map(item => item.trim()), // Chuyển chuỗi thành mảng
             desc: formData.desc,
         };
 
-        console.log(submissionData);
+        // console.log(submissionData);
 
         onSubmit(submissionData);
     };
@@ -140,6 +144,21 @@ const ProductModal = ({
                             />
                         </div>
 
+                        {/* Origin Price */}
+                        <div>
+                            <label className="block text-black mb-1">
+                                Origin Price
+                            </label>
+                            <input
+                                type="number"
+                                name="origin_price"
+                                value={formData.origin_price}
+                                onChange={handleChange}
+                                required
+                                step="0.01"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
+                            />
+                        </div>
                         {/* Price */}
                         <div>
                             <label className="block text-black mb-1">
@@ -167,8 +186,8 @@ const ProductModal = ({
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
                             >
-                                <option value="Available">Available</option>
-                                <option value="Out of Stock">Ordering</option>
+                                <option value="Available">Hàng có sẵn</option>
+                                <option value="Order">Hàng order</option>
                             </select>
                         </div>
 
