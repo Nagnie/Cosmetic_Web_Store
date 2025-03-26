@@ -1,15 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
-import { DataSource } from 'typeorm';
+import { DataSource, ILike, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Combo } from './entities/combo.entity';
+import { ComboDetail } from './entities/combo_detail.entity';
+import { ComboImage } from './entities/combo_image.entity';
+import { ResponseDto } from '@/helpers/utils';
+import { Request } from 'express';
+import { SortField } from './enum/combo_sortfield.enum';
+import { ComboStatus } from './enum/combo_status.enum';
 
 @Injectable()
 export class ComboService {
   constructor(
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
+    @InjectRepository(Combo)
+    private readonly comboRepository: Repository<Combo>,
+    @InjectRepository(ComboDetail)
+    private readonly comboDetailRepository: Repository<ComboDetail>,
+    @InjectRepository(ComboImage)
+    private readonly comboImageRepository: Repository<ComboImage>
   ) { }
-  create(createComboDto: CreateComboDto) {
-    return 'This action adds a new combo';
+
+  async create(createComboDto: CreateComboDto) {
+    const existingCombo = await this.comboRepository.findOne({
+      where: {
+        name: createComboDto.name
+      }
+    });
+
+    if (existingCombo) {
+      throw new HttpException("Combo (name) has existed", HttpStatus.BAD_REQUEST);
+    }
+
+    const {productIds, imageLinks, ...comboBasicInfo} = createComboDto;
+    const combo = await this.comboRepository.save(comboBasicInfo);
+
+    const products = productIds.map((productId) => ({
+      combo,
+      product: {id_pro: productId}
+    }));
+
+    const images = imageLinks.map((item) => ({
+      combo,
+      link: item
+    }));
+    await Promise.all([
+      this.comboDetailRepository.save(products),
+      this.comboImageRepository.save(images)
+    ]);
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", combo);
   }
 
   async findAll(page: number = 1, limit: number = 10) {
@@ -119,11 +161,114 @@ export class ComboService {
     };
   }
 
-  update(id: number, updateComboDto: UpdateComboDto) {
-    return `This action updates a #${id} combo`;
+  async update(id: number, updateComboDto: UpdateComboDto) {
+    const existingCombo = await this.comboRepository.findOneOrFail({
+      where: {
+        id
+      }
+    });
+
+    if (!existingCombo) {
+      throw new HttpException("Combo has not existed", HttpStatus.BAD_REQUEST);
+    }
+
+    if (!updateComboDto) {
+      return new HttpException("Failed to update because body has not defined", HttpStatus.BAD_REQUEST);
+    }
+
+    const { productIds, imageLinks, ...comboInfo } = updateComboDto;
+
+    if (productIds) {
+      this.updateComboItems(this.comboDetailRepository, existingCombo, productIds, "product");
+    }
+
+    if (imageLinks) {
+      this.updateComboItems(this.comboImageRepository, existingCombo, imageLinks, "image");
+    }
+    
+    if (Object.keys(comboInfo).length === 0) {
+      return new ResponseDto(HttpStatus.OK, "Successfully", null);
+    }
+
+    await this.comboRepository.update(id, comboInfo);
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", null);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} combo`;
+  async searchAndFilter(req: Request) {
+    const {
+      name = "",
+      status = "available",
+      page = 1,
+      limit = 5,
+      sortBy = "price",
+      orderBy = "ASC"
+    } = req.query;
+
+    const take =  isNaN(Number(limit)) ? 5 : Number(limit);
+    const skip = (isNaN(Number(page)) || isNaN(Number(limit))) ? 0 : (Number(page) - 1) * Number(limit);
+    const statusValid = Object.values(ComboStatus).filter((item) => item === (status as string).toLowerCase());
+    const sortByValid = Object.values(SortField).filter((item) => item === (sortBy as string).toLowerCase());
+
+    const [items, totalItems] = await this.comboRepository.findAndCount({
+      where: {
+        name: ILike(`%${name}%`),
+        status: ILike(`%${statusValid[0] ? statusValid : ""}%`)
+      },
+      relations: ["comboDetails", "comboDetails.product", "images"],
+      order: {
+        [sortByValid[0]]: orderBy as string
+      },
+      take,
+      skip
+    });
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", {
+      total_pages: Math.ceil(totalItems / take),
+      total_items: totalItems,
+      page,
+      limit,
+      data: items
+    });
+  }
+
+  async  updateComboItems(
+    entityRepository: any,
+    combo: Combo,
+    items: any[],
+    itemType: 'product' | 'image',
+  ): Promise<void> {
+    if (items) {
+      const entities = items.map((item) => {
+        if (itemType === 'product') {
+          return {
+            combo,
+            product: { id_pro: item }, 
+          };
+        } else if (itemType === 'image') {
+          return {
+            combo,
+            link: item, 
+          };
+        }
+      });
+  
+      await Promise.all([
+        entityRepository.delete({combo}), 
+        entityRepository.save(entities),
+      ]);
+    }
+  }
+
+  async remove(id: number) {
+    try {
+      const combo = await this.comboRepository.findOneByOrFail({});
+
+      await this.comboRepository.delete(id);
+
+      return new ResponseDto(HttpStatus.OK, "Successfully", null);
+    } catch (error) {
+      throw new HttpException("Combo has not exited", HttpStatus.BAD_REQUEST);
+    }
   }
 }

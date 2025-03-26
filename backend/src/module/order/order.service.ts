@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, Req } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, ILike, In, Repository } from 'typeorm';
 import { Order } from './entities/order.entity';
 import { OrderDetail } from './entities/order_detail.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,6 +15,7 @@ import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { createCanvas } from 'canvas';
 import * as QRCode from 'qrcode';
+import { OrderSortField } from './enum/order_sortfield.enum';
 
 @Injectable()
 export class OrderService {
@@ -168,11 +169,11 @@ export class OrderService {
 
   async findAll(req: Request) {
     try {
-      const { page = 1, limit = 5, sortBy = "id", order = "ASC" } = req.query;
+      const { page = 1, limit = 5, sortBy = "created_at", orderBy = "desc" } = req.query;
       const allItems = await this.orderRepository.count();
       const allPage = Math.ceil(allItems / (limit as number));
       const orders = await this.orderRepository.find({
-        order: { [(sortBy as string).toLowerCase()]: order },
+        order: { [(sortBy as string).toLowerCase()]: orderBy },
         take: (limit as unknown as number),
         skip: ((page as unknown as number) - 1) * (limit as unknown as number)
       });
@@ -210,17 +211,6 @@ export class OrderService {
         skip: ((page as number) - 1) * (limit as number),
       });
       const allPage = Math.ceil(allOrderDetails.length / (limit as number));
-      // console.log(allOrderDetails);
-      // const idPros = allOrderDetails.flatMap(item => item.product.id_pro);
-      // const images = await this.imageRepository.find({
-      //   where: {
-      //     product: In(idPros)
-      //   },
-      //   relations: ["product"]
-      // });
-      // allOrderDetails.forEach(item => {
-      //   item.product.images = images.filter(image => image.product.id_pro === item.product.id_pro);
-      // });
       return new ResponseDto(HttpStatus.OK, "Successfully", {
         total_pages: allPage,
         total_items: allOrderDetails.length,
@@ -231,6 +221,43 @@ export class OrderService {
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  async searchAndFilter(req: Request) {
+    const {
+      key = "",
+      status = "",
+      page = 1,
+      limit = 5,
+      sortBy = "created_at",
+      orderBy = "ASC"
+    } = req.query;
+
+    const take =  isNaN(Number(limit)) ? 5 : Number(limit);
+    const skip = (isNaN(Number(page)) || isNaN(Number(limit))) ? 0 : (Number(page) - 1) * Number(limit);
+    const statusValid = Object.values(OrderStatus).filter((item) => item === (status as string).toLowerCase());
+    const sortByValid = Object.values(OrderSortField).filter((item) => item === (sortBy as string).toLowerCase());
+
+    const [items, totalItems] = await this.orderRepository.findAndCount({
+      where: {
+        customer: ILike(`%${key}%`),
+        status: statusValid[0]
+      },
+      relations: ["orderDetails"],
+      order: {
+        [sortByValid[0]]: orderBy as string
+      },
+      take,
+      skip
+    });
+
+    return new ResponseDto(HttpStatus.OK, "Successfully", {
+      total_pages: Math.ceil(totalItems / take),
+      total_items: totalItems,
+      page,
+      limit,
+      data: items
+    });
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
