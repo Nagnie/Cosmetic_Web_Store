@@ -198,9 +198,9 @@ export class ComboService {
   async searchAndFilter(req: Request) {
     const {
       name = "",
-      status = "available",
+      status = "",
       minPrice = 0,
-      maxPrice = 10000000,
+      maxPrice = 1000000,
       page = 1,
       limit = 5,
       sortBy = "price",
