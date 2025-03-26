@@ -26,6 +26,8 @@ export class ComboController {
   @ApiOperation({summary: "Search And Filter combo"})
   @ApiQuery({ name: "name", required: false, example: "Combo 1", default: "", description: "Combo name"})
   @ApiQuery({ name: "status", enum: ComboStatus, required: false, example: "available", default: "available", description: "Combo status"})
+  @ApiQuery({ name: "minPrice", required: false, default: 0, description: "Min price filte"})
+  @ApiQuery({ name: "maxPrice", required: false, default: 10000000, description: "Max price filte"})
   @ApiQuery({ name: 'page', required: false, example: 1, default: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, example: 5, default: 5, description: 'Number of records per page' })
   @ApiQuery({ name: "sortBy", enum: SortField, required: false, example: "id", default: "value", description: "Sort by field"})
