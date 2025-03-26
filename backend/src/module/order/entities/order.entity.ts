@@ -32,7 +32,7 @@ export class Order {
     @Column({name: "note"})
     note: string;
 
-    @Column({name: "created_at", default: moment().toDate()})
+    @Column({name: "created_at", default: new Date()})
     created_at: Date;
 
     @OneToMany(() => OrderDetail, orderDetail => orderDetail.order)

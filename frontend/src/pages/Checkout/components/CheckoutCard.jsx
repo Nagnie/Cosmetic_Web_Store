@@ -30,7 +30,10 @@ const CheckoutCard = ({ item }) => {
           className="aspect-square w-full object-contain"
           preview={false}
           loading="lazy"
-          src={item?.images?.[0] || item?.image || SAMPLE_ITEM.image}
+          src={
+            item?.images?.[0] || item?.image
+            // || SAMPLE_ITEM.image
+          }
           fallback="https://placehold.co/499x499?text=Not+found"
         />
       </Link>
