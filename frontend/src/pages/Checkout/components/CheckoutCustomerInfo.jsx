@@ -187,6 +187,7 @@ const CheckoutCustomerInfo = () => {
   const clearCart = useCartStore((state) => state.clearCart);
   const itemCount = useCartStore((state) => state.itemCount);
   const discountInfo = useCartStore((state) => state.discountInfo);
+  const shippingFee = useCartStore((state) => state.shippingFee);
 
   const queryClient = useQueryClient();
 
@@ -241,9 +242,10 @@ const CheckoutCustomerInfo = () => {
         address: `${formattedAddress.address}, ${formattedAddress.wardName}, ${formattedAddress.districtName}, ${formattedAddress.cityName}`,
         note: formattedAddress.note || "",
         order_items: order_items,
-        total_price: discountInfo?.new_total_prices
-          ? +discountInfo.new_total_prices
-          : +totalCartPrice || 0,
+        total_price:
+          (discountInfo?.new_total_prices
+            ? +discountInfo.new_total_prices
+            : +totalCartPrice || 0) + (shippingFee ?? 0) || 0,
       };
 
       const res = await finishOrderMutation.mutateAsync({
