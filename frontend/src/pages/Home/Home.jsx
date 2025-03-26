@@ -13,6 +13,7 @@ import { useCallback, useMemo } from "react";
 import { useInfiniteVouchers } from "@hooks/useVoucherQueries.js";
 import { useAllCombo } from "@hooks/useComboQueries.js";
 import {AnimatePresence, motion} from "framer-motion";
+import { SyncLoader } from "react-spinners"
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -138,40 +139,12 @@ const Homepage = () => {
   return (
     <div className="font-sans">
       <Header />
-
-      {/* Swiper Section */}
-      {/*<motion.section*/}
-      {/*  className={"mx-auto mt-50 mb-20 max-w-6xl pt-10"}*/}
-      {/*  initial="hidden"*/}
-      {/*  animate="visible"*/}
-      {/*  variants={fadeInUp}*/}
-      {/*  transition={{ duration: 0.5 }}*/}
-      {/*>*/}
-      {/*  <div className="my-5 text-center" style={{ color: "#574a3a" }}>*/}
-      {/*    <motion.h1*/}
-      {/*      className="mb-2 text-5xl font-bold"*/}
-      {/*      variants={fadeInUp}*/}
-      {/*      transition={{ delay: 0.5 }}*/}
-      {/*    >*/}
-      {/*      Welcome to Nâu Cosmetic*/}
-      {/*    </motion.h1>*/}
-      {/*    <motion.p*/}
-      {/*      className="text-2xl"*/}
-      {/*      variants={fadeInUp}*/}
-      {/*      transition={{ delay: 0.5 }}*/}
-      {/*    >*/}
-      {/*      Mỹ phẩm, thực phẩm chức năng, sâm Hàn Quốc*/}
-      {/*    </motion.p>*/}
-      {/*  </div>*/}
-      {/*</motion.section>*/}
-
       {/* Poster Swiper Section */}
-      {posters.length > 0 && (
-          <motion.section
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="mb-10 mt-30 lg:mt-58"
+      {posters.isLoading ? (
+          <SyncLoader />
+      ) : (
+          <section
+              className="mb-15 mt-30 lg:mt-55"
           >
             <style>
               {`
@@ -218,65 +191,49 @@ const Homepage = () => {
                   </SwiperSlide>
               ))}
             </Swiper>
-          </motion.section>
+          </section>
       )}
 
       {/* Brands Section */}
-      <motion.section
+      <section
           className="mx-auto py-3"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={fadeInUp}
-          transition={{ duration: 0.6 }}
       >
         <div className="mx-10 mb-6 flex items-center justify-between">
-          <motion.h2
+          <h2
               className="text-3xl font-semibold text-black"
-              variants={fadeInUp}
           >
             Thương hiệu nổi tiếng
-          </motion.h2>
-          <motion.button
-              className="z-100 cursor-pointer text-sm font-medium hover:underline"
+          </h2>
+          <button
+              className="z-5 cursor-pointer text-sm font-medium hover:underline"
               style={{ color: "#91775e" }}
               onClick={() => navigate("/brands")}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              variants={fadeInUp}
           >
             Xem tất cả →
-          </motion.button>
+          </button>
         </div>
 
         {brandsQuery.isLoading ? (
             <div className="flex h-40 items-center justify-center">
-              <motion.div
+              <div
                   className="h-16 w-16 mx-2 rounded-full"
                   style={{ backgroundColor: "#91775e" }}
-                  variants={loaderVariants}
-                  animate="animate"
               />
             </div>
         ) : (
-            <motion.div
+            <div
                 className="flex cursor-pointer flex-wrap justify-center gap-6"
-                variants={staggerContainer}
             >
-              <AnimatePresence>
                 {topBrands.map((brand, index) => (
-                    <motion.div
+                    <div
                         key={brand.id}
-                        variants={scaleIn}
-                        custom={index}
                     >
                       <BrandCard brand={brand} />
-                    </motion.div>
+                    </div>
                 ))}
-              </AnimatePresence>
-            </motion.div>
+            </div>
         )}
-      </motion.section>
+      </section>
 
       {/*Why choose us section*/}
       <motion.section
