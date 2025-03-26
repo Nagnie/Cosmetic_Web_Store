@@ -211,6 +211,7 @@ export class CartService {
       total_pages: total_pages,
       total_items: total_items,
       total_prices: total_prices,
+      ship_price: 18000,
       data: data,
     };
   }

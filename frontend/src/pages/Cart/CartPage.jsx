@@ -164,7 +164,7 @@ const CartPage = () => {
 
   const applyVoucherMutation = useApplyVoucher({
     onSuccess: (data) => {
-      console.log("Voucher áp dụng thành công:", data);
+      // console.log("Voucher áp dụng thành công:", data);
 
       setDiscountInfo({
         ...data,
@@ -190,7 +190,7 @@ const CartPage = () => {
   });
 
   const handleVoucherSelect = (voucher) => {
-    console.log(voucher);
+    // console.log(voucher);
 
     setSelectedVoucher(voucher);
 

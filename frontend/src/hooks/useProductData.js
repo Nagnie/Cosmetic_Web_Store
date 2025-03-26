@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import productsApi from "@apis/productsApi.js";
 
-const LIMIT = 9;
+const LIMIT = 18;
 
 export const useProductData = (queryParams, currentPage) => {
   // Fetch sản phẩm

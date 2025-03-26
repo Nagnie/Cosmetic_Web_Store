@@ -35,7 +35,7 @@ export const updateCartItem = async ({
 };
 
 export const removeCartItem = async ({ id_pro, id_class, type }) => {
-  console.log("removeCartItem", { id_pro, id_class, type });
+  // console.log("removeCartItem", { id_pro, id_class, type });
   const res = await axios.delete(`/cart/delete`, {
     data: { id_pro, id_class, type },
   });

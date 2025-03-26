@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Product, Category, Brand, Order, Combo, Discount } from '../../components/Admin';
+import {Product, Category, Brand, Order, Combo, Discount, Poster} from '../../components/Admin';
 import './Admin.css';
 import {useNavigate} from "react-router-dom";
 import ChangePasswordModal from "@pages/Admin/ChangePassword.jsx";
@@ -27,6 +27,8 @@ const CosmeticAdminPage = () => {
                     return <Combo />;
                     case 'Discount':
                         return <Discount />;
+                        case 'Poster':
+                            return <Poster />;
             default:
                 return <Product  />;
         }
@@ -58,7 +60,7 @@ const CosmeticAdminPage = () => {
 
             {/* Tabs */}
             <div className="flex border-b">
-                {['Product', 'Category', 'Brand', 'Order', 'Discount', 'Combo'].map(tab => (
+                {['Product', 'Category', 'Brand', 'Order', 'Discount', 'Combo', 'Poster'].map(tab => (
                     <button
                         key={tab}
                         className={`px-4 py-2 w-1/3 text-center text-lg font-medium 

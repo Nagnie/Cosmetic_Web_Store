@@ -10,10 +10,6 @@ const subcategoriesApi = {
         });
     },
 
-    getSubcategoryDetail: async (id, { signal }) => {
-        return axios.get(`/subcategory/${id}`, { signal });
-    },
-
     updateSubcategoryDetail: async (id, data) => {
         return axios.patch(`/subcategory/update/${id}`, data);
     },

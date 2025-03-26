@@ -186,8 +186,8 @@ const ProductModal = ({
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
                             >
-                                <option value="Available">Hàng có sẵn</option>
-                                <option value="Order">Hàng order</option>
+                                <option value="Có sẵn">Có sẵn</option>
+                                <option value="Đặt hàng">Đặt hàng</option>
                             </select>
                         </div>
 

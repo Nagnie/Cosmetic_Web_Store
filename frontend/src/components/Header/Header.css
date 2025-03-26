@@ -44,9 +44,15 @@ body {
   }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1190px) {
   nav {
     display: none;
+  }
+}
+
+@media (max-width: 1360px) {
+  .category {
+    padding: 0 25px;
   }
 }
 

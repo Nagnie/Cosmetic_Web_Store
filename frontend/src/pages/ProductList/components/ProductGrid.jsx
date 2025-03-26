@@ -4,7 +4,7 @@ import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx
 import { numberToArray } from "@utils/utils.js";
 import ProductCard from "@components/ProductCard/ProductCard";
 
-const LIMIT = 9;
+const LIMIT = 18;
 
 const ProductGrid = ({ products, isLoading }) => {
   if (isLoading) {

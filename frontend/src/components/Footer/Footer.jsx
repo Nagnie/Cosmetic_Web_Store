@@ -15,8 +15,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {/* Contact Information */}
           <div className="space-y-4">
-            <h2 className="text-brown-600 text-lg font-semibold">About Us - NÂU Cosmetic</h2>
-            <div className="text-start space-y-2 text-black max-w-200 px-20 lg:px-8 md:px-10 ">
+            <h2 className="text-brown-600 text-lg font-semibold">About Us - NÂU COSMETIC</h2>
+            <div className="space-y-2 text-center text-black max-w-200 px-20 lg:px-15 md:px-10 ">
               <span>NÂU COSMETIC tự hào là địa chỉ tin cậy cung cấp mỹ phẩm Hàn Quốc xách tay, cam kết chính hãng 100%, chất lượng cao và giá cả hợp lý.</span>
             </div>
           </div>
