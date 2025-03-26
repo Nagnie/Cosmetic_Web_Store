@@ -281,8 +281,8 @@ export class CartService {
         SELECT com.id_combo AS id, com.name AS name, NULL AS id_class, NULL AS class_name, com.price AS price, $1 AS quantity,
         COALESCE((
           SELECT json_agg(img.link)
-          FROM product_image AS img
-          WHERE img.id_pro = pro.id_pro), '[]'::json
+          FROM combo_image AS img
+          WHERE img.id_combo = com.id_combo), '[]'::json
         ) AS images,
         NULL AS classification
         FROM combo AS com
