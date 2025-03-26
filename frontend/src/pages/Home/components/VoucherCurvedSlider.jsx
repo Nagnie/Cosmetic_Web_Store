@@ -375,7 +375,7 @@ const VoucherCurvedSlider = ({
         )}
 
         {/* Chỉ báo trang */}
-        {items.length > 1 && (
+        {/* {items.length > 1 && (
           <div className="voucher-pagination">
             {items.map((_, index) => (
               <button
@@ -393,14 +393,14 @@ const VoucherCurvedSlider = ({
               />
             ))}
           </div>
-        )}
+        )} */}
 
         {/* Hiển thị chỉ báo số trang */}
-        {items.length > 1 && (
+        {/* {items.length > 1 && (
           <div className="voucher-page-counter">
             {activeIndex + 1} / {items.length}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

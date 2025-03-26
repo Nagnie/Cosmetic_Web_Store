@@ -62,10 +62,7 @@ const Homepage = () => {
       // Chuyển đổi thông tin từ API sang định dạng hiển thị
       const formattedVoucher = {
         id: voucher.id,
-        title:
-          voucher.unit === "fixed"
-            ? "Giảm giá cố định"
-            : `Giảm ${voucher.value}%`,
+        title: voucher.unit === "fixed" ? "Giảm giá" : `Giảm ${voucher.value}%`,
         price:
           voucher.unit === "fixed"
             ? new Intl.NumberFormat("vi-VN").format(voucher.value) + "đ"
@@ -75,9 +72,7 @@ const Homepage = () => {
         expiry: new Date(voucher.end_at).toLocaleDateString("vi-VN"),
         ribbonText:
           voucher.unit === "fixed"
-            ? new Intl.NumberFormat("vi-VN", { notation: "compact" }).format(
-                voucher.value,
-              ) + "đ"
+            ? new Intl.NumberFormat("vi-VN").format(voucher.value) + "đ"
             : `${voucher.value}%`,
         minOrderValue: voucher.minimum_order_value,
       };
