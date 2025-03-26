@@ -20,10 +20,11 @@ const ProductEdit = () => {
     // Form fields state
     const [formData, setFormData] = useState({
         pro_name: '',
+        origin_price: '',
         price: '',
         id_subcat: '',
         id_bra: '',
-        status: 'Available',
+        status: 'Hàng có sẵn',
         images: ['', '', ''],
         classification: ['', '', ''],
         description: '',
@@ -42,7 +43,7 @@ const ProductEdit = () => {
                     const productData = productResponse.data[0];
                     setProduct(productData);
 
-                    console.log("productData: ", productData);
+                    // console.log("productData: ", productData);
 
                     // Lưu dữ liệu gốc của classification
                     if (Array.isArray(productData.classification)) {
@@ -63,16 +64,17 @@ const ProductEdit = () => {
                     // Update form data
                     setFormData({
                         pro_name: productData.pro_name || '',
+                        origin_price: productData.origin_price || '',
                         price: productData.price || '',
                         id_subcat: productData.id_subcat || '',
                         id_bra: productData.id_bra || '',
-                        status: productData.status || 'Available',
+                        status: productData.status || 'Hàng có sẵn',
                         images: Array.isArray(productData.images) ? productData.images : ['', '', ''],
                         classification: displayClassification,
                         description: productData.description || '',
                     });
 
-                    console.log("formData: ", formData);
+                    // console.log("formData: ", formData);
                 } else {
                     throw new Error(productResponse.message || 'Failed to fetch product details');
                 }
@@ -143,7 +145,7 @@ const ProductEdit = () => {
 
             const response = await productsApi.updateProduct(id, apiFormData);
 
-            console.log("response: ", response);
+            // console.log("response: ", response);
 
             if (response.status === 200) {
                 setSuccessMessage('Product updated successfully');
@@ -234,6 +236,21 @@ const ProductEdit = () => {
                                 />
                             </div>
 
+                            {/* Origin Price */}
+                            <div>
+                                <label className="block font-medium text-black mb-1">
+                                    Origin Price (VND) <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    name="origin_price"
+                                    value={formData.origin_price}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
+                                />
+                            </div>
+
                             {/* Price */}
                             <div>
                                 <label className="block font-medium text-black mb-1">
@@ -261,8 +278,8 @@ const ProductEdit = () => {
                                     required
                                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                                 >
-                                    <option value="Available">Available</option>
-                                    <option value="Order">Order</option>
+                                    <option value="Available">Hàng có sẵn</option>
+                                    <option value="Order">Hàng order</option>
                                 </select>
                             </div>
 

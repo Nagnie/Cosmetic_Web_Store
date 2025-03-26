@@ -12,7 +12,12 @@ import PaymentSuccess from "@pages/PaymentSuccess/PaymentSuccess.jsx";
 import AllBrands from "@pages/AllBrand/AllBrands.jsx";
 import ProductEdit from "@components/Admin/Product/ProductEdit.jsx";
 import ProductInfo from "@components/Admin/Product/ProductInfo.jsx";
-import ComboProduct from "@pages/ComboProduct/ComboProduct.jsx";
+import ComboProductDetail from "@pages/ComboProduct/ComboProductDetail.jsx";
+import AllCombos from "@pages/AllCombos/AllCombos.jsx";
+import ComboEdit from "@components/Admin/Combo/ComboEdit.jsx";
+import ComboInfo from "@components/Admin/Combo/ComboInfo.jsx";
+import ComboModal from "@components/Admin/Combo/ComboModal.jsx";
+import comboEdit from "@components/Admin/Combo/ComboEdit.jsx";
 
 const PublicRoutes = [
   {
@@ -75,9 +80,29 @@ const PublicRoutes = [
   },
   {
     path: "/combo/:name/:id",
-    component: ComboProduct,
+    component: ComboProductDetail,
     layout: GuestLayout,
   },
+  {
+    path: "/all_combos",
+    component: AllCombos,
+    layout: GuestLayout,
+  },
+  {
+    path: "/admin/combo/create",
+    component: ComboModal,
+    layout: AdminLayout,
+  },
+  {
+    path: "/admin/combo/edit/:id",
+    component: comboEdit,
+    layout: AdminLayout,
+  },
+  {
+    path: "/admin/combo/info/:id",
+    component: ComboInfo,
+    layout: AdminLayout,
+  }
 ];
 
 export { PublicRoutes };

@@ -97,7 +97,7 @@ const CosmeticComboPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen mt-50 items-center justify-center">
         <Spin
           size="large"
           // tip="Đang tải..." thư viện đang bị lỗi nên không sử dụng được
@@ -126,7 +126,7 @@ const CosmeticComboPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <h2 className="mb-4 text-2xl text-gray-700">Không tìm thấy combo</h2>
-        <Button type="primary" onClick={() => navigate("/combos")}>
+        <Button type="primary" onClick={() => navigate("/all_combos")}>
           Xem danh sách combo
         </Button>
       </div>

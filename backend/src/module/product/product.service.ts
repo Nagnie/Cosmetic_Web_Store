@@ -314,7 +314,7 @@ export class ProductService {
                 brand = null,
                 minPrice = 0,
                 maxPrice = 9999999,
-                sortBy = "price",
+                sortBy = "id_pro",
                 orderBy = "ASC",
                 page = 1,
                 limit = 5,
