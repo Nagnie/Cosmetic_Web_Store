@@ -101,6 +101,10 @@ CREATE TABLE order_detail (
     FOREIGN KEY (class_id) REFERENCES classification(id_class) ON DELETE CASCADE
 );
 
+CREATE TABLE poster (
+    id_post SERIAL PRIMARY KEY,
+    link TEXT NOT NULL
+);
 
 create function cal_order_sum_price_on_insert_update_item() returns trigger as $$
 begin
