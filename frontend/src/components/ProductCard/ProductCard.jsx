@@ -109,7 +109,7 @@ const ProductCard = ({ product }) => {
           })}
         </span>
       </div>
-      <div className="text-left font-medium">
+      <div className="text-left font-semibold text-amber-900">
         <span className="text-lg">
           {formatCurrency({
             number: Number(product.price),

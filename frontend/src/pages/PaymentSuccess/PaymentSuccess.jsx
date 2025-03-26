@@ -11,12 +11,12 @@ const OrderSuccessPage = () => {
   const printRef = useRef();
 
   return (
-    <div className="mt-35 flex min-h-screen items-center justify-center p-6 pt-10">
+    <div className="mt-45 mb-20 flex min-h-screen items-center justify-center p-6 pt-10">
       <div
         className="w-full max-w-3xl rounded-xl border-1 bg-white p-8 shadow-2xl"
         ref={printRef}
       >
-        <h2 className="text-center text-2xl font-bold text-green-600">
+        <h2 className="text-center text-3xl font-bold text-primary-dark">
           Đặt hàng thành công!
         </h2>
         <p className="mt-2 text-center text-gray-700">
@@ -42,10 +42,10 @@ const OrderSuccessPage = () => {
           </div>
         )}
 
-        <div className="mt-6 text-center">
+        <div className="my-6 text-center">
           {/* Về trang chủ */}
 
-          <Link to="/" className="rounded-lg bg-green-600 px-4 py-2 text-white">
+          <Link to="/" className="rounded-lg bg-primary-medium px-5 my-3 py-3 text-white">
             Về trang chủ
           </Link>
         </div>

@@ -72,8 +72,6 @@ const ComboProductCard = ({ combo }) => {
 
   const MAX_DISPLAY_PRODUCTS = 3;
 
-  console.log("combo", combo);
-
   return (
     <div className="w-98 overflow-hidden rounded-lg bg-white shadow-lg">
       <div className="relative">

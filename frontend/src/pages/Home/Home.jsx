@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 import { useBrands } from "@hooks/useBrandQueries.js";
 import { useProducts } from "@hooks/useProductQueries.js";
+import { useAllPosters } from "@hooks/usePosterQueries.js"
 import { numberToArray } from "@utils/utils.js";
 import BrandCard from "@components/BrandCard/BrandCard.jsx";
 import VoucherCurvedSlider from "./components/VoucherCurvedSlider.jsx";
@@ -13,16 +14,27 @@ import { useInfiniteVouchers } from "@hooks/useVoucherQueries.js";
 import { useAllCombo } from "@hooks/useComboQueries.js";
 import {AnimatePresence, motion} from "framer-motion";
 
+// Import Swiper React components
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+
 const Homepage = () => {
   const navigate = useNavigate();
 
   const brandsQuery = useBrands();
   const productsQuery = useProducts({ page: 1, limit: 8 });
   const comboQuery = useAllCombo();
+  const posterQuery = useAllPosters();
 
   const brands = brandsQuery.data?.data?.data || [];
   const products = productsQuery.data?.data || [];
   const allCombos = comboQuery.data || [];
+  const posters = posterQuery.data || [];
 
   // 3 newest combo
   const newestCombos = useMemo(() => {
@@ -128,30 +140,86 @@ const Homepage = () => {
       <Header />
 
       {/* Swiper Section */}
-      <motion.section
-        className={"mx-auto mt-50 mb-20 max-w-6xl pt-10"}
-        initial="hidden"
-        animate="visible"
-        variants={fadeInUp}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="my-5 text-center" style={{ color: "#574a3a" }}>
-          <motion.h1
-            className="mb-2 text-5xl font-bold"
-            variants={fadeInUp}
-            transition={{ delay: 0.5 }}
+      {/*<motion.section*/}
+      {/*  className={"mx-auto mt-50 mb-20 max-w-6xl pt-10"}*/}
+      {/*  initial="hidden"*/}
+      {/*  animate="visible"*/}
+      {/*  variants={fadeInUp}*/}
+      {/*  transition={{ duration: 0.5 }}*/}
+      {/*>*/}
+      {/*  <div className="my-5 text-center" style={{ color: "#574a3a" }}>*/}
+      {/*    <motion.h1*/}
+      {/*      className="mb-2 text-5xl font-bold"*/}
+      {/*      variants={fadeInUp}*/}
+      {/*      transition={{ delay: 0.5 }}*/}
+      {/*    >*/}
+      {/*      Welcome to Nâu Cosmetic*/}
+      {/*    </motion.h1>*/}
+      {/*    <motion.p*/}
+      {/*      className="text-2xl"*/}
+      {/*      variants={fadeInUp}*/}
+      {/*      transition={{ delay: 0.5 }}*/}
+      {/*    >*/}
+      {/*      Mỹ phẩm, thực phẩm chức năng, sâm Hàn Quốc*/}
+      {/*    </motion.p>*/}
+      {/*  </div>*/}
+      {/*</motion.section>*/}
+
+      {/* Poster Swiper Section */}
+      {posters.length > 0 && (
+          <motion.section
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="mb-10 mt-30 lg:mt-58"
           >
-            Welcome to Nâu Cosmetic
-          </motion.h1>
-          <motion.p
-            className="text-2xl"
-            variants={fadeInUp}
-            transition={{ delay: 0.5 }}
-          >
-            Mỹ phẩm, thực phẩm chức năng, sâm Hàn Quốc
-          </motion.p>
-        </div>
-      </motion.section>
+            <style>
+              {`
+                      .swiper-pagination-bullet {
+                        opacity: 0.5;
+                        width: 15px;
+                        height: 15px;
+                        background-color: #FAF1E6;
+                      }
+                      .swiper-pagination-bullet-active {
+                        opacity: 1;
+                        background-color: #FAF1E6;
+                      }
+                      .swiper-pagination {
+                        bottom: 20px !important;
+                      }
+                    `}
+            </style>
+            <Swiper
+                spaceBetween={30}
+                centeredSlides={true}
+                autoplay={{
+                  delay: 3500,
+                  disableOnInteraction: false,
+                }}
+                loop={true}
+                pagination={{
+                  clickable: true,
+                  dynamicBullets: true,
+                }}
+                modules={[Autoplay, Pagination]}
+                className="w-full h-[300px] md:h-[500px] lg:h-[600px] rounded-2xl poster-swiper"
+            >
+              {posters.map((poster) => (
+                  <SwiperSlide key={poster.id_post}>
+                    <div
+                        className="w-full h-full bg-cover bg-center"
+                        style={{
+                          backgroundImage: `url(${poster.link})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center'
+                        }}
+                    />
+                  </SwiperSlide>
+              ))}
+            </Swiper>
+          </motion.section>
+      )}
 
       {/* Brands Section */}
       <motion.section
@@ -175,6 +243,7 @@ const Homepage = () => {
               onClick={() => navigate("/brands")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              variants={fadeInUp}
           >
             Xem tất cả →
           </motion.button>
@@ -318,6 +387,15 @@ const Homepage = () => {
             visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
           }}
       >
+        <motion.h2
+            className="text-5xl text-primary-dark font-bold text-center uppercase mb-10"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 }
+            }}
+        >
+          Combo Mới Nhất
+        </motion.h2>
         {comboQuery.isLoading ? (
             <div className="flex h-60 items-center justify-center">
               <motion.div
@@ -374,7 +452,7 @@ const Homepage = () => {
                 }}
             >
               <AnimatePresence>
-                {newestCombos.map((combo, index) => (
+                {newestCombos.map((combo) => (
                     <motion.div
                         key={combo.id_combo}
                         variants={{
@@ -389,15 +467,6 @@ const Homepage = () => {
                           }
                         }}
                     >
-                      <motion.h2
-                          className="text-5xl text-primary-dark font-bold text-center uppercase mb-10"
-                          variants={{
-                            hidden: { opacity: 0, y: 20 },
-                            visible: { opacity: 1, y: 0 }
-                          }}
-                      >
-                        Combo Mới Nhất
-                      </motion.h2>
                       <ComboProductCard combo={combo} />
                     </motion.div>
                 ))}
@@ -421,7 +490,7 @@ const Homepage = () => {
       </motion.section>
       {/* Best Sellers Section */}
       <motion.div
-          className="px-10 py-10"
+          className="md:px-10 py-10"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
@@ -479,7 +548,7 @@ const Homepage = () => {
             </div>
         ) : (
             <motion.div
-                className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                className="mt-6 grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
                 variants={staggerContainer}
             >
               <AnimatePresence>
