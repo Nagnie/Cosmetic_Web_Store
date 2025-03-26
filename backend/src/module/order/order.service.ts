@@ -100,6 +100,7 @@ export class OrderService {
     }
   }
 
+  // TODO: Modify delete image in the future
   async create(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
     const { name, email, phone, address, note, order_items, total_price } = createOrderDto;
     const queryRunner = this.dataSource.createQueryRunner();
@@ -165,7 +166,6 @@ export class OrderService {
       await queryRunner.release();
     }
   }
-
 
   async findAll(req: Request) {
     try {
@@ -307,10 +307,74 @@ export class OrderService {
     return { url: result.secure_url, publicId: result.public_id };
   }
 
+  // private async generateInvoiceImage(createOrderDto: CreateOrderDto): Promise<string> {
+  //   const { name, phone, address, order_items, total_price } = createOrderDto;
+
+  //   const width = 800, height = 550;
+  //   const canvas = createCanvas(width, height);
+  //   const ctx = canvas.getContext('2d');
+
+  //   // Background
+  //   ctx.fillStyle = '#f8f9fa'; // Màu nền nhạt
+  //   ctx.fillRect(0, 0, width, height);
+
+  //   // Tiêu đề (Màu đen, căn giữa, font to)
+  //   ctx.fillStyle = '#222';
+  //   ctx.font = 'bold 32px Arial';
+  //   const title = 'HÓA ĐƠN ĐẶT HÀNG';
+  //   const titleWidth = ctx.measureText(title).width;
+  //   ctx.fillText(title, (width - titleWidth) / 2, 60);
+
+  //   // Thông tin khách hàng
+  //   ctx.fillStyle = '#333';
+  //   ctx.font = 'bold 24px Arial';
+  //   ctx.fillText('Thông tin khách hàng:', 50, 110);
+
+  //   ctx.fillStyle = '#555';
+  //   ctx.font = '22px Arial';
+  //   ctx.fillText(`Họ và tên: ${name}`, 50, 150);
+  //   ctx.fillText(`Số điện thoại: ${phone}`, 50, 180);
+  //   ctx.fillText(`Địa chỉ: ${address}`, 50, 210);
+
+  //   // Danh sách sản phẩm
+  //   ctx.fillStyle = '#333';
+  //   ctx.font = 'bold 24px Arial';
+  //   ctx.fillText('Sản phẩm:', 50, 250);
+
+  //   ctx.fillStyle = '#555';
+  //   ctx.font = '22px Arial';
+  //   let y = 290;
+  //   order_items.forEach((item, index) => {
+  //     ctx.fillText(`${index + 1}. ${item.pro_name} (x${item.quantity})`, 50, y);
+  //     ctx.fillText(`${item.price}đ`, width - 160, y);
+  //     y += 35;
+  //   });
+
+  //   // Dòng kẻ ngang ngăn cách
+  //   ctx.strokeStyle = '#bbb';
+  //   ctx.beginPath();
+  //   ctx.moveTo(50, y + 10);
+  //   ctx.lineTo(width - 50, y + 10);
+  //   ctx.stroke();
+
+  //   // Tổng tiền (nổi bật)
+  //   ctx.fillStyle = '#222';
+  //   ctx.font = 'bold 26px Arial';
+  //   ctx.fillText('Tổng cộng:', 50, y + 50);
+  //   ctx.fillText(`${total_price}đ`, width - 160, y + 50);
+
+  //   // Lưu ảnh vào file tạm
+  //   const filePath = `invoice_${Date.now()}.png`;
+  //   const buffer = canvas.toBuffer('image/png');
+  //   fs.writeFileSync(filePath, buffer);
+
+  //   return filePath;
+  // }
+
   private async generateInvoiceImage(createOrderDto: CreateOrderDto): Promise<string> {
     const { name, phone, address, order_items, total_price } = createOrderDto;
 
-    const width = 800, height = 550;
+    const width = 800, height = 600;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
@@ -318,7 +382,7 @@ export class OrderService {
     ctx.fillStyle = '#f8f9fa'; // Màu nền nhạt
     ctx.fillRect(0, 0, width, height);
 
-    // Tiêu đề (Màu đen, căn giữa, font to)
+    // Tiêu đề
     ctx.fillStyle = '#222';
     ctx.font = 'bold 32px Arial';
     const title = 'HÓA ĐƠN ĐẶT HÀNG';
@@ -332,21 +396,25 @@ export class OrderService {
 
     ctx.fillStyle = '#555';
     ctx.font = '22px Arial';
-    ctx.fillText(`Họ và tên: ${name}`, 50, 150);
-    ctx.fillText(`Số điện thoại: ${phone}`, 50, 180);
-    ctx.fillText(`Địa chỉ: ${address}`, 50, 210);
+    let y = 150;
+    wrapText(ctx, `Họ và tên: ${name}`, 50, y, width - 100, 26);
+    y += 40;
+    wrapText(ctx, `Số điện thoại: ${phone}`, 50, y, width - 100, 26);
+    y += 40;
+    wrapText(ctx, `Địa chỉ: ${address}`, 50, y, width - 100, 26);
+    y += 50;
 
     // Danh sách sản phẩm
     ctx.fillStyle = '#333';
     ctx.font = 'bold 24px Arial';
-    ctx.fillText('Sản phẩm:', 50, 250);
+    ctx.fillText('Sản phẩm:', 50, y);
+    y += 40;
 
     ctx.fillStyle = '#555';
     ctx.font = '22px Arial';
-    let y = 290;
     order_items.forEach((item, index) => {
-      ctx.fillText(`${index + 1}. ${item.pro_name} (x${item.quantity})`, 50, y);
-      ctx.fillText(`${item.price}đ`, width - 160, y);
+      wrapText(ctx, `${index + 1}. ${item.pro_name} (x${item.quantity})`, 50, y, width - 250, 26);
+      ctx.fillText(`${formatPrice(item.price)}`, width - 160, y);
       y += 35;
     });
 
@@ -356,12 +424,13 @@ export class OrderService {
     ctx.moveTo(50, y + 10);
     ctx.lineTo(width - 50, y + 10);
     ctx.stroke();
+    y += 50;
 
-    // Tổng tiền (nổi bật)
+    // Tổng tiền
     ctx.fillStyle = '#222';
     ctx.font = 'bold 26px Arial';
-    ctx.fillText('Tổng cộng:', 50, y + 50);
-    ctx.fillText(`${total_price}đ`, width - 160, y + 50);
+    ctx.fillText('Tổng cộng:', 50, y);
+    ctx.fillText(`${formatPrice(total_price)}`, width - 160, y);
 
     // Lưu ảnh vào file tạm
     const filePath = `invoice_${Date.now()}.png`;
@@ -371,7 +440,6 @@ export class OrderService {
     return filePath;
   }
 
-
   private async generateQRCode(url: string, publicId: string): Promise<string> {
     const downloadUrl = `http://localhost:3001/api/order/download-invoice?url=${url}&publicId=${publicId}`;
     const qrPath = `qrcode_${Date.now()}.png`;
@@ -379,3 +447,29 @@ export class OrderService {
     return qrPath;
   }
 }
+
+// 📝 Hàm tự động xuống dòng
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+
+  for (let i = 0; i < words.length; i++) {
+    let testLine = line + words[i] + ' ';
+    let testWidth = ctx.measureText(testLine).width;
+
+    if (testWidth > maxWidth && i > 0) {
+      ctx.fillText(line, x, y);
+      line = words[i] + ' ';
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, y);
+}
+
+// 📝 Hàm định dạng tiền
+function formatPrice(price) {
+  return Number(price).toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
