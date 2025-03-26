@@ -88,11 +88,11 @@ const ProductCard = ({ product }) => {
         >
           <Image
             preview={false}
-            src={
-              product.images?.[0] || product.image || SAMPLE_PRODUCT.images[0]
-            }
+            src={product.images?.[0] || product.image}
             alt="product"
             className="aspect-square w-full cursor-pointer object-contain"
+            loading="lazy"
+            fallback="https://placehold.co/499x499?text=Not+found"
           />
         </Link>
         {isHovered && (

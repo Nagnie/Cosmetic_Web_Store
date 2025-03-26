@@ -72,9 +72,6 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  // Determine product status
-  const productStatus = product.status ? "Available" : "Order";
-
   return (
     <Link
       to={`/products/${encodeURIComponent(product.pro_name || product.name)}/${product.id_pro}`}
@@ -85,17 +82,7 @@ const ProductCard = ({ product }) => {
       {/* Product status badge */}
       <div
         className={`absolute top-8 right-0 rounded px-3 py-1 font-semibold shadow ${
-          product.status
-            ? "bg-yellow-100 text-yellow-800"
-            : "bg-teal-100 text-teal-800"
-        }`}
-      >
-        {productStatus}
-      </div>
-      {/* Product status badge */}
-      <div
-        className={`absolute top-8 right-0 rounded px-3 py-1 font-semibold shadow ${
-          product.status === "Available"
+          product.status === "Hàng có sẵn"
             ? "bg-yellow-100 text-yellow-800"
             : "bg-blue-100 text-blue-800"
         }`}
@@ -114,7 +101,15 @@ const ProductCard = ({ product }) => {
           {product.pro_name || product.name}
         </h3>
       </div>
-      <div className="mt-2 text-left font-medium">
+      <div className="text-left line-through text-gray-400 font-medium">
+        <span className="text-sm">
+          {formatCurrency({
+            number: Number(product.origin_price),
+            useFullCurrencyName: true,
+          })}
+        </span>
+      </div>
+      <div className="text-left font-medium">
         <span className="text-lg">
           {formatCurrency({
             number: Number(product.price),

@@ -72,7 +72,7 @@ export class ProductController {
   @ApiQuery({ name: "brand", required: false, example: "" })
   @ApiQuery({ name: "minPrice", required: false, example: 400 })
   @ApiQuery({ name: "maxPrice", required: false, example: 500 })
-  @ApiQuery({ name: "sortBy", required: false, enum: ["price", "name", "id"], example: "price" })
+  @ApiQuery({ name: "sortBy", required: false, enum: ["price", "name", "id_pro"], example: "id_pro", default: "id_pro" })
   @ApiQuery({ name: "orderBy", required: false, enum: ["ASC", "DESC"], example: "ASC" })
   @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, example: 5, description: 'Number of records per page' })

@@ -112,18 +112,6 @@ const Header = () => {
             onChange={(e) => setSearchText(e.target.value)}
           />
 
-          {/* Nút clear đã được điều chỉnh vị trí */}
-          {searchText && (
-            <button
-              className="absolute top-1/2 right-16 -translate-y-1/2 z-10 bg-white text-gray-500 focus:ring-2 focus:ring-primary focus:outline-none"
-              onClick={() => {
-                clearSearchText();
-              }}
-            >
-              <FaTimes />
-            </button>
-          )}
-
           <Link
             to={`/all_products${searchText ? `?search=${searchText}` : ""}`}
             className="flex items-center justify-center rounded-3xl px-4 text-white"
@@ -148,50 +136,57 @@ const Header = () => {
       </header>
       {!loading && (
         <nav
-            className="relative flex items-center justify-center py-1 text-start shadow-md"
-            style={{ backgroundColor: "#f6eadc" }}
+          className="relative flex items-center justify-center py-1 text-start shadow-md"
+          style={{ backgroundColor: "#f6eadc" }}
         >
           {formattedCategories.map((category, index) => (
-                <div
-                    key={category.cat_id}
-                    className="category relative mx-4"
-                    onMouseEnter={() => setActiveCategory(index)}
-                    onMouseLeave={() => setActiveCategory(null)}
-                >
-                  <Link
-                      to={`/all_products?category=${category.cat_name}`}
-                      className="flex cursor-pointer items-center py-2 transition-colors duration-300 hover:text-orange-800"
-                  >
-                    {category.icon}
-                    {category.cat_name}
-                  </Link>
+            <div
+              key={category.cat_id}
+              className="category relative mx-4"
+              onMouseEnter={() => setActiveCategory(index)}
+              onMouseLeave={() => setActiveCategory(null)}
+            >
+              <Link
+                to={`/all_products?category=${category.cat_name}`}
+                className="flex cursor-pointer items-center py-2 transition-colors duration-300 hover:text-orange-800"
+              >
+                {category.icon}
+                {category.cat_name}
+              </Link>
 
+              <div
+                className={`dropdown-menu absolute top-6.5 z-50 mt-5 flex w-full min-w-max origin-top bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${
+                  activeCategory === index
+                    ? "visible scale-y-100 opacity-100"
+                    : "invisible scale-y-0 opacity-0"
+                }`}
+              >
+                {category.menu.map((section, idx) => (
                   <div
-                      className={`dropdown-menu absolute top-6.5 z-50 mt-5 flex w-full min-w-max origin-top bg-white p-6 shadow-lg transition-all duration-300 ease-in-out ${
-                          activeCategory === index ? "visible scale-y-100 opacity-100" : "invisible scale-y-0 opacity-0"
-                      }`}
+                    key={idx}
+                    className="dropdown-section min-w-64"
+                    style={{ color: "#41392f" }}
                   >
-                    {category.menu.map((section, idx) => (
-                        <div key={idx} className="dropdown-section min-w-64" style={{ color: "#41392f" }}>
-                          <ul>
-                            {section.items.map((item) => (
-                                <li
-                                    key={item.id_subcat}
-                                    className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
-                                >
-                                  <Link to={`/all_products?category=${category.cat_name}&subcategory=${item.scat_name}`}>
-                                    {item.scat_name}
-                                  </Link>
-                                </li>
-                            ))}
-                          </ul>
-                        </div>
-                    ))}
+                    <ul>
+                      {section.items.map((item) => (
+                        <li
+                          key={item.id_subcat}
+                          className="cursor-pointer py-1 transition-colors duration-200 hover:bg-amber-50 hover:text-orange-800"
+                        >
+                          <Link
+                            to={`/all_products?category=${category.cat_name}&subcategory=${item.scat_name}`}
+                          >
+                            {item.scat_name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
-            ))
-          }
-      </nav>
+                ))}
+              </div>
+            </div>
+          ))}
+        </nav>
       )}
     </div>
   );
