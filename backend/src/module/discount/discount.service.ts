@@ -83,7 +83,7 @@ export class DiscountService {
 
   async create(createDiscountDto: CreateDiscountDto) {
     try {
-      const existingDiscount = this.discountRepository.findOne({
+      const existingDiscount = await this.discountRepository.findOne({
         where: {
           code: createDiscountDto.code
         }

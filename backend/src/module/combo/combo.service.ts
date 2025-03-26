@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateComboDto } from './dto/create-combo.dto';
 import { UpdateComboDto } from './dto/update-combo.dto';
-import { DataSource, ILike, Repository } from 'typeorm';
+import { Between, DataSource, ILike, LessThan, MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Combo } from './entities/combo.entity';
 import { ComboDetail } from './entities/combo_detail.entity';
@@ -198,7 +198,9 @@ export class ComboService {
   async searchAndFilter(req: Request) {
     const {
       name = "",
-      status = "available",
+      status = "",
+      minPrice = 0,
+      maxPrice = 1000000,
       page = 1,
       limit = 5,
       sortBy = "price",
@@ -213,7 +215,8 @@ export class ComboService {
     const [items, totalItems] = await this.comboRepository.findAndCount({
       where: {
         name: ILike(`%${name}%`),
-        status: ILike(`%${statusValid[0] ? statusValid : ""}%`)
+        status: ILike(`%${statusValid[0] ? statusValid : ""}%`),
+        price: Between(minPrice as number, maxPrice as number),
       },
       relations: ["comboDetails", "comboDetails.product", "images"],
       order: {
