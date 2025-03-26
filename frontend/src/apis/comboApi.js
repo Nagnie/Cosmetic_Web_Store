@@ -17,16 +17,30 @@ const comboApi = {
     sortBy = "",
     minPrice,
     maxPrice,
+    status,
   }) => {
+    const params = {
+      page,
+      limit,
+      name,
+      orderBy,
+      sortBy,
+      minPrice,
+      maxPrice,
+      status,
+    };
+
+    console.log("Params:", params);
+
+    Object.keys(params).forEach((key) => {
+      if (!params[key]) {
+        delete params[key];
+      }
+    });
+
     return axios.get(`/combo/searchAndFilter`, {
       params: {
-        page,
-        limit,
-        name,
-        sortBy,
-        orderBy,
-        minPrice,
-        maxPrice,
+        ...params,
       },
     });
   },

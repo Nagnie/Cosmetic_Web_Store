@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import comboApi from "@apis/comboApi.js";
 import ComboProductCard from "@components/ComboProductCard/ComboProductCard.jsx";
 import { FaSearch } from "react-icons/fa";
+import { useSearchAndFilterCombo } from "@hooks/useComboQueries";
+import { useQueryString } from "@hooks/useQueryString";
+import { useDebounce, useDebounceCallback } from "@hooks/useDebounce";
 
 const AllCombos = () => {
   const navigate = useNavigate();
-  const [combo, setCombo] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,64 +18,169 @@ const AllCombos = () => {
     orderBy: "DESC",
   });
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedMinPrice = useDebounce(filterParams.minPrice, 500);
+  const debouncedMaxPrice = useDebounce(filterParams.maxPrice, 500);
+
+  const {
+    page: pageFromUrl,
+    limit,
+    name: nameFromUrl,
+    orderBy,
+    sortBy,
+    minPrice,
+    maxPrice,
+    status,
+  } = useQueryString();
+
+  useEffect(() => {
+    if (nameFromUrl) {
+      setSearchTerm(nameFromUrl);
+    }
+    if (minPrice) {
+      setFilterParams((prev) => ({ ...prev, minPrice }));
+    }
+    if (maxPrice) {
+      setFilterParams((prev) => ({ ...prev, maxPrice }));
+    }
+    if (orderBy) {
+      setFilterParams((prev) => ({ ...prev, orderBy }));
+    }
+  }, []);
+
   const [pagination, setPagination] = useState({
-    currentPage: 1,
+    currentPage: parseInt(pageFromUrl) || 1,
     totalPages: 1,
     totalItems: 0,
   });
 
-  const fetchCombo = async (page = 1) => {
-    try {
-      setIsLoading(true);
-      const response = await comboApi.getCombos({
-        limit: 6,
-        page: page,
-      });
-      console.log("Combo response:", response);
-
-      // Ensure we're setting an array
-      const comboData = Array.isArray(response.data.data)
-        ? response.data.data
-        : [];
-
-      setCombo(comboData);
-
-      // Update pagination state
-      setPagination({
-        currentPage: response.data.current_page || page,
-        totalPages: response.data.total_pages || 1,
-        totalItems: response.data.total_items || comboData.length,
-      });
-
-      setIsLoading(false);
-    } catch (err) {
-      console.error("Error fetching combos:", err);
-      setError("Không thể tải dữ liệu combo. Vui lòng thử lại sau.");
-      setIsLoading(false);
-    }
-  };
-
-  // Initial fetch of combos
   useEffect(() => {
-    fetchCombo();
-  }, []);
+    const updateUrlParams = () => {
+      const params = new URLSearchParams();
 
-  // Handle search submission
-  const handleSearch = (e) => {
-    e.preventDefault();
+      if (debouncedSearchTerm) {
+        params.append("name", debouncedSearchTerm);
+      }
+
+      if (pagination.currentPage > 1) {
+        params.append("page", pagination.currentPage);
+      }
+
+      if (debouncedMinPrice) {
+        params.append("minPrice", debouncedMinPrice);
+      }
+
+      if (debouncedMaxPrice) {
+        params.append("maxPrice", debouncedMaxPrice);
+      }
+
+      if (filterParams.orderBy !== "DESC") {
+        params.append("orderBy", filterParams.orderBy);
+      }
+
+      const newURL = params.toString()
+        ? `?${params.toString()}`
+        : window.location.pathname;
+      window.history.replaceState(null, "", newURL);
+    };
+
+    updateUrlParams();
+  }, [
+    debouncedSearchTerm,
+    pagination.currentPage,
+    debouncedMinPrice,
+    debouncedMaxPrice,
+    filterParams.orderBy,
+  ]);
+
+  const { data, isLoading, error } = useSearchAndFilterCombo(
+    {
+      page: pagination.currentPage,
+      limit: 6,
+    },
+    {
+      name: debouncedSearchTerm,
+      orderBy: filterParams.orderBy,
+      sortBy: sortBy || "",
+      minPrice: debouncedMinPrice,
+      maxPrice: debouncedMaxPrice,
+      status: status || "",
+    },
+  );
+
+  const combo = data?.data?.data || [];
+
+  useEffect(() => {
+    if (data?.data) {
+      setPagination({
+        currentPage: data.data.current_page || pagination.currentPage,
+        totalPages: data.data.total_pages || 1,
+        totalItems: data.data.total_items || 0,
+      });
+    }
+  }, [data, pagination.currentPage]);
+
+  const debouncedTextInputChange = useDebounceCallback((name, value) => {
+    if (name === "searchTerm") {
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: 1,
+      }));
+    } else {
+      setFilterParams((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: 1,
+      }));
+    }
+  }, 500);
+
+  const handleTextInputChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "searchTerm") {
+      setSearchTerm(value);
+    } else {
+      setFilterParams((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+
+    debouncedTextInputChange(name, value);
   };
 
-  // Handle filter changes
-  const handleFilterChange = (e) => {
+  const handleOrderByChange = (e) => {
     const { name, value } = e.target;
+
     setFilterParams((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    setPagination((prev) => ({
+      ...prev,
+      currentPage: 1,
+    }));
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination((prev) => ({
+      ...prev,
+      currentPage: newPage,
+    }));
   };
 
   if (error) {
-    return <div className="py-10 text-center">{error}</div>;
+    return (
+      <div className="py-10 text-center">
+        Không thể tải dữ liệu combo. Vui lòng thử lại sau.
+      </div>
+    );
   }
 
   return (
@@ -86,25 +191,25 @@ const AllCombos = () => {
         </div>
         {/* Search and Filter Section */}
         <div className="mx-3 mb-10 grid gap-4 md:grid-rows-2 lg:grid-cols-5 lg:grid-rows-1">
-          {/* Search Input */}
-          <form onSubmit={handleSearch} className="lg:col-span-3">
+          <div className="lg:col-span-3">
             <div className="flex">
               <input
                 type="text"
+                name="searchTerm"
                 placeholder="Tìm kiếm combo..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleTextInputChange}
                 className="me-2 w-full rounded-lg border p-2"
               />
               <button
-                type="submit"
+                type="button"
                 className="flex items-center justify-center rounded-lg px-4 text-white"
                 style={{ backgroundColor: "#8D7B68" }}
               >
                 <FaSearch />
               </button>
             </div>
-          </form>
+          </div>
 
           {/* Price Filter */}
           <div className="flex items-center gap-2 lg:col-span-2">
@@ -113,7 +218,7 @@ const AllCombos = () => {
               name="minPrice"
               placeholder="Giá từ"
               value={filterParams.minPrice}
-              onChange={handleFilterChange}
+              onChange={handleTextInputChange}
               className="w-full rounded-lg border p-2"
             />
             <input
@@ -121,15 +226,14 @@ const AllCombos = () => {
               name="maxPrice"
               placeholder="Đến"
               value={filterParams.maxPrice}
-              onChange={handleFilterChange}
+              onChange={handleTextInputChange}
               className="w-full rounded-lg border p-2"
             />
 
-            {/* Order By */}
             <select
               name="orderBy"
               value={filterParams.orderBy}
-              onChange={handleFilterChange}
+              onChange={handleOrderByChange}
               className="w-full rounded-lg border p-2"
             >
               <option value="DESC">Giá tăng dần</option>
@@ -147,8 +251,11 @@ const AllCombos = () => {
           </div>
         ) : (
           <div className="flex flex-wrap justify-center gap-6">
-            {combo.map((combo) => (
-              <ComboProductCard key={combo.id_combo} combo={combo} />
+            {combo.map((comboItem) => (
+              <ComboProductCard
+                key={comboItem.id_combo ?? comboItem.id}
+                combo={comboItem}
+              />
             ))}
           </div>
         )}
@@ -159,7 +266,7 @@ const AllCombos = () => {
             {[...Array(pagination.totalPages)].map((_, index) => (
               <button
                 key={index}
-                onClick={() => fetchCombo(index + 1)}
+                onClick={() => handlePageChange(index + 1)}
                 className={`mx-2 rounded px-4 py-2 ${
                   pagination.currentPage === index + 1
                     ? "bg-primary-dark text-white"

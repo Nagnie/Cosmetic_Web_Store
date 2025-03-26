@@ -34,16 +34,11 @@ export const useAllCombo = () => {
   });
 };
 
-export const useSearchAndFilterCombo = () => {
+export const useSearchAndFilterCombo = ({ page = 1, limit = 9 }, query) => {
   return useQuery({
-    queryKey: ["searchAndFilterCombo"],
-    queryFn: async ({ queryKey }) => {
-      const [, { searchParams }] = queryKey;
-
-      const response = await comboApi.searchCombos(searchParams);
-
-      return response.data;
-    },
-    staleTime: 24 * 60 * 60 * 1000, // 24 giờ
+    queryKey: ["allCombo", page, limit, query],
+    queryFn: () => comboApi.searchCombos({ page, limit, ...query }),
+    select: (data) => data.data,
+    keepPreviousData: true,
   });
 };
