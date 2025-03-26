@@ -62,7 +62,7 @@ const CosmeticAdminPage = () => {
                     <button
                         key={tab}
                         className={`px-4 py-2 w-1/3 text-center text-lg font-medium 
-                        ${activeTab === tab ? 'bg-pink-100 text-pink-700' : 'text-gray-500'}`}
+                        ${activeTab === tab ? 'bg-pink-100 text-pink-700' : 'bg-white text-gray-500'}`}
                         onClick={() => setActiveTab(tab)}
                     >
                         {tab}
@@ -70,7 +70,7 @@ const CosmeticAdminPage = () => {
                 ))}
             </div>
             {/* Content */}
-            <div className="p-4 bg-white rounded-lg mt-4">
+            <div className="p-4 rounded-lg mt-4">
                 {renderComponent()}
             </div>
             {/* Change Password Modal */}

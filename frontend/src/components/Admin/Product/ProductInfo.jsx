@@ -18,8 +18,8 @@ const ProductInfo = () => {
     const fetchProductDetail = async () => {
         try {
             setLoading(true);
-            console.log("product detail: ");
-            console.log(id);
+            // console.log("product detail: ");
+            // console.log(id);
             const response = await productsApi.getProductDetail(id);
 
             // console.log("Response:  ", response);
@@ -116,8 +116,7 @@ const ProductInfo = () => {
                         onClick={handleEdit}
                         className="px-4 py-2 bg-teal-600 flex items-center text-white rounded-md hover:bg-teal-700"
                     >
-                        <Edit size={18} className={"me-2"} />
-                        Edit
+                        <Edit size={18} />
                     </button>
                     <button
                         onClick={handleDelete}

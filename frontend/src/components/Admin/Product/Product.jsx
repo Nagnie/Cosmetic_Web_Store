@@ -40,7 +40,6 @@ const Product = () => {
 
             if (response.status === 200) {
                 setProducts(response.data.data);
-                // If your API returns pagination info differently, adjust this
                 setTotalPages(response.data.total_pages);
             } else {
                 throw new Error(response.message);
@@ -76,7 +75,7 @@ const Product = () => {
             setActionLoading(true);
             const response = await productsApi.createProduct(productData);
 
-            console.log(response);
+            // console.log(response);
 
             if(response.status === 200) {
                 throw new Error(response.data.message);
@@ -227,6 +226,7 @@ const Product = () => {
                                 <th className="px-6 py-3 font-medium text-white tracking-wider">Subcategory</th>
                                 <th className="px-6 py-3 font-medium text-white tracking-wider">Brand</th>
                                 <th className="px-6 py-3 font-medium text-white tracking-wider">Price</th>
+                                <th className="px-6 py-3 font-medium text-white tracking-wider">Status</th>
                                 <th className="px-6 py-3 font-medium text-white tracking-wider"></th>
                             </tr>
                             </thead>
@@ -264,7 +264,12 @@ const Product = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {Number(product.price)} VND
+                                            {Number(product.price).toLocaleString()} VND
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                                                {product.status}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">

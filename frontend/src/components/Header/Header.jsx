@@ -115,7 +115,7 @@ const Header = () => {
           {/* Nút clear đã được điều chỉnh vị trí */}
           {searchText && (
             <button
-              className="absolute top-1/2 right-16 -translate-y-1/2 z-10 bg-white text-gray-500 focus:ring-2 focus:ring-primary focus:outline-none"
+              className="absolute top-1/2 right-23 -translate-y-1/2 z-10 bg-white text-gray-500 focus:ring-2 focus:ring-primary focus:outline-none"
               onClick={() => {
                 clearSearchText();
               }}

@@ -22,7 +22,7 @@ const ComboModal = () => {
     });
 
     // Status options
-    const statusOptions = ['available', 'unavailable'];
+    const statusOptions = ['Available', 'Ordering'];
 
     // For handling product IDs
     const [newProductId, setNewProductId] = useState('');

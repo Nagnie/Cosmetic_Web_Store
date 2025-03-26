@@ -72,7 +72,7 @@ const Discount = () => {
             ...newDiscount,
             [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value,
         });
-        console.log("newDiscount", newDiscount);
+        // console.log("newDiscount", newDiscount);
     };
 
     // Format date for display
@@ -109,6 +109,9 @@ const Discount = () => {
     const addDiscount = async (discountData) => {
         try {
             setActionLoading(true);
+
+            console.log("discountData", discountData);
+
             const response = await discountsApi.createDiscount(discountData);
 
             if (response.data.statusCode !== 200 && response.data.statusCode !== 201) {
@@ -134,7 +137,11 @@ const Discount = () => {
             // Remove unit field for update as per requirements
             const { unit, ...updateData } = discountData;
 
+            console.log("data", discountData);
+
             const response = await discountsApi.updateDiscount(id, updateData);
+
+            console.log("Res", response);
 
             if (response.data.statusCode !== 200) {
                 throw new Error(response.data.message || 'Failed to update discount');

@@ -13,7 +13,7 @@ import ComboProductCard from "@components/ComboProductCard/ComboProductCard.jsx"
 import { useCallback, useMemo } from "react";
 import { useInfiniteVouchers } from "@hooks/useVoucherQueries.js";
 import { useAllCombo } from "@hooks/useComboQueries.js";
-import { motion } from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -117,6 +117,19 @@ const Homepage = () => {
     },
   };
 
+  // Loader animation
+  const loaderVariants = {
+    animate: {
+      scale: [1, 1.2, 1],
+      opacity: [0.5, 1, 0.5],
+      transition: {
+        duration: 1.5,
+        repeat: Infinity,
+        repeatType: "loop"
+      }
+    }
+  };
+
   return (
     <div className="font-sans">
       <Header />
@@ -148,31 +161,60 @@ const Homepage = () => {
       </motion.section>
 
       {/* Brands Section */}
-      <section className="mx-auto py-3">
+      <motion.section
+          className="mx-auto py-3"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeInUp}
+          transition={{ duration: 0.6 }}
+      >
         <div className="mx-10 mb-6 flex items-center justify-between">
-          <h2 className="text-3xl font-semibold text-black">
+          <motion.h2
+              className="text-3xl font-semibold text-black"
+              variants={fadeInUp}
+          >
             Thương hiệu nổi tiếng
-          </h2>
-          <button
-            className="z-10 cursor-pointer text-sm font-medium hover:underline"
-            style={{ color: "#91775e" }}
-            onClick={() => navigate("/brands")}
+          </motion.h2>
+          <motion.button
+              className="z-100 cursor-pointer text-sm font-medium hover:underline"
+              style={{ color: "#91775e" }}
+              onClick={() => navigate("/brands")}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
           >
             Xem tất cả →
-          </button>
+          </motion.button>
         </div>
-        <div className="flex cursor-pointer flex-wrap justify-center gap-6">
-          {brandsQuery.isLoading ? (
-            <>
-              {[...Array(5)].map((_, index) => (
-                <BrandCardSkeleton key={index} />
-              ))}
-            </>
-          ) : (
-            topBrands.map((brand) => <BrandCard key={brand.id} brand={brand} />)
-          )}
-        </div>
-      </section>
+
+        {brandsQuery.isLoading ? (
+            <div className="flex h-40 items-center justify-center">
+              <motion.div
+                  className="h-16 w-16 rounded-full"
+                  style={{ backgroundColor: "#91775e" }}
+                  variants={loaderVariants}
+                  animate="animate"
+              />
+            </div>
+        ) : (
+            <motion.div
+                className="flex cursor-pointer flex-wrap justify-center gap-6"
+                variants={staggerContainer}
+            >
+              <AnimatePresence>
+                {topBrands.map((brand, index) => (
+                    <motion.div
+                        key={brand.id}
+                        variants={scaleIn}
+                        custom={index}
+                    >
+                      <BrandCard brand={brand} />
+                    </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+        )}
+      </motion.section>
 
       {/*Why choose us section*/}
       <motion.section
@@ -273,63 +315,215 @@ const Homepage = () => {
         </div>
       )}
 
-      <section className="my-10">
-          <h2 className="text-5xl text-primary-dark font-bold text-center uppercase text-black mb-10">Combo Mới Nhất</h2>
-          {comboQuery.isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {numberToArray(3).map((index) => (
-                    <ProductCardSkeleton key={index} />
+      <motion.section
+          className="my-10"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+          }}
+      >
+        <motion.h2
+            className="text-5xl text-primary-dark font-bold text-center uppercase mb-10"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 }
+            }}
+        >
+          Combo Mới Nhất
+        </motion.h2>
+
+        {comboQuery.isLoading ? (
+            <div className="flex h-60 items-center justify-center">
+              <motion.div
+                  className="h-10 w-10 rounded-full mx-2"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0
+                  }}
+                  style={{ backgroundColor: "#675746" }}
+              />
+              <motion.div
+                  className="h-10 w-10 rounded-full mx-2"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0.2
+                  }}
+                  style={{ backgroundColor: "#7a6854" }}
+              />
+              <motion.div
+                  className="h-10 w-10 rounded-full mx-2"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0.4
+                  }}
+                  style={{ backgroundColor: "#8b7a62" }}
+              />
+            </div>
+        ) : (
+            <motion.div
+                className="flex flex-wrap justify-center gap-8"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.1
+                    }
+                  }
+                }}
+            >
+              <AnimatePresence>
+                {newestCombos.map((combo, index) => (
+                    <motion.div
+                        key={combo.id_combo}
+                        variants={{
+                          hidden: { opacity: 0, scale: 0.9 },
+                          visible: {
+                            opacity: 1,
+                            scale: 1,
+                            transition: {
+                              type: "spring",
+                              stiffness: 100
+                            }
+                          }
+                        }}
+                    >
+                      <ComboProductCard combo={combo} />
+                    </motion.div>
                 ))}
-              </div>
-          ) : (
-              <div className="flex flex-wrap justify-center gap-8">
-                {newestCombos.map((combo) => (
-                    <ComboProductCard key={combo.id_combo} combo={combo} />
-                ))}
-              </div>
-          )}
-        <button
+              </AnimatePresence>
+            </motion.div>
+        )}
+
+        <motion.button
             className="mx-auto my-10 block rounded-lg px-4 py-2 text-white"
             style={{ backgroundColor: "#675746" }}
             onClick={() => navigate("/all_combos")}
+            whileHover={{ scale: 1.05, backgroundColor: "#7a6854" }}
+            whileTap={{ scale: 0.95 }}
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 }
+            }}
         >
           Xem tất cả combo
-        </button>
-      </section>
-
+        </motion.button>
+      </motion.section>
       {/* Best Sellers Section */}
-      <div className="px-10 py-10">
-        <h2 className="text-center my-5 text-primary-dark text-5xl font-semibold">BEST SELLERS</h2>
-        <div className="mt-15 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {productsQuery.isLoading &&
-            numberToArray(8).map((index) => (
-              <ProductCardSkeleton key={index} />
-            ))}
-          {!productsQuery.isLoading &&
-            products.map((product) => (
-              <ProductCard key={product.id_pro} product={product} />
-            ))}
-        </div>
-        {!productsQuery.isLoading &&
-          products.length === 0 &&
-          productsQuery.status === "success" && (
-            <div className="w-full py-10 text-center">
-              Không có sản phẩm nào
+      <motion.div
+          className="px-10 py-10"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeInUp}
+          transition={{ duration: 0.7 }}
+      >
+        <motion.h2
+            className="text-center text-3xl font-semibold"
+            variants={fadeInUp}
+        >
+          Best Sellers
+        </motion.h2>
+
+        {productsQuery.isLoading ? (
+            <div className="flex h-60 items-center justify-center">
+              <motion.div
+                  className="h-10 w-10 rounded-full bg-brown-400 mx-2"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0
+                  }}
+                  style={{ backgroundColor: "#91775e" }}
+              />
+              <motion.div
+                  className="h-10 w-10 rounded-full bg-brown-500 mx-2"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0.2
+                  }}
+                  style={{ backgroundColor: "#7a6854" }}
+              />
+              <motion.div
+                  className="h-10 w-10 rounded-full bg-brown-600 mx-2"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 1, 0.3]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: 0.4
+                  }}
+                  style={{ backgroundColor: "#675746" }}
+              />
             </div>
-          )}
-        {!productsQuery.isLoading && productsQuery.status === "error" && (
-          <div className="w-full py-10 text-center text-red-500">
-            Có lỗi xảy ra khi tải sản phẩm, vui lòng thử lại sau
-          </div>
+        ) : (
+            <motion.div
+                className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                variants={staggerContainer}
+            >
+              <AnimatePresence>
+                {products.map((product, index) => (
+                    <motion.div
+                        key={product.id_pro}
+                        variants={scaleIn}
+                        custom={index}
+                    >
+                      <ProductCard product={product} />
+                    </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {products.length === 0 && (
+                  <motion.div
+                      className="w-full col-span-4 py-10 text-center"
+                      variants={fadeInUp}
+                  >
+                    Không có sản phẩm nào
+                  </motion.div>
+              )}
+            </motion.div>
         )}
-        <button
-          className="mx-auto my-10 block rounded-lg px-4 py-2 text-white"
-          style={{ backgroundColor: "#675746" }}
-          onClick={() => navigate("/all_products")}
+
+        <motion.button
+            className="mx-auto my-10 block rounded-lg px-4 py-2 text-white"
+            style={{ backgroundColor: "#675746" }}
+            onClick={() => navigate("/all_products")}
+            whileHover={{ scale: 1.05, backgroundColor: "#7a6854" }}
+            whileTap={{ scale: 0.95 }}
+            variants={fadeInUp}
         >
           Xem tất cả sản phẩm
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     </div>
   );
 };
