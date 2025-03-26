@@ -82,7 +82,7 @@ const ProductCard = ({ product }) => {
       {/* Product status badge */}
       <div
         className={`absolute top-8 right-0 rounded px-3 py-1 font-semibold shadow ${
-          product.status === "Hàng có sẵn"
+          product.status === "Có sẵn"
             ? "bg-yellow-100 text-yellow-800"
             : "bg-blue-100 text-blue-800"
         }`}

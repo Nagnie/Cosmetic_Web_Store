@@ -278,8 +278,8 @@ const ProductEdit = () => {
                                     required
                                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                                 >
-                                    <option value="Available">Hàng có sẵn</option>
-                                    <option value="Order">Hàng order</option>
+                                    <option value="Có sẵn">Có sẵn</option>
+                                    <option value="Đặt hàng">Đặt hàng</option>
                                 </select>
                             </div>
 

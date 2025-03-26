@@ -4,9 +4,7 @@ import ProductCard from "../../components/ProductCard/ProductCard.jsx";
 import { useBrands } from "@hooks/useBrandQueries.js";
 import { useProducts } from "@hooks/useProductQueries.js";
 import { numberToArray } from "@utils/utils.js";
-import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
 import BrandCard from "@components/BrandCard/BrandCard.jsx";
-import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
 import VoucherCurvedSlider from "./components/VoucherCurvedSlider.jsx";
 import DiscountCard from "./components/DiscountCard.jsx";
 import ComboProductCard from "@components/ComboProductCard/ComboProductCard.jsx";
@@ -190,7 +188,7 @@ const Homepage = () => {
         {brandsQuery.isLoading ? (
             <div className="flex h-40 items-center justify-center">
               <motion.div
-                  className="h-16 w-16 rounded-full"
+                  className="h-16 w-16 mx-2 rounded-full"
                   style={{ backgroundColor: "#91775e" }}
                   variants={loaderVariants}
                   animate="animate"
@@ -325,16 +323,6 @@ const Homepage = () => {
             visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
           }}
       >
-        <motion.h2
-            className="text-5xl text-primary-dark font-bold text-center uppercase mb-10"
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0 }
-            }}
-        >
-          Combo Mới Nhất
-        </motion.h2>
-
         {comboQuery.isLoading ? (
             <div className="flex h-60 items-center justify-center">
               <motion.div
@@ -406,6 +394,15 @@ const Homepage = () => {
                           }
                         }}
                     >
+                      <motion.h2
+                          className="text-5xl text-primary-dark font-bold text-center uppercase mb-10"
+                          variants={{
+                            hidden: { opacity: 0, y: 20 },
+                            visible: { opacity: 1, y: 0 }
+                          }}
+                      >
+                        Combo Mới Nhất
+                      </motion.h2>
                       <ComboProductCard combo={combo} />
                     </motion.div>
                 ))}
