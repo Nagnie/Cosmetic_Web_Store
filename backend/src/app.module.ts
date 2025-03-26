@@ -19,6 +19,7 @@ import { OrderModule } from './module/order/order.module';
 import { CartModule } from './module/cart/cart.module';
 import { DiscountModule } from './module/discount/discount.module';
 import { ComboModule } from './module/combo/combo.module';
+import { PosterModule } from './module/poster/poster.module';
 
 
 @Module({
@@ -58,6 +59,7 @@ import { ComboModule } from './module/combo/combo.module';
     CartModule,
     DiscountModule,
     ComboModule,
+    PosterModule,
   ],
   controllers: [AppController],
   providers: [
