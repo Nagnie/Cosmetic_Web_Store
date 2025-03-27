@@ -439,7 +439,8 @@ export class OrderService {
   }
 
   private async generateQRCode(url: string, publicId: string): Promise<string> {
-    const downloadUrl = `http://localhost:3001/api/order/download-invoice?url=${url}&publicId=${publicId}`;
+    const server = this.configService.get<String>("SERVERNAME");
+    const downloadUrl = `${server}/api/order/download-invoice?url=${url}&publicId=${publicId}`;
     const qrPath = `qrcode_${Date.now()}.png`;
     await QRCode.toFile(qrPath, downloadUrl, { width: 300 });
     return qrPath;
