@@ -92,7 +92,11 @@ const ProductCard = ({ product }) => {
 
       <img
         loading="lazy"
-        src={images?.[0] ?? "https://placehold.co/276x350?text=No%20Image"}
+        src={
+          images?.[0] === "" || images?.[0] === undefined || images === null
+            ? "https://placehold.co/276x350?text=No%20Image"
+            : images?.[0]
+        }
         alt={product.pro_name || product.name}
         className="h-60 w-full rounded object-cover"
       />
@@ -101,7 +105,7 @@ const ProductCard = ({ product }) => {
           {product.pro_name || product.name}
         </h3>
       </div>
-      <div className="text-left line-through text-gray-400 font-medium">
+      <div className="text-left font-medium text-gray-400 line-through">
         <span className="text-sm">
           {formatCurrency({
             number: Number(product.origin_price),
