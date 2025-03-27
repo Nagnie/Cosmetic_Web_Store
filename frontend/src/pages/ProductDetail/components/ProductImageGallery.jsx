@@ -5,7 +5,15 @@ import PropTypes from "prop-types";
 const ProductImageGallery = ({ images = [], maxVisibleThumbnails = 4 }) => {
   // Xử lý dữ liệu đầu vào một lần bằng useMemo
   const imageList = useMemo(() => {
-    return images.length ? images : [];
+    return images.length
+      ? images.map((image, index) => ({
+          id: image.id || index + 1,
+          src:
+            image.src === "" || image.src === undefined || image.src === null
+              ? null
+              : image.src,
+        }))
+      : [];
   }, [images]);
 
   // Hình ảnh mặc định nếu không có ảnh

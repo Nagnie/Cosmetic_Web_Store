@@ -28,6 +28,7 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
 
     const item = {
       id_pro: product.id_pro,
@@ -53,6 +54,7 @@ const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const handleBuyNow = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const item = {
       id_pro: product.id_pro,
       id_class: classification[0]?.id_class ?? 0,
@@ -61,7 +63,10 @@ const ProductCard = ({ product }) => {
     };
 
     try {
-      const res = await addCartItemMutation.mutateAsync(item);
+      const res = await addCartItemMutation.mutateAsync({
+        ...item,
+        isBuyNow: true,
+      });
 
       if (res && res.cart && res.cart.length > 0) {
         toast.success("Thêm vào giỏ hàng thành công");
@@ -78,9 +83,14 @@ const ProductCard = ({ product }) => {
   return (
     <div>
       <div
-        className="product-image relative aspect-square p-1"
+        className="product-image relative aspect-square cursor-pointer p-1"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={() => {
+          navigate(
+            `/products/${encodeURIComponent(product.pro_name)}/${product.id_pro}`,
+          );
+        }}
       >
         <Link
           to={`/products/${encodeURIComponent(product.pro_name)}/${product.id_pro}`}
