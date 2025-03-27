@@ -131,28 +131,29 @@ const ProductCard = ({ product }) => {
       </div>
       <div className="product-info p-2 text-left">
         <div>
-          <div className="text-[10px] font-bold uppercase">
+          <div className="font-bold uppercase text-primary-dark text-sm">
             {product.brand || product.bra_name || SAMPLE_PRODUCT.brand}
           </div>
         </div>
         <h3
           title={product.pro_name || SAMPLE_PRODUCT.name}
-          className="line-clamp-2 font-medium"
+          className="line-clamp-2 font-semibold text-xl mb-1"
         >
           <Link
             to={`/products/${encodeURIComponent(product.pro_name)}/${product.id_pro}`}
+            // className={"text-xl"}
           >
             {product.pro_name || SAMPLE_PRODUCT.name}
           </Link>
         </h3>
         <div>
-          <span className="!mr-2 !text-[10px] font-bold !text-gray-400 !line-through">
+          <span className="font-bold text-sm me-2 !text-gray-400 !line-through">
             {formatCurrency({
               number:
                 product.origin_price ?? product.pro_origin_price ?? 299000,
             }) ?? "299.000 đ"}
           </span>
-          <span className="text-primary-dark font-bold">
+          <span className="text-primary-dark text-xl font-bold">
             {formatCurrency({
               number:
                 Number(product.price || product.pro_price) ||

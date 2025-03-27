@@ -132,15 +132,23 @@ const ProductCard = ({ product }) => {
           transition={{ duration: 0.4, ease: "easeInOut" }}
         >
           <button
-            className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2 transition-colors hover:bg-amber-100"
+              className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2
+                transition-all duration-200 ease-in-out
+                hover:scale-105 hover:bg-amber-100
+                active:scale-95 active:shadow-sm
+                focus:outline-none"
             onClick={handleBuyNow}
           >
             <FaShoppingBag size={18} />
             <span>Mua ngay</span>
           </button>
           <button
-            className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2 transition-colors hover:bg-amber-50"
-            onClick={handleAddToCart}
+              className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2
+                transition-all duration-200 ease-in-out
+                hover:scale-105 hover:bg-amber-100
+                active:scale-95 active:shadow-sm
+                focus:outline-none"
+              onClick={handleAddToCart}
           >
             <BsCartPlus size={22} />
           </button>

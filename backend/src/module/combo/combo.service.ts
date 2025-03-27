@@ -132,6 +132,7 @@ export class ComboService {
           'pro_name', pro.name,
           'pro_origin_price', pro.origin_price,
           'pro_price', pro.price,
+            'pro_status', pro.status,
           'pro_images', (
             SELECT json_agg(pimg.link)
             FROM product_image AS pimg

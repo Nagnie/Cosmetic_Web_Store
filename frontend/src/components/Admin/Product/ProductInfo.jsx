@@ -10,6 +10,7 @@ import {Edit, Trash2} from "lucide-react";
 
 const ProductInfo = () => {
     const { id } = useParams();
+
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);

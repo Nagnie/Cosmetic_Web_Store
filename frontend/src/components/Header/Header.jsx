@@ -1,6 +1,7 @@
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { GiLipstick, GiMedicines, GiAmpleDress } from "react-icons/gi";
 import { BsClipboard2HeartFill } from "react-icons/bs";
+import { PiCowboyHatFill } from "react-icons/pi";
 import { PiHairDryerFill } from "react-icons/pi";
 import { useState, useEffect } from "react";
 import { useScrollDirection } from "@hooks/useScrollDirectionHook.jsx";
@@ -28,6 +29,7 @@ const Header = () => {
     "Chăm sóc cơ thể": <PiHairDryerFill className="me-2 mt-1" />,
     "Thực phẩm chức năng": <GiMedicines className="me-2 mt-1" />,
     "Đồ trang điểm": <GiLipstick className="me-2 mt-1" />,
+    "Mỹ phẩm nam": <PiCowboyHatFill className="me-2 mt-1" />,
   };
 
   // Default icon if category name doesn't match any in our map
@@ -101,21 +103,21 @@ const Header = () => {
         </Link>
         <div className="search-bar relative flex gap-2">
           <input
-            value={searchText}
-            type="text"
-            placeholder="Tìm kiếm sản phẩm, danh mục hay thương hiệu mong muốn..."
-            className="rounded-3xl border px-5 py-2"
-            style={{
-              width: "90%",
-              paddingRight: searchText ? "40px" : "12px", // Thêm padding bên phải khi có text
-            }}
-            onChange={(e) => setSearchText(e.target.value)}
+              value={searchText}
+              type="text"
+              placeholder="Tìm kiếm sản phẩm, danh mục hay thương hiệu mong muốn..."
+              className="rounded-3xl border px-5 py-2 focus:outline-none focus:ring-primary focus:ring-2" // Added focus styles
+              style={{
+                width: "90%",
+                paddingRight: searchText ? "40px" : "12px", // Thêm padding bên phải khi có text
+              }}
+              onChange={(e) => setSearchText(e.target.value)}
           />
 
           <Link
-            to={`/all_products${searchText ? `?search=${searchText}` : ""}`}
-            className="flex items-center justify-center rounded-3xl px-4 text-white"
-            style={{ backgroundColor: "#8D7B68" }}
+              to={`/all_products${searchText ? `?search=${searchText}` : ""}`}
+              className="flex items-center justify-center rounded-3xl px-4 text-white focus:outline-none focus:ring-primary-light focus:ring-2"
+              style={{ backgroundColor: "#8D7B68" }}
           >
             <FaSearch />
           </Link>

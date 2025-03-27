@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Save, X} from 'lucide-react';
+import {Save, X, Plus, Minus} from 'lucide-react';
 
 const ProductModal = ({
                           isOpen,
@@ -15,10 +15,10 @@ const ProductModal = ({
         id_bra: '',
         price: '',
         origin_price: '',
-        img_url: '',
+        images: [''],
+        classification: [''],
         desc: '',
-        classification: '',
-        status: 'Hàng có sẵn'
+        status: 'Có sẵn'
     });
 
     // Initialize form data when editing
@@ -30,11 +30,14 @@ const ProductModal = ({
                 id_bra: product.id_bra || '',
                 price: product.price || '',
                 origin_price: product.origin_price || '',
-                img_url: Array.isArray(product.img_url) ? product.img_url.join(', ') : product.img_url || '',
+                images: Array.isArray(product.img_url) && product.img_url.length > 0
+                    ? product.img_url
+                    : [''],
+                classification: Array.isArray(product.classification) && product.classification.length > 0
+                    ? product.classification
+                    : [''],
                 desc: product.desc || '',
-                classification: Array.isArray(product.classification) ?
-                    product.classification.join(', ') : product.classification || '',
-                status: product.status || 'Hàng có sẵn'
+                status: product.status || 'Có sẵn'
             });
         } else {
             // Reset form when adding new product
@@ -44,10 +47,10 @@ const ProductModal = ({
                 id_bra: '',
                 price: '',
                 origin_price: '',
-                img_url: '',
+                images: [''],
+                classification: [''],
                 desc: '',
-                classification: '',
-                status: 'Hàng có sẵn'
+                status: 'Có sẵn'
             });
         }
     }, [isEditing, product]);
@@ -57,6 +60,36 @@ const ProductModal = ({
         setFormData({
             ...formData,
             [name]: name === 'price' ? parseFloat(value) || '' : value
+        });
+    };
+
+    // Handle array fields (images and classification)
+    const handleArrayChange = (field, index, value) => {
+        setFormData(prev => {
+            const newArray = [...prev[field]];
+            newArray[index] = value;
+            return {
+                ...prev,
+                [field]: newArray
+            };
+        });
+    };
+
+    // Add or remove array items
+    const handleArrayAction = (field, action) => {
+        setFormData(prev => {
+            let newArray = [...prev[field]];
+
+            if (action === 'add') {
+                newArray.push('');
+            } else if (action === 'remove' && newArray.length > 1) {
+                newArray.pop();
+            }
+
+            return {
+                ...prev,
+                [field]: newArray
+            };
         });
     };
 
@@ -70,12 +103,10 @@ const ProductModal = ({
             price: parseFloat(formData.price),
             origin_price: parseFloat(formData.origin_price),
             status: formData.status,
-            img_url: formData.img_url.split(',').map(url => url.trim()), // Chuyển chuỗi thành mảng
-            classification: formData.classification.split(',').map(item => item.trim()), // Chuyển chuỗi thành mảng
+            img_url: formData.images.filter(img => img.trim() !== ''), // Remove empty images
+            classification: formData.classification.filter(cls => cls.trim() !== ''), // Remove empty classifications
             desc: formData.desc,
         };
-
-        // console.log(submissionData);
 
         onSubmit(submissionData);
     };
@@ -125,7 +156,7 @@ const ProductModal = ({
                                 value={formData.id_subcat}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
 
@@ -140,7 +171,7 @@ const ProductModal = ({
                                 value={formData.id_bra}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
 
@@ -156,7 +187,7 @@ const ProductModal = ({
                                 onChange={handleChange}
                                 required
                                 step="0.01"
-                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
                         {/* Price */}
@@ -171,7 +202,7 @@ const ProductModal = ({
                                 onChange={handleChange}
                                 required
                                 step="0.01"
-                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
                             />
                         </div>
 
@@ -184,7 +215,7 @@ const ProductModal = ({
                                 name="status"
                                 value={formData.status}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
+                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
                             >
                                 <option value="Có sẵn">Có sẵn</option>
                                 <option value="Đặt hàng">Đặt hàng</option>
@@ -194,37 +225,73 @@ const ProductModal = ({
                         {/* Image URLs */}
                         <div className="col-span-2">
                             <label className="block text-black mb-1">
-                                Image URLs (comma separated)
+                                Image URLs
                             </label>
-                            <textarea
-                                name="img_url"
-                                value={formData.img_url}
-                                onChange={handleChange}
-                                rows="2"
-                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
-                                placeholder="/link1, /link2, /link3"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Enter image URLs separated by commas
-                            </p>
+                            {formData.images.map((url, index) => (
+                                <div key={`img-${index}`} className="flex items-center mb-2">
+                                    <input
+                                        type="text"
+                                        value={url}
+                                        onChange={(e) => handleArrayChange('images', index, e.target.value)}
+                                        placeholder={`Image URL ${index + 1}`}
+                                        className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
+                                    />
+                                </div>
+                            ))}
+                            <div className="flex space-x-2 mt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleArrayAction('images', 'add')}
+                                    className="p-2 flex bg-teal-600 text-white rounded-full"
+                                >
+                                    <Plus size={22} />
+                                </button>
+                                {formData.images.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleArrayAction('images', 'remove')}
+                                        className="p-2 flex bg-rose-600 text-white rounded-full"
+                                    >
+                                        <Minus size={22} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {/* Classification */}
                         <div className="col-span-2">
                             <label className="block text-black mb-1">
-                                Classification (comma separated)
+                                Classification Options (sizes, variants, etc.)
                             </label>
-                            <input
-                                type="text"
-                                name="classification"
-                                value={formData.classification}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none  focus:ring-pink-500 focus:ring-2"
-                                placeholder="20ml, 30ml, 50ml"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Enter product variants separated by commas
-                            </p>
+                            {formData.classification.map((option, index) => (
+                                <div key={`cls-${index}`} className="flex items-center mb-2">
+                                    <input
+                                        type="text"
+                                        value={option}
+                                        onChange={(e) => handleArrayChange('classification', index, e.target.value)}
+                                        placeholder={`Option ${index + 1}`}
+                                        className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"
+                                    />
+                                </div>
+                            ))}
+                            <div className="flex space-x-2 mt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleArrayAction('classification', 'add')}
+                                    className="p-2 flex bg-teal-600 text-white rounded-full"
+                                >
+                                    <Plus size={22} />
+                                </button>
+                                {formData.classification.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleArrayAction('classification', 'remove')}
+                                        className="p-2 flex bg-rose-600 text-white rounded-full"
+                                    >
+                                        <Minus size={22} />
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {/* Description */}
@@ -234,7 +301,7 @@ const ProductModal = ({
                             </label>
                             <textarea
                                 name="desc"
-                                value={formData.description}
+                                value={formData.desc}
                                 onChange={handleChange}
                                 rows="4"
                                 className="w-full px-3 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-pink-500 focus:ring-2"

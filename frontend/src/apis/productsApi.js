@@ -39,8 +39,8 @@ const productsApi = {
     });
   },
 
-  getProductDetail: async (id, { signal }) => {
-    return axios.get(`/product/${id}`, { signal });
+  getProductDetail: async (id) => {
+    return axios.get(`/product/${id}`);
   },
 
   getProductsByBrand: (
