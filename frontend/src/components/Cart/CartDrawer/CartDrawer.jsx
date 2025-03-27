@@ -5,8 +5,8 @@ import useCartStore from "../ZustandCartStore";
 import { CartDrawerFooter } from "..";
 import { useEffect, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-// import { useQueryClient } from "@tanstack/react-query";
 import CustomSpin from "@components/Spin/CustomSpin";
+// import { useQueryClient } from "@tanstack/react-query";
 
 const CartDrawer = () => {
   const isCartDrawerOpen = useCartStore((state) => state.isCartDrawerOpen);
@@ -31,6 +31,7 @@ const CartDrawer = () => {
   });
 
   // Always refetch when drawer opens, regardless of whether data exists
+  // const queryClient = useQueryClient();
   // useEffect(() => {
   //   if (isCartDrawerOpen) {
   //     // Invalidate cache và refetch khi drawer mở
@@ -75,7 +76,7 @@ const CartDrawer = () => {
   return (
     <Drawer
       classNames={{
-        body: "scrollbar-custom !p-0",
+        body: "scrollbar-custom !p-0 !flex !flex-col",
         header: "!p-[15px] sm:!p-[20px]",
         footer: "!p-[15px] sm:!p-[20px]",
       }}
@@ -103,10 +104,12 @@ const CartDrawer = () => {
       <div
         id="scrollableCartContainer"
         ref={scrollContainerRef}
-        className="p-[15px] sm:p-[20px]"
-        style={{
-          overflow: "auto",
-        }}
+        // className="scrollbar-hide p-[15px] sm:p-[20px]"
+        className="scrollbar-hide flex-grow overflow-auto p-[15px] sm:p-[20px]"
+        // style={{
+        //   overflow: "auto",
+        //   height: "calc(100vh - 200px)",
+        // }}
       >
         {isLoading ? (
           <div className="flex h-full items-center justify-center">
@@ -133,7 +136,6 @@ const CartDrawer = () => {
                 {isFetchingNextPage && <CustomSpin />}
               </div>
             }
-            scrollThreshold={0.8}
             endMessage={
               <div className="py-4 text-center text-gray-500">
                 Đã hiển thị tất cả sản phẩm trong giỏ hàng
@@ -142,6 +144,7 @@ const CartDrawer = () => {
             scrollableTarget="scrollableCartContainer"
           >
             <List
+              className="overflow-x-hidden"
               dataSource={allItems}
               renderItem={(item) => (
                 <List.Item key={`${item.id_pro}-${item.id_class}`}>

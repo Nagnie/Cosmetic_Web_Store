@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
 const QuantitySelector = ({
@@ -9,9 +9,18 @@ const QuantitySelector = ({
   width = 180,
   height = 40,
   value,
+  disabled = false,
 }) => {
   const [quantity, setQuantity] = useState(() => initialValue);
   const [inputValue, setInputValue] = useState(() => initialValue.toString());
+
+  // Đồng bộ hóa state nội bộ với prop value khi nó thay đổi
+  useEffect(() => {
+    if (value !== undefined && value !== quantity) {
+      setQuantity(value);
+      setInputValue(value.toString());
+    }
+  }, [value]);
 
   const validateValue = (value) => {
     const numValue =
@@ -20,10 +29,13 @@ const QuantitySelector = ({
   };
 
   const handleDecrease = () => {
-    const currentValid = validateValue(inputValue);
+    if (disabled) return;
 
-    if (currentValid > min) {
-      const newValue = currentValid - 1;
+    const currentValue = value !== undefined ? value : quantity;
+    const validValue = validateValue(currentValue);
+
+    if (validValue > min) {
+      const newValue = validValue - 1;
       setQuantity(newValue);
       setInputValue(newValue.toString());
       onChange && onChange(newValue);
@@ -31,10 +43,13 @@ const QuantitySelector = ({
   };
 
   const handleIncrease = () => {
-    const currentValid = validateValue(inputValue);
+    if (disabled) return;
 
-    if (currentValid < max) {
-      const newValue = currentValid + 1;
+    const currentValue = value !== undefined ? value : quantity;
+    const validValue = validateValue(currentValue);
+
+    if (validValue < max) {
+      const newValue = validValue + 1;
       setQuantity(newValue);
       setInputValue(newValue.toString());
       onChange && onChange(newValue);
@@ -42,13 +57,15 @@ const QuantitySelector = ({
   };
 
   const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInputValue(value);
+    if (disabled) return;
 
-    if (value !== "") {
-      const numValue = parseInt(value.replace(/[^\d]/g, ""));
+    const val = e.target.value;
+    setInputValue(val);
+
+    if (val !== "") {
+      const numValue = parseInt(val.replace(/[^\d]/g, ""));
       if (!isNaN(numValue)) {
-        const validValue = validateValue(value);
+        const validValue = validateValue(val);
         setQuantity(validValue);
         onChange && onChange(validValue);
       }
@@ -56,15 +73,25 @@ const QuantitySelector = ({
   };
 
   const handleBlur = () => {
+    if (disabled) return;
+
     const validValue = validateValue(inputValue);
     setQuantity(validValue);
     setInputValue(validValue.toString());
     onChange && onChange(validValue);
   };
 
+  // Luôn sử dụng value từ props nếu được cung cấp
+  const currentValue = value !== undefined ? value : quantity;
+
+  const isButtonDisabled = (isDecrease) => {
+    if (disabled) return true;
+    return isDecrease ? currentValue <= min : currentValue >= max;
+  };
+
   return (
     <div
-      className={`!flex !items-center !text-gray-700`}
+      className={`!flex !items-center !text-gray-700 ${disabled ? "opacity-60" : ""}`}
       style={{
         width: width,
         height: height,
@@ -72,9 +99,9 @@ const QuantitySelector = ({
     >
       <button
         onClick={handleDecrease}
-        disabled={(value || quantity) <= min}
+        disabled={isButtonDisabled(true)}
         className={`!bg-secondary-medium !border-secondary-deep flex h-full items-center justify-center !rounded-l-lg !border !border-r-0 !px-4 !py-2 !font-bold !outline-none select-none hover:opacity-90 ${
-          (value || quantity) <= min
+          isButtonDisabled(true)
             ? "cursor-not-allowed opacity-50"
             : "cursor-pointer"
         }`}
@@ -86,17 +113,18 @@ const QuantitySelector = ({
       </button>
       <input
         type="text"
-        className={`!border-secondary-deep h-full !border !text-center outline-none`}
-        value={value || inputValue}
+        className={`!border-secondary-deep h-full !border !text-center outline-none ${disabled ? "bg-gray-100" : ""}`}
+        value={value !== undefined ? value : inputValue}
         onChange={handleInputChange}
         onBlur={handleBlur}
+        disabled={disabled}
         style={{ width: (2 * width) / 4 }}
       />
       <button
         onClick={handleIncrease}
-        disabled={(value || quantity) >= max}
+        disabled={isButtonDisabled(false)}
         className={`!bg-secondary-medium !border-secondary-deep !flex h-full !items-center !justify-center !rounded-r-lg !border !border-l-0 !px-4 !py-2 !font-bold !outline-none select-none hover:opacity-90 ${
-          (value || quantity) >= max
+          isButtonDisabled(false)
             ? "cursor-not-allowed opacity-50"
             : "cursor-pointer"
         }`}
@@ -118,6 +146,7 @@ QuantitySelector.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
   value: PropTypes.number,
+  disabled: PropTypes.bool,
 };
 
 export default QuantitySelector;

@@ -12,6 +12,8 @@ function App() {
   const totalPrice = useCartStore((state) => state.totalPrice);
   const setTotalPrice = useCartStore((state) => state.setTotalPrice);
   const clearCart = useCartStore((state) => state.clearCart);
+  const shippingFee = useCartStore((state) => state.shippingFee);
+  const setShippingFee = useCartStore((state) => state.setShippingFee);
 
   const { data, status } = useInfiniteCartItems({
     limit: 10,
@@ -22,6 +24,7 @@ function App() {
     if (status === "success" && data) {
       const totalItems = data?.pages[0]?.total_items || 0;
       const totalPrices = data?.pages[0]?.total_prices || 0;
+      const shippingFees = data?.pages[0]?.ship_price || 0;
 
       if (totalItems !== itemCount) {
         setItemCount(totalItems);
@@ -29,6 +32,10 @@ function App() {
 
       if (totalPrices !== totalPrice) {
         setTotalPrice(totalPrices);
+      }
+
+      if (shippingFees !== shippingFee) {
+        setShippingFee(shippingFees);
       }
     } else if (status === "error") {
       clearCart();
@@ -41,6 +48,8 @@ function App() {
     itemCount,
     totalPrice,
     setTotalPrice,
+    shippingFee,
+    setShippingFee,
   ]);
 
   useEffect(() => {

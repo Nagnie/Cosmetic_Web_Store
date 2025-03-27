@@ -1,11 +1,12 @@
-import { Image, Select } from "antd";
-import { CloseOutlined } from "@ant-design/icons";
+import { ConfigProvider, Image, Select } from "antd";
+import { CloseOutlined, LoadingOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
 
 import { QuantitySelector } from "@pages/ProductDetail/components";
 import { formatCurrency } from "@utils/utils";
 import { useRemoveCartItem, useUpdateCartItem } from "@hooks/useCartQueries";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const SAMPLE_ITEM = {
   id: 1,
@@ -17,6 +18,9 @@ const SAMPLE_ITEM = {
 };
 
 const CartDrawerCart = ({ item, availableClassifications }) => {
+  const [error, setError] = useState(null);
+  const [currentQuantity, setCurrentQuantity] = useState(item?.quantity || 1);
+
   const removeCartItemMutation = useRemoveCartItem();
 
   const handleRemoveItem = () => {
@@ -31,13 +35,33 @@ const CartDrawerCart = ({ item, availableClassifications }) => {
   const updateCartItemMutation = useUpdateCartItem();
 
   const handleUpdateItem = (quantity, newIdClass) => {
-    updateCartItemMutation.mutate({
-      id_pro: item.id_pro ?? item.id,
-      id_class: newIdClass ?? item.id_class ?? 0,
-      quantity,
-      old_id_class: item.id_class ?? item.old_id_class ?? 0,
-      type: item.type || "product",
-    });
+    if (quantity === currentQuantity && newIdClass === item.id_class) return;
+
+    setError(null);
+    setCurrentQuantity(quantity);
+
+    updateCartItemMutation.mutate(
+      {
+        id_pro: item.id_pro ?? item.id,
+        id_class: newIdClass ?? item.id_class ?? 0,
+        quantity,
+        old_id_class: item.id_class ?? item.old_id_class ?? 0,
+        type: item.type || "product",
+      },
+      {
+        onSuccess: () => {
+          console.log("Cập nhật item thành công:", quantity);
+        },
+        onError: (error) => {
+          console.error("Lỗi khi cập nhật item:", error);
+          if (newIdClass) {
+            setError("Không thể cập nhật phân loại. Vui lòng thử lại sau.");
+          } else setError("Không thể cập nhật số lượng. Vui lòng thử lại sau.");
+
+          setCurrentQuantity(item?.quantity || 1);
+        },
+      },
+    );
   };
 
   return (
@@ -82,44 +106,80 @@ const CartDrawerCart = ({ item, availableClassifications }) => {
             >
               Phân loại:
             </span>
-            <Select
-              defaultValue={item?.class_name || "10ml"}
-              onChange={(value) => {
-                handleUpdateItem(item?.quantity, value);
+            <ConfigProvider
+              theme={{
+                components: {
+                  Select: {
+                    colorPrimary: "#91775E",
+                    colorBorder: "#C8B6A6",
+                    controlItemBgActive: "#F1DEC9",
+                    controlItemBgHover: "#F1DEC9",
+                    optionSelectedBg: "#F1DEC9",
+                    optionSelectedColor: "#574A3A",
+                    hoverBorderColor: "#91775E",
+                  },
+                },
               }}
             >
-              {availableClassifications.map((classification) => (
-                <Select.Option
-                  key={classification.id_class}
-                  value={classification.id_class}
-                >
-                  {classification.name}
-                </Select.Option>
-              ))}
-            </Select>
+              <Select
+                value={item?.id_class || 0}
+                loading={updateCartItemMutation.isPending}
+                onChange={(value) => {
+                  handleUpdateItem(item?.quantity, value);
+                }}
+              >
+                {availableClassifications.map((classification) => (
+                  <Select.Option
+                    key={classification.id_class}
+                    value={classification.id_class}
+                  >
+                    {classification.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </ConfigProvider>
           </div>
         )}
 
         <div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <QuantitySelector
-              initialValue={item?.quantity || 1}
-              value={item?.quantity}
-              width={35 * 3}
-              height={35}
-              onChange={handleUpdateItem}
-            />
+            {updateCartItemMutation.isPending ? (
+              <div className="flex h-7 items-center px-4">
+                <LoadingOutlined className="text-secondary-deep" />
+                <span className="ml-2 text-xs text-gray-500">
+                  Đang cập nhật...
+                </span>
+              </div>
+            ) : (
+              <QuantitySelector
+                initialValue={currentQuantity}
+                width={35 * 3}
+                height={35}
+                value={currentQuantity}
+                onChange={handleUpdateItem}
+                disabled={updateCartItemMutation.isPending}
+              />
+            )}
             <span className="font-semibold sm:text-lg">
               {formatCurrency({
                 number: item?.price || +item?.pro_price || SAMPLE_ITEM.price,
               })}
             </span>
           </div>
+
+          {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
         </div>
       </div>
 
-      <div className="cursor-pointer" onClick={() => handleRemoveItem()}>
-        <CloseOutlined />
+      <div
+        className={`cursor-pointer ${removeCartItemMutation.isPending ? "opacity-50" : ""}`}
+        onClick={() => !removeCartItemMutation.isPending && handleRemoveItem()}
+      >
+        {removeCartItemMutation.isPending ? (
+          <LoadingOutlined />
+        ) : (
+          <CloseOutlined />
+        )}
       </div>
     </div>
   );

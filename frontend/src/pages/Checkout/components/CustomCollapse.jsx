@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Empty, List } from "antd";
+import { Empty, List, Button } from "antd";
 import { DownOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import InfiniteScroll from "react-infinite-scroll-component";
 
@@ -9,6 +9,7 @@ import CustomSpin from "@components/Spin/CustomSpin";
 
 const CustomCollapse = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [useInfiniteScroll] = useState(false);
 
   const scrollContainerRef = useRef(null);
 
@@ -26,6 +27,12 @@ const CustomCollapse = () => {
 
   const totalItems = data?.pages[0]?.total_items || 0;
   const allItems = data?.pages.flatMap((page) => page.data || []) || [];
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
 
   return (
     <div>
@@ -75,7 +82,7 @@ const CustomCollapse = () => {
             <div className="flex h-full items-center justify-center">
               <Empty description="Giỏ hàng trống" />
             </div>
-          ) : (
+          ) : useInfiniteScroll ? (
             <InfiniteScroll
               dataLength={allItems.length}
               next={fetchNextPage}
@@ -102,6 +109,37 @@ const CustomCollapse = () => {
                 )}
               />
             </InfiniteScroll>
+          ) : (
+            <>
+              <List
+                dataSource={allItems}
+                renderItem={(item) => (
+                  <List.Item key={`${item.id_pro}-${item.id_class}`}>
+                    <CheckoutCard item={item} />
+                  </List.Item>
+                )}
+              />
+
+              {hasNextPage && (
+                <div className="mt-4 text-center">
+                  <Button
+                    type="primary"
+                    className="!bg-primary !hover:bg-primary-dark !text-neutral-light rounded-lg px-4 py-2 transition-colors duration-300"
+                    onClick={handleLoadMore}
+                    loading={isFetchingNextPage}
+                    disabled={!hasNextPage}
+                  >
+                    Tải thêm
+                  </Button>
+                </div>
+              )}
+
+              {!hasNextPage && allItems.length > 0 && (
+                <div className="py-4 text-center text-gray-500">
+                  Đã hiển thị tất cả sản phẩm trong giỏ hàng
+                </div>
+              )}
+            </>
           )}
         </div>
 
