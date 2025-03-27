@@ -330,7 +330,6 @@ const CheckoutCustomerInfo = () => {
               label="Email"
               name="email"
               tooltip={{
-                title: "Email sẽ được sử dụng để nhận thông báo đơn hàng",
                 icon: <span className="text-gray-400">(không bắt buộc)</span>,
               }}
               rules={[{ type: "email", message: "Email không hợp lệ!" }]}
