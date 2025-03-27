@@ -90,7 +90,10 @@ const productsApi = {
     // Tạo đối tượng params ban đầu
     const params = {
       orderBy,
-      sortBy,
+      sortBy:
+        sortBy === "" || sortBy === undefined || sortBy === null
+          ? "price"
+          : sortBy,
       minPrice,
       maxPrice,
       brand,
