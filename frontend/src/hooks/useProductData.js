@@ -10,7 +10,7 @@ export const useProductData = (queryParams, currentPage) => {
     return productsApi.findProducts(queryParams, {
       page: currentPage,
       limit: LIMIT,
-    });
+    })
   };
 
   const { data, isLoading } = useQuery({

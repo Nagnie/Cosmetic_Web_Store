@@ -230,7 +230,7 @@ const ProductDetail = () => {
 
             <div className="mt-8 text-justify">
               <div className="mt-5">
-                <p className="text-primary-dark text-xl">
+                <p className="text-primary-dark text-xl whitespace-pre-line">
                   {product?.description || "Không có mô tả cho sản phẩm này."}
                 </p>
               </div>

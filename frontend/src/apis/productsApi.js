@@ -73,7 +73,7 @@ const productsApi = {
     });
   },
 
-  searchProducts: async (search, { page = 1, limit = 9 }) => {
+  searchProducts: async (search, { page = 1, limit = 18 }) => {
     return axios.get(`/product/search`, {
       params: {
         key: search,
@@ -85,14 +85,14 @@ const productsApi = {
 
   findProducts: async (
     { orderBy, sortBy, minPrice, maxPrice, brand, subcate, category, key },
-    { page = 1, limit = 9 },
+    { page = 1, limit = 18 },
   ) => {
     // Tạo đối tượng params ban đầu
     const params = {
       orderBy,
       sortBy:
         sortBy === "" || sortBy === undefined || sortBy === null
-          ? "price"
+          ? "id_pro"
           : sortBy,
       minPrice,
       maxPrice,
