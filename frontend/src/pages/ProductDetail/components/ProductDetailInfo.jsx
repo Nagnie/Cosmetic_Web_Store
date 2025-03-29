@@ -68,7 +68,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
   };
 
   return (
-    <div className="text-left ms-8">
+    <div className="text-left md:ms-8">
       <div className="text-primary-dark text-left mb-4 text-2xl font-bold md:text-4xl">
         {product.pro_name ??
           `[DEAL 26/2 - 10/3 HĐ 229K COLORKEY TẶNG 1 GƯƠNG TRANG ĐIỂM COLORKEY + 1
