@@ -408,7 +408,12 @@ export class ProductService {
           SELECT json_agg(img.link)
           FROM product_image AS img
           WHERE img.id_pro = pro.id_pro), '[]'::json
-        ) AS images
+        ) AS images,
+        COALESCE(
+         (SELECT json_agg(DISTINCT jsonb_build_object('id_class', class.id_class, 'name', class.name)) 
+         FROM classification AS class 
+         WHERE class.id_pro = pro.id_pro), '[]'::json
+        ) AS classification
         FROM product AS pro
         JOIN brand AS bra ON pro.id_bra = bra.id_bra
         WHERE bra.name = $1 AND pro.id_pro != $2
@@ -450,7 +455,12 @@ export class ProductService {
           SELECT json_agg(img.link)
           FROM product_image AS img
           WHERE img.id_pro = pro.id_pro), '[]'::json
-        ) AS images
+        ) AS images,
+        COALESCE(
+         (SELECT json_agg(DISTINCT jsonb_build_object('id_class', class.id_class, 'name', class.name)) 
+         FROM classification AS class 
+         WHERE class.id_pro = pro.id_pro), '[]'::json
+        ) AS classification
         FROM product AS pro
         JOIN sub_category AS scat ON pro.id_subcat = scat.id_subcat
         JOIN brand AS bra ON pro.id_bra = bra.id_bra
