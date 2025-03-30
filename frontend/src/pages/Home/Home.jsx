@@ -144,7 +144,7 @@ const Homepage = () => {
           <SyncLoader />
       ) : (
           <section
-              className="mb-15 mt-30 lg:mt-55"
+              className="mb-15 mt-50"
           >
             <style>
               {`
@@ -198,7 +198,7 @@ const Homepage = () => {
       <section
           className="mx-auto py-3"
       >
-        <div className="mx-10 mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between">
           <h2
               className="text-3xl font-semibold text-black"
           >

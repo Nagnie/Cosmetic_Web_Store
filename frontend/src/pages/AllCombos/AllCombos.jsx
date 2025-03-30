@@ -185,7 +185,7 @@ const AllCombos = () => {
 
   return (
     <div className="font-sans">
-      <div className="container mx-auto mt-48 mb-20 py-8">
+      <div className="container mx-auto mt-40 mb-20 py-8">
         <div className="mb-15">
           <h1 className="text-3xl font-bold text-gray-800">Tất cả combo</h1>
         </div>

@@ -182,7 +182,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="mx-auto mt-40 mb-5 pt-10 sm:px-4">
+    <div className="mx-auto mt-35 mb-5 pt-10 sm:px-4">
       {/* Hiển thị thông báo lỗi ở đầu trang */}
       {renderErrorMessage()}
 
