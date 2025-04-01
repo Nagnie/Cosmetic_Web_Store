@@ -33,7 +33,7 @@ const PaymentMethods = () => {
   ];
 
   return (
-    <div className="mx-auto mt-35 mb-4 pt-10 lg:px-4">
+    <div className="mx-auto mt-35 mb-15 pt-10">
       {/* Breadcrumb */}
       <div className="mb-4">
         <Breadcrumb separator=">" items={routes} />

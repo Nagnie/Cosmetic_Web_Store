@@ -10,6 +10,7 @@ import { useSearchStore } from "./ZustandSearchStore";
 import { Link } from "react-router-dom";
 import categoriesApi from "@apis/categoriesApi.js";
 import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+import "./Header.css"
 
 const Header = () => {
   const scrollDirection = useScrollDirection();
@@ -223,11 +224,11 @@ const Header = () => {
               onClick={(e) => {
                 handleCartClick(e);
               }}
-              className="cursor-pointer text-3xl select-none"
+              className="relative cursor-pointer text-3xl select-none"
           >
           🛒
             {cartItemsCount > 0 && (
-                <div className="absolute -top-0.5 left-6 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-center align-top text-[12px] text-white">
+                <div className="cart-count flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-center align-top text-[12px] text-white">
                   {cartItemsCount}
                 </div>
             )}
