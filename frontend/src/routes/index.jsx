@@ -18,6 +18,7 @@ import ComboEdit from "@components/Admin/Combo/ComboEdit.jsx";
 import ComboInfo from "@components/Admin/Combo/ComboInfo.jsx";
 import ComboModal from "@components/Admin/Combo/ComboModal.jsx";
 import comboEdit from "@components/Admin/Combo/ComboEdit.jsx";
+import PaymentMethods from "@pages/PaymentMethods/PaymentMethods.jsx";
 
 const PublicRoutes = [
   {
@@ -43,6 +44,11 @@ const PublicRoutes = [
   {
     path: "/checkout",
     component: CheckoutPage,
+    layout: GuestLayout,
+  },
+  {
+    path: "/checkout/payment-methods",
+    component: PaymentMethods,
     layout: GuestLayout,
   },
   {
@@ -102,7 +108,7 @@ const PublicRoutes = [
     path: "/admin/combo/info/:id",
     component: ComboInfo,
     layout: AdminLayout,
-  }
+  },
 ];
 
 export { PublicRoutes };
