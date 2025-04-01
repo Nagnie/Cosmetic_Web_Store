@@ -1,18 +1,32 @@
-import { fetchListOrderItems } from "@apis/orderApi";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { ConfigProvider, Form, Input, Select } from "antd";
+
 import { useCartStore } from "@components/Cart";
 import CustomSpin from "@components/Spin/CustomSpin";
 import useFormPersistence from "@hooks/useFormPersistence";
-import { useFinishOrder } from "@hooks/useOrderQueries";
 import {
   useProvinces,
   useDistricts,
   useWards,
 } from "@hooks/useLocationQueries";
-import { Form, Input, Select } from "antd";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { useQueryClient } from "@tanstack/react-query";
+import { fetchListOrderItems } from "@apis/orderApi";
+
+const theme = {
+  token: {
+    colorPrimary: "#91775E", // Màu primary của bạn
+    colorPrimaryHover: "#675746", // Màu primary dark của bạn
+    colorPrimaryActive: "#675746", // Màu khi active
+    colorBorder: "#d9d9d9", // Màu viền mặc định
+    colorBorderHover: "#91775E", // Màu viền khi hover
+    colorText: "#333333", // Màu text
+    colorTextPlaceholder: "#8d7053", // Màu placeholder
+    // Tùy chỉnh shadow khi focus
+    boxShadow: "0 0 0 2px rgba(145, 119, 94, 0.2)",
+    boxShadowSecondary: "0 0 0 2px rgba(145, 119, 94, 0.2)",
+  },
+};
 
 const CheckoutCustomerInfo = () => {
   const [form] = Form.useForm();
@@ -182,14 +196,11 @@ const CheckoutCustomerInfo = () => {
     [form],
   );
 
-  const finishOrderMutation = useFinishOrder();
   const totalCartPrice = useCartStore((state) => state.totalPrice);
-  const clearCart = useCartStore((state) => state.clearCart);
   const itemCount = useCartStore((state) => state.itemCount);
   const discountInfo = useCartStore((state) => state.discountInfo);
   const shippingFee = useCartStore((state) => state.shippingFee);
-
-  const queryClient = useQueryClient();
+  const setOrderPayload = useCartStore((state) => state.setOrderPayload);
 
   // Handle form submission
   const handleSubmit = async (values) => {
@@ -248,28 +259,9 @@ const CheckoutCustomerInfo = () => {
             : +totalCartPrice || 0) + (shippingFee ?? 0) || 0,
       };
 
-      const res = await finishOrderMutation.mutateAsync({
-        ...persistData,
-      });
+      setOrderPayload(persistData);
 
-      if (res && +res.statusCode === 201) {
-        toast.success("Đặt hàng thành công!");
-
-        // Clear cart
-        clearCart();
-        queryClient.invalidateQueries("infiniteCartItems");
-
-        navigate("/payment-confirmation", {
-          state: {
-            invoice_url: res.invoice_url.url,
-            qr_code_url: res.qr_code_url.url,
-          },
-        });
-
-        return res;
-      } else {
-        toast.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
-      }
+      navigate("/checkout/payment-methods");
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");
@@ -302,219 +294,223 @@ const CheckoutCustomerInfo = () => {
       </h2>
 
       <div className="mt-2">
-        <Form
-          form={form}
-          onFinish={handleSubmit}
-          layout="vertical"
-          name="checkout-form"
-          scrollToFirstError
-        >
-          {/* Name field */}
-          <Form.Item
-            label="Họ và tên"
-            name="name"
-            rules={[
-              { required: true, message: "Vui lòng nhập họ và tên!" },
-              { min: 2, message: "Họ tên phải có ít nhất 2 ký tự!" },
-            ]}
+        <ConfigProvider theme={theme}>
+          <Form
+            form={form}
+            onFinish={handleSubmit}
+            layout="vertical"
+            name="checkout-form"
+            scrollToFirstError
           >
-            <Input
-              placeholder="Nhập họ và tên người nhận"
-              className="rounded-md"
-            />
-          </Form.Item>
-
-          {/* Email and Phone */}
-          <div className="grid gap-0 sm:grid-cols-2 sm:gap-4">
+            {/* Name field */}
             <Form.Item
-              label="Email"
-              name="email"
-              tooltip={{
-                icon: <span className="text-gray-400">(không bắt buộc)</span>,
-              }}
-              rules={[{ type: "email", message: "Email không hợp lệ!" }]}
-            >
-              <Input placeholder="example@email.com" className="rounded-md" />
-            </Form.Item>
-
-            <Form.Item
-              required
-              label="Số điện thoại"
-              name="phone"
-              rules={[{ validator: validatePhoneNumber }]}
-            >
-              <Input placeholder="0xxxxxxxxx" className="rounded-md" />
-            </Form.Item>
-          </div>
-
-          {/* Address */}
-          <Form.Item
-            label="Địa chỉ"
-            name="address"
-            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
-          >
-            <Input
-              placeholder="Số nhà, tên đường, khu vực..."
-              className="rounded-md"
-            />
-          </Form.Item>
-
-          {/* Location selectors */}
-          <div className="grid gap-0 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-            <Form.Item
-              label="Tỉnh/Thành phố"
-              name="city"
+              label="Họ và tên"
+              name="name"
               rules={[
-                { required: true, message: "Vui lòng chọn tỉnh/thành phố!" },
+                { required: true, message: "Vui lòng nhập họ và tên!" },
+                { min: 2, message: "Họ tên phải có ít nhất 2 ký tự!" },
               ]}
             >
-              <Select
-                placeholder="Chọn tỉnh/thành phố"
-                onChange={handleCityChange}
-                className="w-full rounded-md"
-                showSearch
-                filterOption={(input, option) =>
-                  option.children.toLowerCase().includes(input.toLowerCase())
-                }
-                loading={loadingCities}
-                disabled={loadingCities}
-                notFoundContent={
-                  loadingCities ? <CustomSpin size="small" /> : null
-                }
-              >
-                {cities.map((city) => (
-                  <Select.Option key={city.id} value={city.id}>
-                    {city.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              shouldUpdate={(prevValues, currentValues) => {
-                return prevValues.city !== currentValues.city;
-              }}
-            >
-              {({ getFieldValue }) => (
-                <Form.Item
-                  label="Quận/Huyện"
-                  name="district"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn quận/huyện!" },
-                  ]}
-                >
-                  <Select
-                    placeholder="Chọn quận/huyện"
-                    onChange={handleDistrictChange}
-                    disabled={!getFieldValue("city") || loadingDistricts}
-                    className="w-full rounded-md"
-                    showSearch
-                    filterOption={(input, option) =>
-                      option.children
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    loading={loadingDistricts}
-                    notFoundContent={
-                      loadingDistricts ? <CustomSpin size="small" /> : null
-                    }
-                  >
-                    {locationAvailability.hasDistricts ? (
-                      districts.map((district) => (
-                        <Select.Option key={district.id} value={district.id}>
-                          {district.name}
-                        </Select.Option>
-                      ))
-                    ) : (
-                      <Select.Option value="N/A">N/A</Select.Option>
-                    )}
-                  </Select>
-                </Form.Item>
-              )}
-            </Form.Item>
-
-            <Form.Item
-              shouldUpdate={(prevValues, currentValues) => {
-                return (
-                  prevValues.district !== currentValues.district ||
-                  prevValues.city !== currentValues.city
-                );
-              }}
-            >
-              {({ getFieldValue }) => (
-                <Form.Item
-                  label="Phường/Xã"
-                  name="ward"
-                  rules={[
-                    { required: true, message: "Vui lòng chọn phường/xã!" },
-                  ]}
-                >
-                  <Select
-                    placeholder="Chọn phường/xã"
-                    disabled={
-                      !getFieldValue("district") ||
-                      !locationAvailability.hasDistricts ||
-                      loadingWards
-                    }
-                    className="w-full rounded-md"
-                    showSearch
-                    filterOption={(input, option) =>
-                      option.children
-                        .toLowerCase()
-                        .includes(input.toLowerCase())
-                    }
-                    loading={loadingWards}
-                    notFoundContent={
-                      loadingWards ? <CustomSpin size="small" /> : null
-                    }
-                  >
-                    {locationAvailability.hasWards ? (
-                      wards.map((ward) => (
-                        <Select.Option key={ward.id} value={ward.id}>
-                          {ward.name}
-                        </Select.Option>
-                      ))
-                    ) : (
-                      <Select.Option value="N/A">N/A</Select.Option>
-                    )}
-                  </Select>
-                </Form.Item>
-              )}
-            </Form.Item>
-          </div>
-
-          <div>
-            <Form.Item label="Ghi chú" name="note">
-              <Input.TextArea
-                rows={4}
-                placeholder="Nhập ghi chú (nếu có)"
+              <Input
+                placeholder="Nhập họ và tên người nhận"
                 className="rounded-md"
               />
             </Form.Item>
-          </div>
 
-          {/* Submit */}
-          <div className="mt-6 flex items-center justify-between gap-4">
-            <Link
-              to="/cart"
-              className="text-primary flex shrink-0 items-center justify-center gap-1 text-sm font-semibold"
+            {/* Email and Phone */}
+            <div className="grid gap-0 sm:grid-cols-2 sm:gap-4">
+              <Form.Item
+                label="Email"
+                name="email"
+                tooltip={{
+                  icon: <span className="text-gray-400">(không bắt buộc)</span>,
+                }}
+                rules={[{ type: "email", message: "Email không hợp lệ!" }]}
+              >
+                <Input placeholder="example@email.com" className="rounded-md" />
+              </Form.Item>
+
+              <Form.Item
+                required
+                label="Số điện thoại"
+                name="phone"
+                rules={[{ validator: validatePhoneNumber }]}
+              >
+                <Input placeholder="0xxxxxxxxx" className="rounded-md" />
+              </Form.Item>
+            </div>
+
+            {/* Address */}
+            <Form.Item
+              label="Địa chỉ"
+              name="address"
+              rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
             >
-              <span className="text-primary underline">Quay lại giỏ hàng</span>
-            </Link>
-            <button
-              type="submit"
-              disabled={isSubmitting || !itemCount}
-              className={`bg-primary hover:bg-primary-dark flex w-full items-center justify-center rounded-md py-3 text-white transition-colors duration-300 ${
-                isSubmitting || !itemCount
-                  ? "!cursor-not-allowed opacity-70"
-                  : ""
-              }`}
-            >
-              {isSubmitting ? <CustomSpin size="small" /> : null}
-              {isSubmitting ? "Đang xử lý..." : "Đặt hàng"}
-            </button>
-          </div>
-        </Form>
+              <Input
+                placeholder="Số nhà, tên đường, khu vực..."
+                className="rounded-md"
+              />
+            </Form.Item>
+
+            {/* Location selectors */}
+            <div className="grid gap-0 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              <Form.Item
+                label="Tỉnh/Thành phố"
+                name="city"
+                rules={[
+                  { required: true, message: "Vui lòng chọn tỉnh/thành phố!" },
+                ]}
+              >
+                <Select
+                  placeholder="Chọn tỉnh/thành phố"
+                  onChange={handleCityChange}
+                  className="w-full rounded-md"
+                  showSearch
+                  filterOption={(input, option) =>
+                    option.children.toLowerCase().includes(input.toLowerCase())
+                  }
+                  loading={loadingCities}
+                  disabled={loadingCities}
+                  notFoundContent={
+                    loadingCities ? <CustomSpin size="small" /> : null
+                  }
+                >
+                  {cities.map((city) => (
+                    <Select.Option key={city.id} value={city.id}>
+                      {city.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                shouldUpdate={(prevValues, currentValues) => {
+                  return prevValues.city !== currentValues.city;
+                }}
+              >
+                {({ getFieldValue }) => (
+                  <Form.Item
+                    label="Quận/Huyện"
+                    name="district"
+                    rules={[
+                      { required: true, message: "Vui lòng chọn quận/huyện!" },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Chọn quận/huyện"
+                      onChange={handleDistrictChange}
+                      disabled={!getFieldValue("city") || loadingDistricts}
+                      className="w-full rounded-md"
+                      showSearch
+                      filterOption={(input, option) =>
+                        option.children
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      loading={loadingDistricts}
+                      notFoundContent={
+                        loadingDistricts ? <CustomSpin size="small" /> : null
+                      }
+                    >
+                      {locationAvailability.hasDistricts ? (
+                        districts.map((district) => (
+                          <Select.Option key={district.id} value={district.id}>
+                            {district.name}
+                          </Select.Option>
+                        ))
+                      ) : (
+                        <Select.Option value="N/A">N/A</Select.Option>
+                      )}
+                    </Select>
+                  </Form.Item>
+                )}
+              </Form.Item>
+
+              <Form.Item
+                shouldUpdate={(prevValues, currentValues) => {
+                  return (
+                    prevValues.district !== currentValues.district ||
+                    prevValues.city !== currentValues.city
+                  );
+                }}
+              >
+                {({ getFieldValue }) => (
+                  <Form.Item
+                    label="Phường/Xã"
+                    name="ward"
+                    rules={[
+                      { required: true, message: "Vui lòng chọn phường/xã!" },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Chọn phường/xã"
+                      disabled={
+                        !getFieldValue("district") ||
+                        !locationAvailability.hasDistricts ||
+                        loadingWards
+                      }
+                      className="w-full rounded-md"
+                      showSearch
+                      filterOption={(input, option) =>
+                        option.children
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      loading={loadingWards}
+                      notFoundContent={
+                        loadingWards ? <CustomSpin size="small" /> : null
+                      }
+                    >
+                      {locationAvailability.hasWards ? (
+                        wards.map((ward) => (
+                          <Select.Option key={ward.id} value={ward.id}>
+                            {ward.name}
+                          </Select.Option>
+                        ))
+                      ) : (
+                        <Select.Option value="N/A">N/A</Select.Option>
+                      )}
+                    </Select>
+                  </Form.Item>
+                )}
+              </Form.Item>
+            </div>
+
+            <div>
+              <Form.Item label="Ghi chú" name="note">
+                <Input.TextArea
+                  rows={4}
+                  placeholder="Nhập ghi chú (nếu có)"
+                  className="rounded-md"
+                />
+              </Form.Item>
+            </div>
+
+            {/* Submit */}
+            <div className="mt-6 flex items-center justify-between gap-4">
+              <Link
+                to="/cart"
+                className="text-primary flex shrink-0 items-center justify-center gap-1 text-sm font-semibold"
+              >
+                <span className="text-primary underline">
+                  Quay lại giỏ hàng
+                </span>
+              </Link>
+              <button
+                type="submit"
+                disabled={isSubmitting || !itemCount}
+                className={`bg-primary hover:bg-primary-dark flex w-full items-center justify-center rounded-md py-3 text-white transition-colors duration-300 ${
+                  isSubmitting || !itemCount
+                    ? "!cursor-not-allowed opacity-70"
+                    : ""
+                }`}
+              >
+                {isSubmitting ? <CustomSpin size="small" /> : null}
+                {isSubmitting ? "Đang xử lý..." : "Thanh toán"}
+              </button>
+            </div>
+          </Form>
+        </ConfigProvider>
       </div>
     </div>
   );
