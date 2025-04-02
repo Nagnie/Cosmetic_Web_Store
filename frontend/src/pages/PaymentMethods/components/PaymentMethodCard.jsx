@@ -9,7 +9,7 @@ const PaymentMethodCard = ({ method, selected, onSelect }) => {
     <div
       className={`mb-3 flex cursor-pointer rounded-lg border p-4 transition-all ${
         selected
-          ? "border-primary bg-blue-50"
+          ? "border-primary bg-orange-50"
           : "border-gray-200 hover:border-gray-300"
       }`}
       onClick={() => onSelect(method.id)}
