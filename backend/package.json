@@ -37,6 +37,7 @@
     "@nestjs/swagger": "^8.1.1",
     "@nestjs/throttler": "^6.3.0",
     "@nestjs/typeorm": "^10.0.2",
+    "@payos/node": "^1.0.10",
     "axios": "^1.8.3",
     "bcrypt": "^5.1.1",
     "cache-manager-ioredis": "^2.1.0",
