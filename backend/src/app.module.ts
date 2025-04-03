@@ -20,6 +20,7 @@ import { CartModule } from './module/cart/cart.module';
 import { DiscountModule } from './module/discount/discount.module';
 import { ComboModule } from './module/combo/combo.module';
 import { PosterModule } from './module/poster/poster.module';
+import { PaymentModule } from './payment/payment.module';
 
 
 @Module({
@@ -60,6 +61,7 @@ import { PosterModule } from './module/poster/poster.module';
     DiscountModule,
     ComboModule,
     PosterModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
