@@ -16,6 +16,12 @@ const CheckoutPriceInfo = () => {
   const totalCartPrice = useCartStore((state) => state.totalPrice);
   const discountInfo = useCartStore((state) => state.discountInfo);
   const setDiscountInfo = useCartStore((state) => state.setDiscountInfo);
+  const shippingFee = useCartStore((state) => state.shippingFee);
+
+  const finalTotalPrice =
+    (discountInfo?.new_total_prices
+      ? discountInfo.new_total_prices
+      : +totalCartPrice || 0) + (shippingFee ?? 0) || 0;
 
   const [selectedVoucher, setSelectedVoucher] = useState(() => {
     return {
@@ -167,7 +173,9 @@ const CheckoutPriceInfo = () => {
 
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold">Phí vận chuyển</span>
-          <span className="text-sm font-semibold">0đ</span>
+          <span className="text-sm font-semibold">
+            {formatCurrency({ number: shippingFee ?? 0 })}
+          </span>
         </div>
       </div>
 
@@ -178,9 +186,7 @@ const CheckoutPriceInfo = () => {
         <span>Tổng cộng</span>
         <span>
           {formatCurrency({
-            number: discountInfo?.new_total_prices
-              ? discountInfo.new_total_prices
-              : +totalCartPrice || 0,
+            number: finalTotalPrice,
           })}
         </span>
       </div>

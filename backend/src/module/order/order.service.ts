@@ -20,14 +20,14 @@ import { OrderSortField } from './enum/order_sortfield.enum';
 @Injectable()
 export class OrderService {
   constructor(
-    @InjectRepository(Order)
-    private readonly orderRepository: Repository<Order>,
-    @InjectRepository(OrderDetail)
-    private readonly orderDetailRepository: Repository<OrderDetail>,
-    private readonly dataSource: DataSource,
-    @InjectRepository(Image)
-    private readonly imageRepository: Repository<Image>,
-    private readonly configService: ConfigService
+      @InjectRepository(Order)
+      private readonly orderRepository: Repository<Order>,
+      @InjectRepository(OrderDetail)
+      private readonly orderDetailRepository: Repository<OrderDetail>,
+      private readonly dataSource: DataSource,
+      @InjectRepository(Image)
+      private readonly imageRepository: Repository<Image>,
+      private readonly configService: ConfigService
   ) {
     setupCloudinary(this.configService);
   }
@@ -42,57 +42,52 @@ export class OrderService {
 
     const cartJson = JSON.stringify(req.session.cart);
     const data = await this.dataSource.query(
-      `
-      WITH cart_items AS (
-          SELECT * FROM jsonb_to_recordset($1::jsonb) 
-          AS x(id_pro INT, id_class INT, quantity INT, type TEXT)
-      )
-      SELECT 
-          pro.id_pro AS id, 
-          pro.name AS name, 
-          class.id_class AS id_class, 
-          class.name AS class_name, 
-          pro.price AS price, 
-          ci.quantity AS quantity,
-          'product' AS type,
-          COALESCE((
-              SELECT json_agg(img.link)
-              FROM product_image AS img
-              WHERE img.id_pro = pro.id_pro), '[]'::json
-          ) AS images,
-          COALESCE(
-              (SELECT json_agg(DISTINCT jsonb_build_object('id_class', class.id_class, 'name', class.name)) 
-              FROM classification AS class 
-              WHERE class.id_pro = pro.id_pro), '[]'::json
-          ) AS classification
-      FROM cart_items AS ci
-      JOIN product AS pro ON pro.id_pro = ci.id_pro
-      LEFT JOIN classification AS class ON class.id_class = ci.id_class
-      WHERE ci.type = 'product'
-      
-      UNION ALL
-      
-      SELECT 
-          com.id_combo AS id, 
-          com.name AS name, 
-          NULL AS id_class, 
-          NULL AS class_name, 
-          com.price AS price, 
-          ci.quantity AS quantity,
-          'combo' AS type,
-          COALESCE((
-              SELECT json_agg(img.link)
-              FROM combo_image AS img
-              WHERE img.id_combo = com.id_combo), '[]'::json
-          ) AS images,
-          NULL AS classification
-      FROM cart_items AS ci
-      JOIN combo AS com ON com.id_combo = ci.id_pro
-      WHERE ci.type = 'combo'
-  
-      ORDER BY name ASC
-  `,
-      [cartJson]
+        `
+          WITH cart_items AS (SELECT *
+                              FROM jsonb_to_recordset($1::jsonb)
+                                     AS x(id_pro INT, id_class INT, quantity INT, type TEXT))
+          SELECT pro.id_pro     AS id,
+                 pro.name       AS name,
+                 class.id_class AS id_class,
+                 class.name     AS class_name,
+                 pro.price      AS price,
+                 ci.quantity    AS quantity,
+                 'product'      AS type,
+                 COALESCE((SELECT json_agg(img.link)
+                           FROM product_image AS img
+                           WHERE img.id_pro = pro.id_pro), '[]' ::json
+                 )              AS images,
+                 COALESCE(
+                     (SELECT json_agg(DISTINCT jsonb_build_object('id_class', class.id_class, 'name', class.name))
+                      FROM classification AS class
+                      WHERE class.id_pro = pro.id_pro), '[]' ::json
+                 )              AS classification
+          FROM cart_items AS ci
+                 JOIN product AS pro ON pro.id_pro = ci.id_pro
+                 LEFT JOIN classification AS class ON class.id_class = ci.id_class
+          WHERE ci.type = 'product'
+
+          UNION ALL
+
+          SELECT com.id_combo AS id,
+                 com.name     AS name,
+                 NULL         AS id_class,
+                 NULL         AS class_name,
+                 com.price    AS price,
+                 ci.quantity  AS quantity,
+                 'combo'      AS type,
+                 COALESCE((SELECT json_agg(img.link)
+                           FROM combo_image AS img
+                           WHERE img.id_combo = com.id_combo), '[]' ::json
+                 )            AS images,
+                 NULL         AS classification
+          FROM cart_items AS ci
+                 JOIN combo AS com ON com.id_combo = ci.id_pro
+          WHERE ci.type = 'combo'
+
+          ORDER BY name ASC
+        `,
+        [cartJson]
     );
 
     return {
@@ -102,7 +97,7 @@ export class OrderService {
 
   // TODO: Modify delete image in the future
   async create(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
-    const { name, email, phone, address, note, order_items, total_price } = createOrderDto;
+    const {name, email, phone, address, note, order_items, total_price} = createOrderDto;
     const queryRunner = this.dataSource.createQueryRunner();
 
     // START TRANSACTION
@@ -113,10 +108,9 @@ export class OrderService {
       // INSERT ORDER
       const status = OrderStatus.NOT_ORDERED;
       const insertOrder = await queryRunner.query(`
-          INSERT INTO orders(customer, email, phone, address, status, sum_price, note)
-          VALUES($1, $2, $3, $4, $5, $6, $7)
-          RETURNING *
-        `, [name, email, phone, address, status, total_price, note]);
+        INSERT INTO orders(customer, email, phone, address, status, sum_price, note)
+        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+      `, [name, email, phone, address, status, total_price, note]);
 
       const id_order = insertOrder[0]?.id;
 
@@ -124,9 +118,8 @@ export class OrderService {
       for (const item of order_items) {
         await queryRunner.query(`
           INSERT INTO order_detail(order_id, pro_id, pro_name, pro_image, class_id, class_name, quantity, price, type)
-          VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
-          RETURNING *;
-          `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price, item.type]);
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
+        `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price, item.type]);
       }
 
       // Create invoice's image
@@ -169,11 +162,11 @@ export class OrderService {
 
   async findAll(req: Request) {
     try {
-      const { page = 1, limit = 5, sortBy = "created_at", orderBy = "desc" } = req.query;
+      const {page = 1, limit = 5, sortBy = "created_at", orderBy = "desc"} = req.query;
       const allItems = await this.orderRepository.count();
       const allPage = Math.ceil(allItems / (limit as number));
       const orders = await this.orderRepository.find({
-        order: { [(sortBy as string).toLowerCase()]: orderBy },
+        order: {[(sortBy as string).toLowerCase()]: orderBy},
         take: (limit as unknown as number),
         skip: ((page as unknown as number) - 1) * (limit as unknown as number)
       });
@@ -191,7 +184,7 @@ export class OrderService {
 
   async findOne(orderId: number, req: Request) {
     try {
-      const { page = 1, limit = 5 } = req.query;
+      const {page = 1, limit = 5} = req.query;
 
       const [items, totalItems] = await this.orderDetailRepository.findAndCount({
         where: {
@@ -199,11 +192,11 @@ export class OrderService {
             id: orderId
           }
         },
-        order: { id: "ASC" },
+        order: {id: "ASC"},
         take: (limit as number),
         skip: ((page as number) - 1) * (limit as number),
       });
-      
+
       if (totalItems === 0) {
         throw new HttpException("Order does not exist", HttpStatus.BAD_REQUEST);
       }
@@ -231,7 +224,7 @@ export class OrderService {
       orderBy = "ASC"
     } = req.query;
 
-    const take =  isNaN(Number(limit)) ? 5 : Number(limit);
+    const take = isNaN(Number(limit)) ? 5 : Number(limit);
     const skip = (isNaN(Number(page)) || isNaN(Number(limit))) ? 0 : (Number(page) - 1) * Number(limit);
     const statusValid = Object.values(OrderStatus).filter((item) => item === (status as string).toLowerCase());
     const sortByValid = Object.values(OrderSortField).filter((item) => item === (sortBy as string).toLowerCase());
@@ -261,7 +254,7 @@ export class OrderService {
   async update(id: number, updateOrderDto: UpdateOrderDto) {
     try {
       const order = await this.orderRepository.findOne({
-        where: { id }
+        where: {id}
       });
 
       if (!order) {
@@ -278,7 +271,7 @@ export class OrderService {
   async remove(id: number) {
     try {
       const order = await this.orderRepository.findOne({
-        where: { id }
+        where: {id}
       });
 
       if (!order) {
@@ -302,7 +295,7 @@ export class OrderService {
       expires_at: deleteAt,
     });
     fs.unlinkSync(filePath);
-    return { url: result.secure_url, publicId: result.public_id };
+    return {url: result.secure_url, publicId: result.public_id};
   }
 
   // private async generateInvoiceImage(createOrderDto: CreateOrderDto): Promise<string> {
@@ -370,24 +363,29 @@ export class OrderService {
   // }
 
   private async generateInvoiceImage(createOrderDto: CreateOrderDto): Promise<string> {
-    const { name, phone, address, order_items, total_price } = createOrderDto;
+    const {name, phone, address, order_items, total_price} = createOrderDto;
 
-    const width = 800, height = 600;
+    const shipping_fee = 18000;
+
+    // Calculate base width: 800 + (100 * additional items)
+    const width = 800 + (Math.max(0, order_items.length - 1) * 100);
+    const height = 600 + (order_items.length * 50); // Also adjust height slightly
+
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
     // Background
-    ctx.fillStyle = '#f8f9fa'; // Màu nền nhạt
+    ctx.fillStyle = '#f8f9fa'; // Light background
     ctx.fillRect(0, 0, width, height);
 
-    // Tiêu đề
+    // Title
     ctx.fillStyle = '#222';
     ctx.font = 'bold 32px Arial';
     const title = 'HÓA ĐƠN ĐẶT HÀNG';
     const titleWidth = ctx.measureText(title).width;
     ctx.fillText(title, (width - titleWidth) / 2, 60);
 
-    // Thông tin khách hàng
+    // Customer Information
     ctx.fillStyle = '#333';
     ctx.font = 'bold 24px Arial';
     ctx.fillText('Thông tin khách hàng:', 50, 110);
@@ -400,23 +398,30 @@ export class OrderService {
     wrapText(ctx, `Số điện thoại: ${phone}`, 50, y, width - 100, 26);
     y += 40;
     wrapText(ctx, `Địa chỉ: ${address}`, 50, y, width - 100, 26);
-    y += 50;
+    y += 60;
 
-    // Danh sách sản phẩm
+    // Calculate original total price
+    const original_total_price = order_items.reduce((sum, item) =>
+        sum + (item.price * item.quantity), 0);
+
+    // Calculate discount
+    const discount = original_total_price - total_price + shipping_fee;
+
+    // Product List
     ctx.fillStyle = '#333';
     ctx.font = 'bold 24px Arial';
     ctx.fillText('Sản phẩm:', 50, y);
-    y += 40;
+    y += 35;
 
     ctx.fillStyle = '#555';
     ctx.font = '22px Arial';
     order_items.forEach((item, index) => {
-      wrapText(ctx, `${index + 1}. ${item.pro_name} (x${item.quantity})`, 50, y, width - 250, 26);
-      ctx.fillText(`${formatPrice(item.price)}`, width - 160, y);
-      y += 35;
+      wrapText(ctx, `${index + 1}. ${item.pro_name} (x${item.quantity})`, 50, y, width - 290, 26);
+      ctx.fillText(`${formatPrice(item.price)}đ`, width - 200, y);
+      y += 50;
     });
 
-    // Dòng kẻ ngang ngăn cách
+    // Horizontal line
     ctx.strokeStyle = '#bbb';
     ctx.beginPath();
     ctx.moveTo(50, y + 10);
@@ -424,13 +429,29 @@ export class OrderService {
     ctx.stroke();
     y += 50;
 
-    // Tổng tiền
+    // Total calculations
     ctx.fillStyle = '#222';
-    ctx.font = 'bold 26px Arial';
-    ctx.fillText('Tổng cộng:', 50, y);
-    ctx.fillText(`${formatPrice(total_price)}`, width - 160, y);
+    ctx.font = 'bold 22px Arial';
+    ctx.fillText('Tổng cộng', 50, y);
+    ctx.fillText(`${formatPrice(original_total_price)}đ`, width - 200, y);
+    y += 35
 
-    // Lưu ảnh vào file tạm
+    // Discount
+    ctx.fillText('Giảm giá:', 50, y);
+    ctx.fillText(`${formatPrice(discount)}đ`, width - 200, y);
+    y += 35
+
+    // Shipping fee
+    ctx.fillText('Phí vận chuyển:', 50, y);
+    ctx.fillText(`${formatPrice(shipping_fee)}đ`, width - 200, y);
+    y += 40;
+
+    // Total amount
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText('Tổng tiền:', 50, y);
+    ctx.fillText(`${formatPrice(total_price)}đ`, width - 200, y);
+
+    // Save image to temporary file
     const filePath = `invoice_${Date.now()}.png`;
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(filePath, buffer);

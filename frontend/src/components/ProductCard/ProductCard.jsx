@@ -92,7 +92,11 @@ const ProductCard = ({ product }) => {
 
       <img
         loading="lazy"
-        src={images?.[0] ?? "https://placehold.co/276x350?text=No%20Image"}
+        src={
+          images?.[0] === "" || images?.[0] === undefined || images === null
+            ? "https://placehold.co/276x350?text=No%20Image"
+            : images?.[0]
+        }
         alt={product.pro_name || product.name}
         className="h-60 w-full rounded object-cover"
       />
@@ -101,7 +105,7 @@ const ProductCard = ({ product }) => {
           {product.pro_name || product.name}
         </h3>
       </div>
-      <div className="text-left line-through text-gray-400 font-medium">
+      <div className="text-left font-medium text-gray-400 line-through">
         <span className="text-sm">
           {formatCurrency({
             number: Number(product.origin_price),
@@ -128,15 +132,23 @@ const ProductCard = ({ product }) => {
           transition={{ duration: 0.4, ease: "easeInOut" }}
         >
           <button
-            className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2 transition-colors hover:bg-amber-100"
+              className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2
+                transition-all duration-200 ease-in-out
+                hover:scale-105 hover:bg-amber-100
+                active:scale-95 active:shadow-sm
+                focus:outline-none"
             onClick={handleBuyNow}
           >
             <FaShoppingBag size={18} />
             <span>Mua ngay</span>
           </button>
           <button
-            className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2 transition-colors hover:bg-amber-50"
-            onClick={handleAddToCart}
+              className="text-primary mt-7 flex items-center gap-1 rounded bg-white px-4 py-2
+                transition-all duration-200 ease-in-out
+                hover:scale-105 hover:bg-amber-100
+                active:scale-95 active:shadow-sm
+                focus:outline-none"
+              onClick={handleAddToCart}
           >
             <BsCartPlus size={22} />
           </button>

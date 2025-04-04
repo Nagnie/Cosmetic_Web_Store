@@ -1,11 +1,12 @@
 import { Image } from "antd";
-import { CloseOutlined } from "@ant-design/icons";
+import { CloseOutlined, LoadingOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
 
 import { QuantitySelector } from "@pages/ProductDetail/components";
 import { formatCurrency } from "@utils/utils";
 import { useRemoveCartItem, useUpdateCartItem } from "@hooks/useCartQueries";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const SAMPLE_ITEM = {
   id: 1,
@@ -18,6 +19,16 @@ const SAMPLE_ITEM = {
 
 const CartDrawerCart = ({ item }) => {
   // console.log("CartDrawerCart", { item });
+  const [error, setError] = useState(null);
+  // Thêm local state để theo dõi số lượng hiện tại
+  const [currentQuantity, setCurrentQuantity] = useState(item?.quantity || 1);
+
+  // Cập nhật currentQuantity khi item.quantity thay đổi từ props
+  useEffect(() => {
+    if (item?.quantity) {
+      setCurrentQuantity(item.quantity);
+    }
+  }, [item?.quantity]);
 
   const removeCartItemMutation = useRemoveCartItem();
 
@@ -25,7 +36,7 @@ const CartDrawerCart = ({ item }) => {
     removeCartItemMutation.mutate({
       id_pro: item.id_pro ?? item.id,
       id_class: item.id_class ?? 0,
-      quantity: item.quantity,
+      quantity: currentQuantity,
       type: item.type || "product",
     });
   };
@@ -33,13 +44,32 @@ const CartDrawerCart = ({ item }) => {
   const updateCartItemMutation = useUpdateCartItem();
 
   const handleUpdateItem = (quantity) => {
-    updateCartItemMutation.mutate({
-      id_pro: item.id_pro ?? item.id,
-      id_class: item.id_class ?? item.old_id_class ?? 0,
-      quantity,
-      old_id_class: item.id_class ?? item.old_id_class ?? 0,
-      type: item.type || "product",
-    });
+    if (quantity === currentQuantity && !updateCartItemMutation.isPending) {
+      return;
+    }
+
+    setError(null);
+    setCurrentQuantity(quantity);
+
+    updateCartItemMutation.mutate(
+      {
+        id_pro: item.id_pro ?? item.id,
+        id_class: item.id_class ?? item.old_id_class ?? 0,
+        quantity,
+        old_id_class: item.id_class ?? item.old_id_class ?? 0,
+        type: item.type || "product",
+      },
+      {
+        onSuccess: () => {
+          console.log("Cập nhật số lượng thành công:", quantity);
+        },
+        onError: (error) => {
+          console.error("Lỗi khi cập nhật số lượng:", error);
+          setError("Không thể cập nhật số lượng. Vui lòng thử lại sau.");
+          setCurrentQuantity(item?.quantity || 1);
+        },
+      },
+    );
   };
 
   return (
@@ -79,23 +109,42 @@ const CartDrawerCart = ({ item }) => {
         <p className="text-xs">{item?.class_name}</p>
 
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <QuantitySelector
-            initialValue={item?.quantity || 1}
-            width={28 * 4.5}
-            height={28}
-            value={item?.quantity || 1}
-            onChange={handleUpdateItem}
-          />
+          {updateCartItemMutation.isPending ? (
+            <div className="flex h-7 items-center px-4">
+              <LoadingOutlined className="text-secondary-deep" />
+              <span className="ml-2 text-xs text-gray-500">
+                Đang cập nhật...
+              </span>
+            </div>
+          ) : (
+            <QuantitySelector
+              initialValue={currentQuantity}
+              width={28 * 4.5}
+              height={28}
+              value={currentQuantity}
+              onChange={handleUpdateItem}
+              disabled={updateCartItemMutation.isPending}
+            />
+          )}
           <span className="text-sm font-semibold">
             {formatCurrency({
               number: item?.price || +item?.pro_price || SAMPLE_ITEM.price,
             }) || "229.000 đ"}
           </span>
         </div>
+
+        {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
       </div>
 
-      <div className="cursor-pointer" onClick={() => handleRemoveItem()}>
-        <CloseOutlined />
+      <div
+        className={`cursor-pointer ${removeCartItemMutation.isPending ? "opacity-50" : ""}`}
+        onClick={() => !removeCartItemMutation.isPending && handleRemoveItem()}
+      >
+        {removeCartItemMutation.isPending ? (
+          <LoadingOutlined />
+        ) : (
+          <CloseOutlined />
+        )}
       </div>
     </div>
   );

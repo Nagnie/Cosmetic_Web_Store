@@ -24,7 +24,7 @@ const ProductEdit = () => {
         price: '',
         id_subcat: '',
         id_bra: '',
-        status: 'Hàng có sẵn',
+        status: 'Có sẵn',
         images: ['', '', ''],
         classification: ['', '', ''],
         description: '',
@@ -68,7 +68,7 @@ const ProductEdit = () => {
                         price: productData.price || '',
                         id_subcat: productData.id_subcat || '',
                         id_bra: productData.id_bra || '',
-                        status: productData.status || 'Hàng có sẵn',
+                        status: productData.status || 'Có sẵn',
                         images: Array.isArray(productData.images) ? productData.images : ['', '', ''],
                         classification: displayClassification,
                         description: productData.description || '',
@@ -141,7 +141,7 @@ const ProductEdit = () => {
             setSubmitting(true);
             setError(null);
 
-            console.log("apiFormData: ", apiFormData);
+            // console.log("apiFormData: ", apiFormData);
 
             const response = await productsApi.updateProduct(id, apiFormData);
 

@@ -144,7 +144,7 @@ const Homepage = () => {
           <SyncLoader />
       ) : (
           <section
-              className="mb-15 mt-30 lg:mt-55"
+              className="mb-15 mt-40 lg:mt-50"
           >
             <style>
               {`
@@ -176,7 +176,7 @@ const Homepage = () => {
                   dynamicBullets: true,
                 }}
                 modules={[Autoplay, Pagination]}
-                className="w-full h-[300px] md:h-[500px] lg:h-[600px] rounded-2xl poster-swiper"
+                className="w-full h-[280px] md:h-[450px] lg:h-[550px] rounded-2xl poster-swiper"
             >
               {posters.map((poster) => (
                   <SwiperSlide key={poster.id_post}>
@@ -198,7 +198,7 @@ const Homepage = () => {
       <section
           className="mx-auto py-3"
       >
-        <div className="mx-10 mb-6 flex items-center justify-between">
+        <div className="mb-6 flex items-center justify-between">
           <h2
               className="text-3xl font-semibold text-black"
           >

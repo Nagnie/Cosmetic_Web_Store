@@ -57,7 +57,7 @@ const Order = () => {
 
 
     // Fetch orders from API
-    const fetchOrders = async (page = 1, limit = 10) => {
+    const fetchOrders = async (page = 1, limit = 30) => {
         setLoading(true);
         try {
             const response = await ordersApi.getOrders({ page, limit });

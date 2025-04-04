@@ -185,7 +185,7 @@ const AllCombos = () => {
 
   return (
     <div className="font-sans">
-      <div className="container mx-auto mt-48 mb-20 py-8">
+      <div className="container mx-auto mt-40 mb-20 py-8">
         <div className="mb-15">
           <h1 className="text-3xl font-bold text-gray-800">Tất cả combo</h1>
         </div>
@@ -199,11 +199,11 @@ const AllCombos = () => {
                 placeholder="Tìm kiếm combo..."
                 value={searchTerm}
                 onChange={handleTextInputChange}
-                className="me-2 w-full rounded-lg border p-2"
+                className="me-2 w-full rounded-lg border p-2 focus:outline-none focus:ring-primary focus:ring-2"
               />
               <button
                 type="button"
-                className="flex items-center justify-center rounded-lg px-4 text-white"
+                className="flex items-center justify-center rounded-lg px-4 text-white focus:outline-none focus:ring-primary-light focus:ring-2"
                 style={{ backgroundColor: "#8D7B68" }}
               >
                 <FaSearch />
@@ -219,7 +219,7 @@ const AllCombos = () => {
               placeholder="Giá từ"
               value={filterParams.minPrice}
               onChange={handleTextInputChange}
-              className="w-full rounded-lg border p-2"
+              className="w-full rounded-lg border p-2 focus:outline-none focus:ring-primary focus:ring-2"
             />
             <input
               type="number"
@@ -227,14 +227,14 @@ const AllCombos = () => {
               placeholder="Đến"
               value={filterParams.maxPrice}
               onChange={handleTextInputChange}
-              className="w-full rounded-lg border p-2"
+              className="w-full rounded-lg border p-2 focus:outline-none focus:ring-primary focus:ring-2"
             />
 
             <select
               name="orderBy"
               value={filterParams.orderBy}
               onChange={handleOrderByChange}
-              className="w-full rounded-lg border p-2"
+              className="w-full rounded-lg border p-2 focus:outline-none focus:ring-primary focus:ring-2"
             >
               <option value="DESC">Giá tăng dần</option>
               <option value="ACS">Giá giảm dần</option>

@@ -13,7 +13,7 @@ const Discount = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 8;
+    const limit = 10;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');

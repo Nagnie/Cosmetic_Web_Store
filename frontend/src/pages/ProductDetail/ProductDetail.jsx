@@ -182,7 +182,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="mx-auto mt-35 mb-4 pt-10 sm:px-4">
+    <div className="mx-auto mt-35 mb-5 pt-10 sm:px-4">
       {/* Hiển thị thông báo lỗi ở đầu trang */}
       {renderErrorMessage()}
 
@@ -221,16 +221,16 @@ const ProductDetail = () => {
 
       {!isError && (
         <>
-          <div className="mt-10">
+          <div className="mt-15">
             <div className="flex items-center">
-              <div className="bg-primary-dark flex items-center justify-between px-6 py-3 text-white">
+              <div className="bg-primary-dark text-xl flex items-center justify-between rounded px-6 py-3 text-white">
                 <span>Mô tả sản phẩm</span>
               </div>
             </div>
 
-            <div className="mt-4 text-justify">
+            <div className="mt-8 text-justify">
               <div className="mt-5">
-                <p className="text-primary-dark">
+                <p className="text-primary-dark text-xl whitespace-pre-line">
                   {product?.description || "Không có mô tả cho sản phẩm này."}
                 </p>
               </div>
@@ -241,7 +241,7 @@ const ProductDetail = () => {
           {shouldRenderCarousels && (
             <div>
               <h2
-                className={`text-primary-dark mt-10 mb-4 text-3xl font-semibold`}
+                className={`text-primary-dark mt-15 mb-6 text-3xl font-semibold`}
               >
                 Sản phẩm cùng brand
               </h2>
@@ -258,9 +258,9 @@ const ProductDetail = () => {
 
           {/* Sản phẩm cùng danh mục */}
           {shouldRenderCarousels && (
-            <div>
+            <div className={"mb-10"}>
               <h2
-                className={`text-primary-dark mt-10 mb-4 text-3xl font-semibold`}
+                className={`text-primary-dark mt-10 mb-6 text-3xl font-semibold`}
               >
                 Sản phẩm cùng danh mục
               </h2>

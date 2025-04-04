@@ -10,6 +10,7 @@ import {Edit, Trash2} from "lucide-react";
 
 const ProductInfo = () => {
     const { id } = useParams();
+
     const navigate = useNavigate();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -199,7 +200,7 @@ const ProductInfo = () => {
 
                         <div className="mt-6">
                             <h3 className="font-semibold text-lg">Description</h3>
-                            <div className="mt-2 text-gray-700">
+                            <div className="mt-2 text-gray-700 whitespace-pre-line">
                                 {product.description ? (
                                     <div dangerouslySetInnerHTML={{ __html: product.description }} />
                                 ) : (

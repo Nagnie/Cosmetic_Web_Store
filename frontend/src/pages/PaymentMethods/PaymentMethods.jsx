@@ -1,10 +1,11 @@
 import { Breadcrumb } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 
-import { CheckoutCustomerInfo, CheckoutPriceInfo } from "./components";
 import { useCartStore } from "@components/Cart";
+import { CheckoutPriceInfo } from "@pages/Checkout/components";
+import { PaymentMethodSelect } from "./components";
 
-const CheckoutPage = () => {
+const PaymentMethods = () => {
   const cartItemCount = useCartStore((state) => state.itemCount);
 
   const routes = [
@@ -25,6 +26,10 @@ const CheckoutPage = () => {
       title: "Thông tin đặt hàng",
       href: "/checkout",
     },
+    {
+      title: "Phương thức thanh toán",
+      href: "/checkout/payment-methods",
+    },
   ];
 
   return (
@@ -37,7 +42,7 @@ const CheckoutPage = () => {
       <div className="grid grid-cols-1 gap-2 text-left lg:grid-cols-2 lg:gap-8">
         {/* Left */}
         <div className="order-2 lg:order-1">
-          <CheckoutCustomerInfo />
+          <PaymentMethodSelect />
         </div>
         {/* Right */}
         <div className="order-1 lg:order-2">
@@ -47,4 +52,4 @@ const CheckoutPage = () => {
     </div>
   );
 };
-export default CheckoutPage;
+export default PaymentMethods;

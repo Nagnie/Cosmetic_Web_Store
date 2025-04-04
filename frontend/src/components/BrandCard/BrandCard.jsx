@@ -9,7 +9,7 @@ const BrandCard = ({ brand }) => {
 
     return (
         <div
-            className="relative mb-4 h-66 w-55 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
+            className="relative mb-2 h-66 w-57 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
             onClick={handleClick}
         >
             {/* Image */}

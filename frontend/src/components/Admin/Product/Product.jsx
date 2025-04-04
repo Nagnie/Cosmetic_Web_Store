@@ -25,7 +25,7 @@ const Product = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 15;
+    const limit = 50;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');

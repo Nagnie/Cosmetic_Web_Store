@@ -7,11 +7,11 @@ import { useQuery } from "@tanstack/react-query";
 import comboApi from "@apis/comboApi.js";
 import { useAddCartItem } from "@hooks/useCartQueries";
 import { toast } from "react-toastify";
+import Card from "./Component/Card.jsx"
 
 const CosmeticComboPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [activeImage, setActiveImage] = useState(0);
 
   // Query to fetch combo details using the id from URL params
   const { data, isLoading, isError, error } = useQuery({
@@ -143,7 +143,7 @@ const CosmeticComboPage = () => {
         </div>
 
         {/* Right Column - Product Info */}
-        <div className="space-y-6">
+        <div className="space-y-6 ps-4">
           <h2 className="text-3xl font-bold text-gray-800">{comboData.name}</h2>
 
           <div className="flex items-center space-x-4">
@@ -156,18 +156,18 @@ const CosmeticComboPage = () => {
               {formatPrice(comboData.price)}
             </span>
             <span
-              className={`rounded-md px-2 py-1 text-sm font-medium ${
+              className={`rounded-md px-3 py-1 text-sm font-medium ${
                 comboData.status === "available"
                   ? "bg-green-100 text-green-800"
                   : "bg-red-100 text-red-800"
               }`}
             >
-              {comboData.status === "available" ? "Còn hàng" : "Hết hàng"}
+              {comboData.status === "available" ? "Có sẵn" : "Đặt hàng"}
             </span>
           </div>
 
-          <div className="rounded-lg bg-gray-50 p-4">
-            <h3 className="mb-2 text-lg font-medium">Mô tả sản phẩm:</h3>
+          <div className="rounded-lg bg-gray-50">
+            <h3 className="mb-2 text-lg font-medium">Mô tả:</h3>
             <p className="text-gray-700">{comboData.description}</p>
           </div>
 
@@ -199,52 +199,13 @@ const CosmeticComboPage = () => {
 
       {/* Product Cards Section */}
       {comboData.products && comboData.products.length > 0 && (
-        <div className="mt-16">
-          <h2 className="mb-6 text-2xl font-bold text-gray-800">
+        <div className="mt-20">
+          <h2 className="my-10 text-3xl font-bold text-primary-dark">
             Sản phẩm trong combo
           </h2>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 mb-15 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {comboData.products.map((product) => (
-              <div
-                key={product.id_pro}
-                className="overflow-hidden rounded-lg border shadow-sm transition-shadow duration-200 hover:shadow-md"
-              >
-                {product.pro_images && product.pro_images.length > 0 && (
-                  <img
-                    src={product.pro_images[0]}
-                    alt={product.pro_name}
-                    className="h-48 w-full object-cover"
-                    onError={(e) => {
-                      e.target.src =
-                        "https://placehold.co/400x300/png?text=No+Image";
-                    }}
-                  />
-                )}
-                <div className="p-4">
-                  <h3 className="mb-2 line-clamp-2 text-lg font-medium text-gray-800">
-                    {product.pro_name}
-                  </h3>
-                  {product.pro_classification && (
-                    <p className="mb-2 text-sm text-gray-500">
-                      Phân loại:{" "}
-                      {product.pro_classification
-                        .map((c) => c.class_name)
-                        .join(", ")}
-                    </p>
-                  )}
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-primary-dark font-semibold">
-                      {formatPrice(product.pro_price)}
-                    </span>
-                    <Link
-                      to={`/products/${product.id_pro}`}
-                      className="text-primary-dark rounded bg-pink-100 px-3 py-1 text-sm transition duration-200 hover:bg-pink-200"
-                    >
-                      Chi tiết
-                    </Link>
-                  </div>
-                </div>
-              </div>
+                <Card key={product.id_pro} product={product} />
             ))}
           </div>
         </div>

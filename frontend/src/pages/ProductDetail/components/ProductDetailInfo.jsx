@@ -68,8 +68,8 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
   };
 
   return (
-    <div className="text-left">
-      <div className="text-primary-dark text-left text-xl font-bold md:text-2xl">
+    <div className="text-left md:ms-8">
+      <div className="text-primary-dark text-left mb-4 text-2xl font-bold md:text-4xl">
         {product.pro_name ??
           `[DEAL 26/2 - 10/3 HĐ 229K COLORKEY TẶNG 1 GƯƠNG TRANG ĐIỂM COLORKEY + 1
         BÔNG MÚT COLORKEY] Nước Hoa Colorkey Rose Wild Violet Eau De Parfum`}
@@ -78,12 +78,11 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
         <Tag
           title="Thương hiệu"
           bordered={false}
-          className="!rounded-full"
-          color="magenta"
+          className="!rounded-full !bg-rose-100"
         >
           <Link
             to={`/all_products?brand=${product.bra_name}`}
-            className="!text-primary !font-bold"
+            className="!text-rose-800 !font-bold px-2"
           >
             {product.bra_name ?? "Colorkey"}
           </Link>
@@ -91,20 +90,24 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
         <Tag
           title="Danh mục"
           bordered={false}
-          className="!rounded-full !font-bold"
-          color="blue"
+          className="!rounded-full !bg-sky-100"
         >
-          <Link to={`/all_products?category=${product.cat_name}`}>
-            {product.cat_name ?? "Nước hoa"}
+          <Link
+              to={`/all_products?category=${product.cat_name}`}
+              className="!font-bold !text-sky-800 px-2 py-2"
+          >
+            {product.scat_name ?? "Nước hoa"}
           </Link>
         </Tag>
         <Tag
           title="Tình trạng"
           bordered={false}
-          className="!rounded-full !font-bold"
+          className="!rounded-full !font-bold !bg-green-100"
           color="green"
         >
-          {product.pro_status ?? "Còn hàng"}
+          <div className={"px-2 !text-green-900"}>
+            {product.pro_status ?? "Có sẵn"}
+          </div>
         </Tag>
       </div>
       <div className="!mt-4">
@@ -129,7 +132,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
                       number: originalPrice,
                     }) ?? "299.000 đ"}
                   </span>
-                  <span className="!text-2xl !font-bold">
+                  <span className="!text-3xl !font-bold">
                     {formatCurrency({
                       number: discountedPrice,
                     }) ?? "229.000 đ"}
@@ -145,27 +148,36 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
           })()}
         </Tag>
       </div>
-      {classification.length > 0 && (
-        <div className="!mt-4">
-          <span className="!font-bold">Phân loại</span>
+      {classification.length > 0 && classification.some(item => {
+        const name = typeof item === 'object' ? item.name : item;
+        return name && name.trim() !== '';
+      }) && (
+          <div className="!mt-4">
+            <span className="!font-bold">Phân loại</span>
 
-          <div className="!mt-2 !flex !flex-wrap text-sm">
-            {classification.map((item, index) => (
-              <Tag
-                key={index}
-                title={item.name ?? item}
-                onClick={() => setSelectedClassification(item)}
-                className={`${
-                  selectedClassification?.id_class === item.id_class
-                    ? "!-translate-y-[1px] !shadow-[0_4px_10px_rgba(87,74,58,0.2),0_0_2px_rgba(87,74,58,0.3)]"
-                    : ""
-                } !border-primary-dark !text-primary-dark !flex !h-[35px] !w-fit cursor-pointer !items-center !justify-between bg-white !px-4 !font-bold !transition-all !duration-200`}
-              >
-                {item.name ?? item}
-              </Tag>
-            ))}
+            <div className="!mt-2 !flex !flex-wrap text-sm">
+              {classification
+                  .filter(item => {
+                    const name = typeof item === 'object' ? item.name : item;
+                    return name && name.trim() !== '';
+                  })
+                  .map((item, index) => (
+                      <Tag
+                          key={index}
+                          title={item.name ?? item}
+                          onClick={() => setSelectedClassification(item)}
+                          className={`${
+                              selectedClassification?.id_class === item.id_class
+                                  ? "!-translate-y-[1px] !shadow-[0_4px_10px_rgba(87,74,58,0.2),0_0_2px_rgba(87,74,58,0.3)]"
+                                  : ""
+                          } !border-primary-dark !text-primary-dark !flex !h-[35px] !w-fit cursor-pointer !items-center !justify-between bg-white !px-4 !font-bold !transition-all !duration-200`}
+                      >
+                        {item.name ?? item}
+                      </Tag>
+                  ))
+              }
+            </div>
           </div>
-        </div>
       )}
       <div className={`!mt-10 ${isShowBottomSheet ? "" : "hidden md:block"}`}>
         <div className="flex items-center space-x-4">
@@ -173,7 +185,7 @@ const ProductDetailInfo = ({ isShowBottomSheet = false, product = {} }) => {
           <QuantitySelector onChange={setQuantity} />
         </div>
 
-        <div className="mt-4 flex h-[90px] w-full flex-col gap-2 sm:flex-row sm:gap-4 md:h-auto">
+        <div className="mt-8 flex h-[90px] w-full flex-col gap-2 sm:flex-row sm:gap-4 md:h-auto">
           <Button
             type="default"
             icon={<ShoppingCartOutlined />}

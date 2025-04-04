@@ -13,7 +13,7 @@ const Brand = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 8;
+    const limit = 30;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
@@ -291,7 +291,7 @@ const Brand = () => {
                                             {brand.numProducts}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <img src={brand.image} alt={brand.name} className={"h-30 rounded-2xl"} />
+                                            <img src={brand.image} alt={brand.name} className={"h-25 rounded-2xl"} />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex space-x-2">

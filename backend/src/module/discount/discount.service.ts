@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, Req } from '@nestjs/common';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
-import { ILike, Repository, DataSource } from 'typeorm';
+import { ILike, Repository, DataSource, LessThan, MoreThan, MoreThanOrEqual } from 'typeorm';
 import { Discount } from './entities/discount.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Request } from 'express';
@@ -158,7 +158,8 @@ export class DiscountService {
 
     const [items, totalItems] = await this.discountRepository.findAndCount({
       where: {
-        code: ILike(`%${code}%`)
+        code: ILike(`%${code}%`),
+        end_at: MoreThanOrEqual(new Date())
       },
       order: { 
         [sortByValid[0]] : orderBy as string

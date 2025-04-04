@@ -14,7 +14,7 @@ const SubCategoryTable = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 15;
+    const limit = 30;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');

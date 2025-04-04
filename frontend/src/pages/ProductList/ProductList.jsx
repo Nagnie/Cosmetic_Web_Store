@@ -46,7 +46,7 @@ const ProductListingPage = () => {
   }, [currentPage]);
 
   return (
-    <div className="container mx-auto mt-40 mb-20 py-8">
+    <div className="container mx-auto mt-35 mb-20 py-8">
       <h1
         className="mb-10 text-center text-3xl font-bold text-primary-deepest"
       >

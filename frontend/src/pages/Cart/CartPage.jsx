@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo, useState } from "react";
-import { Breadcrumb, Empty, List, message, Space } from "antd";
+import { Breadcrumb, Button, Empty, List, message, Space } from "antd";
 import { HomeOutlined, GiftOutlined } from "@ant-design/icons";
 import InfiniteScroll from "react-infinite-scroll-component";
 
@@ -18,6 +18,8 @@ import { useApplyVoucher } from "@hooks/useVoucherQueries";
 const CartPage = () => {
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [voucherCode, setVoucherCode] = useState("");
+
+  const [useInfiniteScroll] = useState(false);
 
   const showModal = useModalStore((state) => state.showModal);
   const hideModal = useModalStore((state) => state.hideModal);
@@ -39,6 +41,12 @@ const CartPage = () => {
   } = useInfiniteCartItems({
     limit: 10,
   });
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
 
   // Tính toán các giá trị dẫn xuất từ data
   const { totalItems, totalPrice, allItems } = useMemo(() => {
@@ -127,7 +135,7 @@ const CartPage = () => {
       );
     }
 
-    return (
+    return useInfiniteScroll ? (
       <InfiniteScroll
         dataLength={allItems.length}
         next={fetchNextPage}
@@ -137,7 +145,6 @@ const CartPage = () => {
             {isFetchingNextPage && <CustomSpin />}
           </div>
         }
-        scrollThreshold={0.8}
         endMessage={
           <div className="py-4 text-center text-gray-500">
             Đã hiển thị tất cả sản phẩm trong giỏ hàng
@@ -146,6 +153,7 @@ const CartPage = () => {
         scrollableTarget="scrollableCartContainer"
       >
         <List
+          className="overflow-x-hidden"
           dataSource={allItems}
           renderItem={(item, index) => (
             <List.Item key={`${item.id_pro}-${item.id_class}`}>
@@ -159,6 +167,43 @@ const CartPage = () => {
           )}
         />
       </InfiniteScroll>
+    ) : (
+      <>
+        <List
+          className="overflow-x-hidden"
+          dataSource={allItems}
+          renderItem={(item, index) => (
+            <List.Item key={`${item.id_pro}-${item.id_class}`}>
+              <CartCard
+                availableClassifications={
+                  availableClasses[index].availableClassifications
+                }
+                item={item}
+              />
+            </List.Item>
+          )}
+        />
+
+        {hasNextPage && (
+          <div className="mt-4 text-center">
+            <Button
+              type="primary"
+              className="!bg-primary !hover:bg-primary-dark !text-neutral-light rounded-lg px-4 py-2 transition-colors duration-300"
+              onClick={handleLoadMore}
+              loading={isFetchingNextPage}
+              disabled={!hasNextPage}
+            >
+              Tải thêm
+            </Button>
+          </div>
+        )}
+
+        {!hasNextPage && allItems.length > 0 && (
+          <div className="py-4 text-center text-gray-500">
+            Đã hiển thị tất cả sản phẩm trong giỏ hàng
+          </div>
+        )}
+      </>
     );
   };
 
@@ -283,6 +328,7 @@ const CartPage = () => {
               className="p-[15px] sm:p-[20px]"
               style={{
                 overflow: "auto",
+                height: useInfiniteScroll ? "calc(100vh - 200px)" : "auto",
               }}
             >
               {renderCartContent()}

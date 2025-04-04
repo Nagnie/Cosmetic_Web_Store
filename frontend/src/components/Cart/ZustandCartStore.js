@@ -9,6 +9,8 @@ const useCartStore = create(
       itemCount: 0,
       totalPrice: 0,
       discountInfo: null,
+      shippingFee: 0,
+      orderPayload: null,
 
       // Actions
       toggleCartDrawer: () =>
@@ -25,6 +27,12 @@ const useCartStore = create(
       // Cập nhật thông tin giảm giá
       setDiscountInfo: (info) => set({ discountInfo: info }),
 
+      // Cập nhật phí vận chuyển
+      setShippingFee: (fee) => set({ shippingFee: fee }),
+
+      // Cập nhật thông tin đơn hàng
+      setOrderPayload: (payload) => set({ orderPayload: payload }),
+
       // Reset giỏ hàng
       clearCart: () =>
         set({
@@ -32,6 +40,7 @@ const useCartStore = create(
           totalPrice: 0,
           isCartDrawerOpen: false,
           discountInfo: null,
+          shippingFee: 0,
         }),
     }),
     {
@@ -40,6 +49,8 @@ const useCartStore = create(
       partialize: (state) => ({
         itemCount: state.itemCount,
         totalPrice: state.totalPrice,
+        shippingFee: state.shippingFee,
+        orderPayload: state.orderPayload,
       }),
     },
   ),

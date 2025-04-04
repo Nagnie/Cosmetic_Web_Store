@@ -15,7 +15,7 @@ const Combo = () => {
     // Pagination state
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 8;
+    const limit = 20;
 
     // State for form and UI
     const [searchTerm, setSearchTerm] = useState('');
