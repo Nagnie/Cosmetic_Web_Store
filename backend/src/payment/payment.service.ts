@@ -24,11 +24,23 @@ export class PaymentService {
 
   async getCheckoutUrl() {
     const checkoutRequest : CheckoutRequestType = {
-      orderCode: 2,
-      amount: 5000,
-      description: "CK TEST",
-      returnUrl: "https://naucosmetic.com",
-      cancelUrl: "https://naucosmetic.com"
+      orderCode: 4,
+      amount: 25000,
+      description: "CK TEST ITEMS 2",
+      items: [
+        {
+          name: "SP 1",
+          price: 5000,
+          quantity: 2,
+        },
+        {
+          name: "SP 2",
+          price: 3000,
+          quantity: 5
+        }
+      ],
+      returnUrl: "https://naucosmetic.com/payment-confirmation",
+      cancelUrl: "https://naucosmetic.com/checkout/payment-methods"
     };
     const checkoutUrl: CheckoutResponseDataType = await this.payOS.createPaymentLink(checkoutRequest);
 
