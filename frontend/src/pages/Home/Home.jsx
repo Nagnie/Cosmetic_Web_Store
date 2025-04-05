@@ -176,7 +176,7 @@ const Homepage = () => {
                   dynamicBullets: true,
                 }}
                 modules={[Autoplay, Pagination]}
-                className="w-full h-[280px] md:h-[450px] lg:h-[550px] rounded-2xl poster-swiper"
+                className="w-full h-[250px] md:h-[450px] lg:h-[550px] rounded-2xl poster-swiper"
             >
               {posters.map((poster) => (
                   <SwiperSlide key={poster.id_post}>
@@ -200,7 +200,7 @@ const Homepage = () => {
       >
         <div className="mb-6 flex items-center justify-between">
           <h2
-              className="text-3xl font-semibold text-black"
+              className="text-2xl md:text-3xl text-left font-semibold text-black"
           >
             Thương hiệu nổi tiếng
           </h2>
