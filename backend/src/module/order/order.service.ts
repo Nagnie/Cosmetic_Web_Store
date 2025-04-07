@@ -25,8 +25,6 @@ export class OrderService {
       @InjectRepository(OrderDetail)
       private readonly orderDetailRepository: Repository<OrderDetail>,
       private readonly dataSource: DataSource,
-      @InjectRepository(Image)
-      private readonly imageRepository: Repository<Image>,
       private readonly configService: ConfigService
   ) {
     setupCloudinary(this.configService);
@@ -465,6 +463,23 @@ export class OrderService {
     const qrPath = `qrcode_${Date.now()}.png`;
     await QRCode.toFile(qrPath, downloadUrl, { width: 300 });
     return qrPath;
+  }
+
+  async getOrder(id: number) {
+    const order = await this.orderRepository.findOne({
+      where: {
+        id
+      },
+      relations: {
+        orderDetails: {
+          product: true
+        },
+      }
+    });
+    if (!order) {
+      throw new Error("Order not found");
+    }
+    return order;
   }
 }
 

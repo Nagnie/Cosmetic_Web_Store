@@ -35,6 +35,10 @@ export class Order {
     @Column({name: "created_at", default: new Date()})
     created_at: Date;
 
+    @Column({name: "paid", default: "NO"})
+    paid: string;
+
     @OneToMany(() => OrderDetail, orderDetail => orderDetail.order)
     orderDetails: OrderDetail[];
 }
+    

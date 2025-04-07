@@ -8,9 +8,10 @@ import { Image } from '../image/entities/image.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderDetail, Image]),
+    TypeOrmModule.forFeature([Order, OrderDetail]),
   ],
   controllers: [OrderController],
   providers: [OrderService],
+  exports: [OrderService]
 })
 export class OrderModule {}
