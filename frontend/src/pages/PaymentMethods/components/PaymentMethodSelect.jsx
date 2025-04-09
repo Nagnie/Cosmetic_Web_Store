@@ -68,7 +68,7 @@ const PaymentMethodSelect = () => {
       console.log("fullPayLoad", fullPayload);
 
       // Gửi API
-      const res = await fetch("/api/payment/checkout", {
+      const res = await fetch("http://localhost:3001/api/payment/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -82,11 +82,10 @@ const PaymentMethodSelect = () => {
       console.log(result);
 
       // Xử lý khi thành công
-      alert("Thanh toán thành công!");
+      //alert("Thanh toán thành công!");
       localStorage.removeItem("persistData");
       // redirect sang trang cảm ơn hoặc đơn hàng
-      window.location.href = "/payment-confirmation";
-
+      window.location.href = result.data;
     } catch (err) {
       console.error("Lỗi khi thanh toán:", err);
       alert("Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại.");
