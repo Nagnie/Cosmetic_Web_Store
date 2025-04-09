@@ -35,7 +35,7 @@ export class Order {
     @Column({name: "created_at", default: new Date()})
     created_at: Date;
 
-    @Column({name: "paid", default: "NO"})
+    @Column({name: "paid", default: ""})
     paid: string;
 
     @OneToMany(() => OrderDetail, orderDetail => orderDetail.order)

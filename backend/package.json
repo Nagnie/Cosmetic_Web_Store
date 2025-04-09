@@ -24,6 +24,7 @@
     "typeorm:revert-migration": "npm run typeorm migration:revert -- -d ./typeOrm.config.ts"
   },
   "dependencies": {
+    "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/cache-manager": "^3.0.0",
     "@nestjs/common": "^10.0.0",

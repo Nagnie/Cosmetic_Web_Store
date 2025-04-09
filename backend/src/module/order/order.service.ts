@@ -16,6 +16,7 @@ import * as fs from 'fs';
 import { createCanvas } from 'canvas';
 import * as QRCode from 'qrcode';
 import { OrderSortField } from './enum/order_sortfield.enum';
+import { ProductService } from '../product/product.service';
 
 @Injectable()
 export class OrderService {
@@ -25,7 +26,8 @@ export class OrderService {
       @InjectRepository(OrderDetail)
       private readonly orderDetailRepository: Repository<OrderDetail>,
       private readonly dataSource: DataSource,
-      private readonly configService: ConfigService
+      private readonly configService: ConfigService,
+      private readonly productService: ProductService
   ) {
     setupCloudinary(this.configService);
   }
@@ -95,7 +97,7 @@ export class OrderService {
 
   // TODO: Modify delete image in the future
   async create(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
-    const {name, email, phone, address, note, order_items, total_price} = createOrderDto;
+    const {name, email, phone, address, note, order_items, total_price, paid} = createOrderDto;
     const queryRunner = this.dataSource.createQueryRunner();
 
     // START TRANSACTION
@@ -106,9 +108,9 @@ export class OrderService {
       // INSERT ORDER
       const status = OrderStatus.NOT_ORDERED;
       const insertOrder = await queryRunner.query(`
-        INSERT INTO orders(customer, email, phone, address, status, sum_price, note)
-        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
-      `, [name, email, phone, address, status, total_price, note]);
+        INSERT INTO orders(customer, email, phone, address, status, sum_price, note. paid)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+      `, [name, email, phone, address, status, total_price, note, paid]);
 
       const id_order = insertOrder[0]?.id;
 
@@ -480,6 +482,22 @@ export class OrderService {
       throw new Error("Order not found");
     }
     return order;
+  }
+
+  async getProductsFromOrderDto(createOrderDto: CreateOrderDto) {
+    const order_items = createOrderDto.order_items;
+    const products = await Promise.all(
+      order_items.map(async (item) => {
+          return await this.productService.findOne(item.id_pro);
+      })
+    );
+    
+    return products;
+  }
+
+  async createOrderDetail(createOrderDto: CreateOrderDto) {
+    const products = this.getProductsFromOrderDto(createOrderDto);
+    
   }
 }
 

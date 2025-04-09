@@ -86,8 +86,17 @@ export class CreateOrderDto {
     @Type(() => OrderItemDto)
     order_items: OrderItemDto[];
 
-    @ApiProperty({ example: 5, description: "Total price" })
+    @ApiProperty({ example: 5000, description: "Total price" })
     @IsNumber({}, { message: "Total price must be a number" })
     @IsNotEmpty({ message: "Total price must not be empty" })
     total_price: number;
+
+    @ApiProperty({
+        description: "Type of paid",
+        example: "full",
+        enum: ["full", "half"],
+        required: true
+    })
+    @IsNotEmpty()
+    paid: string;
 }
