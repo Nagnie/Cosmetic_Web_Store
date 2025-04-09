@@ -62,7 +62,7 @@ export class PaymentService {
     this.savePaymentToRedis(paymentRequest.orderCode, checkoutKey, checkoutInfo);
 
     const sessionId = req.session.id;
-    this.addSessionToOrderSet(paymentRequest.orderCode, sessionId);
+    this.addSessionIdToOrderSet(paymentRequest.orderCode, sessionId);
     console.log(checkoutInfo);
     return res.redirect(checkoutInfo.checkoutUrl);
   }
@@ -86,7 +86,7 @@ export class PaymentService {
     await this.redisService.createSet(String(orderCode), [orderKey]);;
   }
 
-  private async addSessionToOrderSet(orderCode: number, sessionId: string) {
+  private async addSessionIdToOrderSet(orderCode: number, sessionId: string) {
     await this.redisService.addToSet(String(orderCode), [sessionId]);
   }
 

@@ -73,10 +73,10 @@ export class CreateOrderDto {
     @ApiProperty({
         example: [
             { 
-                "id_pro": 1, "pro_image": "product01", "pro_name": "Toner TheOrdinary Glycolic Acid 7%Toning Solution", "id_class": 1, "class_name": "20ml", "quantity": 3, "price": 40000, "type": "product"
+                "id_pro": 1, "pro_image": "product01", "pro_name": "Toner TheOrdinary Glycolic Acid 7%Toning Solution", "id_class": 1, "class_name": "20ml", "quantity": 3, "price": 2000, "type": "product"
             },
             { 
-                "id_pro": 1, "pro_image": "link01", "pro_name": "Combo01", "id_class": 0, "class_name": "", "quantity": 3, "price": 500000, "type": "combo"
+                "id_pro": 1, "pro_image": "link01", "pro_name": "Combo01", "id_class": 0, "class_name": "", "quantity": 3, "price": 1000, "type": "combo"
             }
         ],
         description: "List of order items"
