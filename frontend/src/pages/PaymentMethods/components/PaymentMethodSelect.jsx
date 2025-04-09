@@ -6,6 +6,7 @@ import CustomSpin from "@components/Spin/CustomSpin";
 import images from "@assets/images/PaymentMethods";
 import PaymentMethodCard from "./PaymentMethodCard";
 import PaymentSelectCard from "./PaymentSelectCard";
+import {checkoutPayment} from "@apis/orderApi.js";
 // import { useFinishOrder } from "@hooks/useOrderQueries";
 // import { useQueryClient } from "@tanstack/react-query";
 
@@ -61,31 +62,20 @@ const PaymentMethodSelect = () => {
 
       const fullPayload = {
         ...orderPayload,
-        // payment_method: selectedPaymentMethod,
-        paid: selectedPaymentSelect,
+        payment_method: selectedPaymentMethod,
+        payment_option: selectedPaymentSelect,
       };
 
       console.log("fullPayLoad", fullPayload);
 
       // Gửi API
-      const res = await fetch("/api/payment/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(fullPayload),
-      });
-
-      if (!res.ok) throw new Error("Có lỗi khi gửi thanh toán");
-
-      const result = await res.json();
-      console.log(result);
+      const res = await checkoutPayment(fullPayload);
 
       // Xử lý khi thành công
       alert("Thanh toán thành công!");
       localStorage.removeItem("persistData");
       // redirect sang trang cảm ơn hoặc đơn hàng
-      window.location.href = "/payment-confirmation";
+      window.location.href = "/checkout/confirmation";
 
     } catch (err) {
       console.error("Lỗi khi thanh toán:", err);
