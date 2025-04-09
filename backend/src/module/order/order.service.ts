@@ -97,7 +97,7 @@ export class OrderService {
 
   // TODO: Modify delete image in the future
   async create(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
-    const {name, email, phone, address, note, order_items, total_price, paid} = createOrderDto;
+    const {name, email, phone, address, note, order_items, total_price} = createOrderDto;
     const queryRunner = this.dataSource.createQueryRunner();
 
     // START TRANSACTION
@@ -108,9 +108,9 @@ export class OrderService {
       // INSERT ORDER
       const status = OrderStatus.NOT_ORDERED;
       const insertOrder = await queryRunner.query(`
-        INSERT INTO orders(customer, email, phone, address, status, sum_price, note. paid)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
-      `, [name, email, phone, address, status, total_price, note, paid]);
+        INSERT INTO orders(customer, email, phone, address, status, sum_price, note)
+        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+      `, [name, email, phone, address, status, total_price, note]);
 
       const id_order = insertOrder[0]?.id;
 
@@ -495,9 +495,45 @@ export class OrderService {
     return products;
   }
 
-  async createOrderDetail(createOrderDto: CreateOrderDto) {
+  async getOrderDetailFromOrderDto(createOrderDto: CreateOrderDto) {
     const products = this.getProductsFromOrderDto(createOrderDto);
     
+  }
+
+  async saveOrderDb(createOrderDto: CreateOrderDto) {
+    const {name, email, phone, address, note, order_items, total_price, paid} = createOrderDto;
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    // START TRANSACTION
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // INSERT ORDER
+      const status = OrderStatus.NOT_ORDERED;
+      const insertOrder = await queryRunner.query(`
+        INSERT INTO orders(customer, email, phone, address, status, sum_price, note, paid)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+      `, [name, email, phone, address, status, total_price, note, paid]);
+
+      const id_order = insertOrder[0]?.id;
+
+      // INSERT ORDER DETAIL
+      for (const item of order_items) {
+        await queryRunner.query(`
+          INSERT INTO order_detail(order_id, pro_id, pro_name, pro_image, class_id, class_name, quantity, price, type)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
+        `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price, item.type]);
+      }
+
+      return true;
+    } catch(e) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('Failed to create order: ' + e.message);
+    } finally {
+      // CLOSE QUERYRUNNER
+      await queryRunner.release();
+    }
   }
 }
 

@@ -1,18 +1,15 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Req } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { ConfigService } from '@nestjs/config';
 const PayOS = require("@payos/node");
 import { CheckoutRequestType, CheckoutResponseDataType, WebhookDataType, WebhookType } from '@payos/node/lib/type';
 import { Request, Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Order } from '@/module/order/entities/order.entity';
 import { OrderService } from '@/module/order/order.service';
 import { Payment } from './entities/payment.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from '@/module/order/dto/create-order.dto';
 import { RedisService } from '@/redis/redis.service';
-import axios from 'axios';
 
 @Injectable()
 export class PaymentService {
@@ -39,7 +36,7 @@ export class PaymentService {
     );
   }
 
-  async checkout(createOrderDto: CreateOrderDto, res: Response) {
+  async checkout(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto, res: Response) {
     // const checkoutRequest = await this.createPaymentRequest(createPaymentDto);
     // const checkouResponse: CheckoutResponseDataType = await this.payOS.createPaymentLink(checkoutRequest);
     // console.log(checkouResponse);
@@ -63,6 +60,9 @@ export class PaymentService {
 
     const checkoutInfo: CheckoutResponseDataType = await this.payOS.createPaymentLink(paymentRequest);
     this.savePaymentToRedis(paymentRequest.orderCode, checkoutKey, checkoutInfo);
+
+    const sessionId = req.session.id;
+    this.addSessionToOrderSet(paymentRequest.orderCode, sessionId);
     console.log(checkoutInfo);
     return res.redirect(checkoutInfo.checkoutUrl);
   }
@@ -81,50 +81,18 @@ export class PaymentService {
     await this.redisService.addToSet(String(orderCode), [checkoutKey]);
   }
 
-  private async saveOrderToRedis(orderCode: number, orderKey: string, orderInfo: CreateOrderDto) {
-    await this.redisService.set(orderKey, orderInfo);
-    await this.redisService.createSet(String(orderCode), [orderKey]);
+  private async saveOrderToRedis(orderCode: number, orderKey: string, orderDto: CreateOrderDto) {
+    await this.redisService.set(orderKey, orderDto);
+    await this.redisService.createSet(String(orderCode), [orderKey]);;
   }
 
-  private async delPaymentOnRedis(checkoutKey: string) {
-    await this.redisService.del(checkoutKey);
+  private async addSessionToOrderSet(orderCode: number, sessionId: string) {
+    await this.redisService.addToSet(String(orderCode), [sessionId]);
   }
 
-  private async delOrderOnRedis(orderKey: string) {
-    await this.redisService.del(orderKey);
+  private async delSession(sessionId: string) {
+    await this.redisService.del("sess:" + sessionId);
   }
-
-  // async createPaymentRequest(createPaymentDto: CreatePaymentDto)  {
-  //   // const orderId = createPaymentDto.orderCode;
-  //   const orderId = 1;
-  //   try {
-  //     const order = await this.orderService.getOrder(+orderId);
-  //     const orderItems = this.handleItemsOrder(order);
-  //     const paymentRequest = {
-  //       orderCode: orderId,
-  //       amount: order.sumPrice,
-  //       description: "THANH TOAN DON HANG " + orderId,
-  //       items: orderItems,
-  //       returnUrl: this.returnUrl,
-  //       cancelUrl: this.cancelUrl
-  //     };
-
-  //     return paymentRequest;
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   }
-
-  // }
-
-  // handleItemsOrder(order: Order) {
-  //   const items = order.orderDetails.map((item) => ({
-  //     name: item.product.name,
-  //     price: item.product.price,
-  //     quantity: item.quantity
-  //   }));
-
-  //   return items;
-  // }
 
   async getPaymentInfo(orderCode: number) {
     const paymentLink = await this.payOS.getPaymentLinkInformation(orderCode);
@@ -155,9 +123,11 @@ export class PaymentService {
     }
     
     const orderCode = paymentHookResponse.data.orderCode;
-    const [orderKey, checkoutKey] = await this.redisService.getSetMembers(String(orderCode));
-
+    const [orderKey, checkoutKey, sessionId] = await this.redisService.getSetMembers(String(orderCode));
+    const orderData = await this.redisService.get(orderKey);
+    await this.orderService.saveOrderDb(orderData);
     await this.cleanOrderRedis(orderCode, orderKey, checkoutKey);
+    await this.delSession(sessionId);
     const paymentEntity = {
       ...paymentHookResponse.data,
       errorDescription: paymentHookResponse.data.desc

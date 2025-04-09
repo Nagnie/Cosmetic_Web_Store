@@ -14,8 +14,8 @@ export class PaymentController {
   @Post("checkout")
   @Public()
   @ApiBody({ type: CreateOrderDto })
-  checkout(@Body() createOrderDto: CreateOrderDto, @Res() res: Response) {
-    return this.paymentService.checkout(createOrderDto, res);
+  checkout(@Req() req: Request & { session: any }, @Body() createOrderDto: CreateOrderDto, @Res() res: Response) {
+    return this.paymentService.checkout(req, createOrderDto, res);
   }
 
   @Get("info/:orderCode")
