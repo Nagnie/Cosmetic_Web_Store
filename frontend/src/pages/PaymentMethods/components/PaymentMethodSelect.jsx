@@ -17,12 +17,6 @@ const PAYMENT_METHODS = [
     icons: [images.momo],
   },
   {
-    id: "vnpay",
-    name: "Thẻ ATM/Visa/Master/JCB/QR Pay qua cổng VNPAY",
-    description: "Thanh toán qua cổng thanh toán VNPAY",
-    icons: [images.vnpay, images.visa],
-  },
-  {
     id: "other",
     name: "Chuyển khoản ngân hàng (VietQR)",
     description: "Thanh toán qua mã VietQR",
@@ -49,15 +43,58 @@ const PaymentMethodSelect = () => {
   const [selectedPaymentSelect, setSelectedPaymentSelect] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (!selectedPaymentMethod || !itemCount) return;
-    if (!selectedPaymentSelect) return;
+  const handleSubmit = async () => {
+    if (!selectedPaymentMethod || !selectedPaymentSelect || !itemCount) return;
+
     setIsSubmitting(true);
-    setTimeout(() => {
+
+    try {
+      const storedData = localStorage.getItem("persistData");
+      if (!storedData) {
+        alert("Không tìm thấy thông tin đơn hàng.");
+        return;
+      }
+
+      const orderPayload = JSON.parse(storedData);
+
+      console.log("orderPayload", orderPayload);
+
+      const fullPayload = {
+        ...orderPayload,
+        // payment_method: selectedPaymentMethod,
+        paid: selectedPaymentSelect,
+      };
+
+      console.log("fullPayLoad", fullPayload);
+
+      // Gửi API
+      const res = await fetch("/api/payment/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fullPayload),
+      });
+
+      if (!res.ok) throw new Error("Có lỗi khi gửi thanh toán");
+
+      const result = await res.json();
+      console.log(result);
+
+      // Xử lý khi thành công
+      alert("Thanh toán thành công!");
+      localStorage.removeItem("persistData");
+      // redirect sang trang cảm ơn hoặc đơn hàng
+      window.location.href = "/payment-confirmation";
+
+    } catch (err) {
+      console.error("Lỗi khi thanh toán:", err);
+      alert("Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại.");
+    } finally {
       setIsSubmitting(false);
-      alert(`Đã chọn phương thức thanh toán: ${selectedPaymentMethod}`);
-    }, 2000);
+    }
   };
+
 
   return (
       <div>

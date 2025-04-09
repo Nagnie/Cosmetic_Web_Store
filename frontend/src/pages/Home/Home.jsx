@@ -176,7 +176,7 @@ const Homepage = () => {
                   dynamicBullets: true,
                 }}
                 modules={[Autoplay, Pagination]}
-                className="w-full h-[250px] md:h-[450px] lg:h-[550px] rounded-2xl poster-swiper"
+                className="w-full h-[225px] md:h-[450px] lg:h-[550px] rounded-2xl poster-swiper"
             >
               {posters.map((poster) => (
                   <SwiperSlide key={poster.id_post}>

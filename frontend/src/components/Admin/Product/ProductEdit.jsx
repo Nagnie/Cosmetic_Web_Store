@@ -92,21 +92,9 @@ const ProductEdit = () => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: name === "price" ? Number(value) : value
+            [name]: name === "price" || name === "origin_price" ? Number(value) : value
         }));
 
-    };
-
-    // Handle array fields (img_url and classification)
-    const handleArrayChange = (field, index, value) => {
-        setFormData(prev => {
-            const newArray = [...prev[field]];
-            newArray[index] = value;
-            return {
-                ...prev,
-                [field]: newArray
-            };
-        });
     };
 
     // Add or remove array items
@@ -144,8 +132,6 @@ const ProductEdit = () => {
             // console.log("apiFormData: ", apiFormData);
 
             const response = await productsApi.updateProduct(id, apiFormData);
-
-            // console.log("response: ", response);
 
             if (response.status === 200) {
                 setSuccessMessage('Product updated successfully');
