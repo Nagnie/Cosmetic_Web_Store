@@ -16,6 +16,7 @@ import * as fs from 'fs';
 import { createCanvas } from 'canvas';
 import * as QRCode from 'qrcode';
 import { OrderSortField } from './enum/order_sortfield.enum';
+import { ProductService } from '../product/product.service';
 
 @Injectable()
 export class OrderService {
@@ -25,9 +26,8 @@ export class OrderService {
       @InjectRepository(OrderDetail)
       private readonly orderDetailRepository: Repository<OrderDetail>,
       private readonly dataSource: DataSource,
-      @InjectRepository(Image)
-      private readonly imageRepository: Repository<Image>,
-      private readonly configService: ConfigService
+      private readonly configService: ConfigService,
+      private readonly productService: ProductService
   ) {
     setupCloudinary(this.configService);
   }
@@ -97,7 +97,7 @@ export class OrderService {
 
   // TODO: Modify delete image in the future
   async create(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
-    const {name, email, phone, address, note, order_items, total_price} = createOrderDto;
+    const {name, email, phone, address, note, order_items, total_price, paid} = createOrderDto;
     const queryRunner = this.dataSource.createQueryRunner();
 
     // START TRANSACTION
@@ -108,9 +108,9 @@ export class OrderService {
       // INSERT ORDER
       const status = OrderStatus.NOT_ORDERED;
       const insertOrder = await queryRunner.query(`
-        INSERT INTO orders(customer, email, phone, address, status, sum_price, note)
-        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
-      `, [name, email, phone, address, status, total_price, note]);
+        INSERT INTO orders(customer, email, phone, address, status, sum_price, note, paid)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+      `, [name, email, phone, address, status, total_price, note, paid]);
 
       const id_order = insertOrder[0]?.id;
 
@@ -460,10 +460,110 @@ export class OrderService {
   }
 
   private async generateQRCode(url: string, publicId: string): Promise<string> {
-    const downloadUrl = `http://localhost:3001/api/order/download-invoice?url=${url}&publicId=${publicId}`;
+    const server = this.configService.get<String>("SERVERNAME");
+    const downloadUrl = `${server}/api/order/download-invoice?url=${url}&publicId=${publicId}`;
     const qrPath = `qrcode_${Date.now()}.png`;
     await QRCode.toFile(qrPath, downloadUrl, { width: 300 });
     return qrPath;
+  }
+
+  async getOrder(id: number) {
+    const order = await this.orderRepository.findOne({
+      where: {
+        id
+      },
+      relations: {
+        orderDetails: {
+          product: true
+        },
+      }
+    });
+    if (!order) {
+      throw new Error("Order not found");
+    }
+    return order;
+  }
+
+  // async getProductsFromOrderDto(createOrderDto: CreateOrderDto) {
+  //   const order_items = createOrderDto.order_items;
+  //   const products = await Promise.all(
+  //     order_items.map(async (item) => {
+  //         return await this.productService.findOne(item.id_pro);
+  //     })
+  //   );
+    
+  //   return products;
+  // }
+
+  // async getOrderDetailFromOrderDto(createOrderDto: CreateOrderDto) {
+  //   const products = this.getProductsFromOrderDto(createOrderDto);
+    
+  // }
+
+  async getInvoice(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
+    // Create invoice's image
+    const invoiceImagePath = await this.generateInvoiceImage(createOrderDto);
+
+    // Create invoice's url
+    const invoiceUrl = await this.uploadImageToCloudinary(invoiceImagePath);
+
+    // Create QR code
+    const qrCodePath = await this.generateQRCode(invoiceUrl.url, invoiceUrl.publicId);
+
+    // Upload QR code
+    const qrCodeUrl = await this.uploadImageToCloudinary(qrCodePath);
+
+    // Delete session 
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Lỗi khi xóa session:', err);
+      }
+    });
+
+    return new ResponseDto(200, "Successfully", {
+      invoice_url: invoiceUrl,
+      qr_code_url: qrCodeUrl
+    })
+  }
+
+  async saveOrder(orderCode: number, createOrderDto: CreateOrderDto) {
+    const {name, email, phone, address, note, order_items, total_price, paid} = createOrderDto;
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    // START TRANSACTION
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // INSERT ORDER
+      const status = OrderStatus.NOT_ORDERED;
+      const insertOrder = await queryRunner.query(`
+        INSERT INTO orders(id, customer, email, phone, address, status, sum_price, note, paid)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *
+      `, [orderCode, name, email, phone, address, status, total_price, note, paid]);
+
+      const id_order = insertOrder[0]?.id;
+
+      // INSERT ORDER DETAIL
+      for (const item of order_items) {
+        await queryRunner.query(`
+          INSERT INTO order_detail(order_id, pro_id, pro_name, pro_image, class_id, class_name, quantity, price, type)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
+        `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price, item.type]);
+      }
+
+      // COMMIT
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (error) {
+      // ROLL BACK
+      await queryRunner.rollbackTransaction();
+      return false;
+      throw new InternalServerErrorException('Failed to create order');
+    } finally {
+      // CLOSE QUERYRUNNER
+      await queryRunner.release();
+    }
   }
 }
 

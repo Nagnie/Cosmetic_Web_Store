@@ -69,13 +69,28 @@ const PaymentMethodSelect = () => {
       console.log("fullPayLoad", fullPayload);
 
       // Gửi API
-      const res = await checkoutPayment(fullPayload);
+//       const res = await checkoutPayment(fullPayload);
+      const res = await fetch("http://localhost:3001/api/payment/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(fullPayload),
+      });
+
+      if (!res.ok) throw new Error("Có lỗi khi gửi thanh toán");
+
+      const result = await res.json();
+      console.log(result);
 
       // Xử lý khi thành công
-      alert("Thanh toán thành công!");
+      //alert("Thanh toán thành công!");
       localStorage.removeItem("persistData");
       // redirect sang trang cảm ơn hoặc đơn hàng
-      window.location.href = "/checkout/confirmation";
+
+      // window.location.href = "/checkout/confirmation";
+
+      window.location.href = result.data;
 
     } catch (err) {
       console.error("Lỗi khi thanh toán:", err);
