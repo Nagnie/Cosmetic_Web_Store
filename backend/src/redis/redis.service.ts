@@ -40,7 +40,8 @@ export class RedisService {
     }
 
     async createSet(key: string, values: string[]) {
-        return await this.redisClient.sAdd(key, values);
+        await this.redisClient.sAdd(key, values);
+        await this.redisClient.expire(key, 900); 
     }
 
     async addToSet(key: string, values: string[]) {

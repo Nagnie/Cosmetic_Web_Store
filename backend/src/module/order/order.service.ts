@@ -97,7 +97,7 @@ export class OrderService {
 
   // TODO: Modify delete image in the future
   async create(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
-    const {name, email, phone, address, note, order_items, total_price} = createOrderDto;
+    const {name, email, phone, address, note, order_items, total_price, paid} = createOrderDto;
     const queryRunner = this.dataSource.createQueryRunner();
 
     // START TRANSACTION
@@ -108,9 +108,9 @@ export class OrderService {
       // INSERT ORDER
       const status = OrderStatus.NOT_ORDERED;
       const insertOrder = await queryRunner.query(`
-        INSERT INTO orders(customer, email, phone, address, status, sum_price, note)
-        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
-      `, [name, email, phone, address, status, total_price, note]);
+        INSERT INTO orders(customer, email, phone, address, status, sum_price, note, paid)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+      `, [name, email, phone, address, status, total_price, note, paid]);
 
       const id_order = insertOrder[0]?.id;
 
@@ -484,23 +484,49 @@ export class OrderService {
     return order;
   }
 
-  async getProductsFromOrderDto(createOrderDto: CreateOrderDto) {
-    const order_items = createOrderDto.order_items;
-    const products = await Promise.all(
-      order_items.map(async (item) => {
-          return await this.productService.findOne(item.id_pro);
-      })
-    );
+  // async getProductsFromOrderDto(createOrderDto: CreateOrderDto) {
+  //   const order_items = createOrderDto.order_items;
+  //   const products = await Promise.all(
+  //     order_items.map(async (item) => {
+  //         return await this.productService.findOne(item.id_pro);
+  //     })
+  //   );
     
-    return products;
+  //   return products;
+  // }
+
+  // async getOrderDetailFromOrderDto(createOrderDto: CreateOrderDto) {
+  //   const products = this.getProductsFromOrderDto(createOrderDto);
+    
+  // }
+
+  async getInvoice(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
+    // Create invoice's image
+    const invoiceImagePath = await this.generateInvoiceImage(createOrderDto);
+
+    // Create invoice's url
+    const invoiceUrl = await this.uploadImageToCloudinary(invoiceImagePath);
+
+    // Create QR code
+    const qrCodePath = await this.generateQRCode(invoiceUrl.url, invoiceUrl.publicId);
+
+    // Upload QR code
+    const qrCodeUrl = await this.uploadImageToCloudinary(qrCodePath);
+
+    // Delete session 
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Lỗi khi xóa session:', err);
+      }
+    });
+
+    return new ResponseDto(200, "Successfully", {
+      invoice_url: invoiceUrl,
+      qr_code_url: qrCodeUrl
+    })
   }
 
-  async getOrderDetailFromOrderDto(createOrderDto: CreateOrderDto) {
-    const products = this.getProductsFromOrderDto(createOrderDto);
-    
-  }
-
-  async saveOrderDb(createOrderDto: CreateOrderDto) {
+  async saveOrder(orderCode: number, createOrderDto: CreateOrderDto) {
     const {name, email, phone, address, note, order_items, total_price, paid} = createOrderDto;
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -512,9 +538,9 @@ export class OrderService {
       // INSERT ORDER
       const status = OrderStatus.NOT_ORDERED;
       const insertOrder = await queryRunner.query(`
-        INSERT INTO orders(customer, email, phone, address, status, sum_price, note, paid)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
-      `, [name, email, phone, address, status, total_price, note, paid]);
+        INSERT INTO orders(id, customer, email, phone, address, status, sum_price, note, paid)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *
+      `, [orderCode, name, email, phone, address, status, total_price, note, paid]);
 
       const id_order = insertOrder[0]?.id;
 
@@ -526,10 +552,14 @@ export class OrderService {
         `, [id_order, item.id_pro, item.pro_name, item.pro_image, item.id_class, item.class_name, item.quantity, item.price, item.type]);
       }
 
+      // COMMIT
+      await queryRunner.commitTransaction();
       return true;
-    } catch(e) {
+    } catch (error) {
+      // ROLL BACK
       await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException('Failed to create order: ' + e.message);
+      return false;
+      throw new InternalServerErrorException('Failed to create order');
     } finally {
       // CLOSE QUERYRUNNER
       await queryRunner.release();

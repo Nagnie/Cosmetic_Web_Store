@@ -14,7 +14,7 @@ import { RedisService } from '@/redis/redis.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Payment, Order, OrderDetail, Product,]),
-    RedisModule
+    RedisModule,
   ],
   controllers: [PaymentController],
   providers: [PaymentService, OrderService, ProductService, RedisService],

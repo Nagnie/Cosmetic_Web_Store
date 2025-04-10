@@ -62,7 +62,7 @@ export class CreatePaymentDto {
         this.buyerName = createOrderDto.name;
         this.buyerPhone = createOrderDto.phone;
         this.buyerAddress = createOrderDto.address;
-        this.expiredAt = Math.floor(Date.now() / 1000) + (60 * 15);
+        this.expiredAt = Math.floor(Date.now() / 1000) + (60 * 18);
         this.checkoutType = createOrderDto.paid;
     }
 

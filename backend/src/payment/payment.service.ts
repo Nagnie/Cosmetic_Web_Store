@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, Req } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Req} from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ConfigService } from '@nestjs/config';
 const PayOS = require("@payos/node");
@@ -10,6 +10,7 @@ import { Payment } from './entities/payment.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from '@/module/order/dto/create-order.dto';
 import { RedisService } from '@/redis/redis.service';
+import { ResponseDto } from '@/helpers/utils';
 
 @Injectable()
 export class PaymentService {
@@ -22,13 +23,13 @@ export class PaymentService {
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
     private readonly orderService: OrderService,
-    private readonly redisService: RedisService
+    private readonly redisService: RedisService,
   ) {
     const clientId = configService.get<string>("PAYOS_CLIENT_ID");
     const apiKey = configService.get<string>("PAYOS_API_KEY");
     const checksumKey = configService.get<string>("PAYOS_CHECKSUM_KEY");
-    this.returnUrl = configService.get<string>("SERVERNAME") + "/payment-confirmation";
-    this.cancelUrl = configService.get<string>("SERVERNAME") + "/payment-confirmation";
+    this.returnUrl = configService.get<string>("RETURN_URL");
+    this.cancelUrl = configService.get<string>("CANCEL_URL");
     this.payOS = new PayOS(
       clientId,
       apiKey,
@@ -36,21 +37,11 @@ export class PaymentService {
     );
   }
 
-  async checkout(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto, res: Response) {
-    // const checkoutRequest = await this.createPaymentRequest(createPaymentDto);
-    // const checkouResponse: CheckoutResponseDataType = await this.payOS.createPaymentLink(checkoutRequest);
-    // console.log(checkouResponse);
-    //return res.redirect(303, checkouResponse.checkoutUrl);
-    // await this.orderService.getProductsFromOrderDto(createOrderDto);
+  async checkout(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
 
     //check redis
     const uniqueOrderCode = this.createOrderKeyFromOrderDto(createOrderDto);
     const checkoutKey = "CHECKOUT" + uniqueOrderCode;
-    const existedCheckout = await this.redisService.get(checkoutKey);
-
-    if (existedCheckout) {
-      return res.redirect(303, existedCheckout.checkoutUrl);
-    }
 
     const paymentDto: CreatePaymentDto = await this.getPaymentDtoFromOrderDto(createOrderDto);
     const paymentRequest = this.createPaymentRequest(uniqueOrderCode, paymentDto);
@@ -59,12 +50,29 @@ export class PaymentService {
     await this.saveOrderToRedis(paymentRequest.orderCode, orderKey, createOrderDto);
 
     const checkoutInfo: CheckoutResponseDataType = await this.payOS.createPaymentLink(paymentRequest);
+    console.log(checkoutInfo);
     this.savePaymentToRedis(paymentRequest.orderCode, checkoutKey, checkoutInfo);
 
-    const sessionId = req.session.id;
-    this.addSessionIdToOrderSet(paymentRequest.orderCode, sessionId);
-    console.log(checkoutInfo);
-    return res.redirect(checkoutInfo.checkoutUrl);
+    // const sessionId = req.session.id;
+    // console.log(sessionId);
+    // this.addSessionIdToOrderSet(paymentRequest.orderCode, sessionId);
+
+    //proxy to payos
+    return new ResponseDto(200, "Successfully", checkoutInfo.checkoutUrl);
+
+    //return res.redirect(checkoutInfo.checkoutUrl);
+  }
+
+  async checkExistedCheckout(createOrderDto: CreateOrderDto) {
+    const uniqueOrderCode = this.createOrderKeyFromOrderDto(createOrderDto);
+    const checkoutKey = "CHECKOUT" + uniqueOrderCode;
+    const existedCheckout = await this.redisService.get(checkoutKey);
+
+    if (existedCheckout) {
+      return new ResponseDto(200, "Checkout has already existed", existedCheckout.checkoutUrl);
+    } else {
+      return new ResponseDto(400, "Checkout has not existed", null);
+    }
   }
 
   private createPaymentRequest(uniqueOrderCode: number, paymentDto: CreatePaymentDto): CheckoutRequestType {
@@ -123,17 +131,19 @@ export class PaymentService {
     }
     
     const orderCode = paymentHookResponse.data.orderCode;
-    const [orderKey, checkoutKey, sessionId] = await this.redisService.getSetMembers(String(orderCode));
+    const [orderKey, checkoutKey] = await this.redisService.getSetMembers(String(orderCode));
+    
     const orderData = await this.redisService.get(orderKey);
-    await this.orderService.saveOrderDb(orderData);
-    await this.cleanOrderRedis(orderCode, orderKey, checkoutKey);
-    await this.delSession(sessionId);
+    await this.orderService.saveOrder(orderCode, orderData);
+
     const paymentEntity = {
       ...paymentHookResponse.data,
       errorDescription: paymentHookResponse.data.desc
     };
     delete paymentEntity.desc;
     await this.paymentRepository.save(paymentEntity);
+
+    await this.cleanOrderRedis(orderCode, orderKey, checkoutKey);
 
     return res.json();
   }
