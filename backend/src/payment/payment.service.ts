@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, Req} from '@nestjs/common';
+import { HttpStatus, Injectable, InternalServerErrorException, Req} from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ConfigService } from '@nestjs/config';
 const PayOS = require("@payos/node");
@@ -40,13 +40,19 @@ export class PaymentService {
   async checkout(@Req() req: Request & { session: any }, createOrderDto: CreateOrderDto) {
 
     //check redis
-    const uniqueOrderCode = this.createOrderKeyFromOrderDto(createOrderDto);
-    const checkoutKey = "CHECKOUT" + uniqueOrderCode;
+    const uniqueOrderKey = this.createOrderKeyFromOrderDto(createOrderDto);
+
+    const checkoutKey = "CHECKOUT" + uniqueOrderKey;
+    const existedCheckout = await this.redisService.get(checkoutKey);
+
+    if (existedCheckout) {
+      return new ResponseDto(HttpStatus.BAD_REQUEST, "Checkout has already existed", existedCheckout.checkoutUrl);
+    }
 
     const paymentDto: CreatePaymentDto = await this.getPaymentDtoFromOrderDto(createOrderDto);
-    const paymentRequest = this.createPaymentRequest(uniqueOrderCode, paymentDto);
+    const paymentRequest = this.createPaymentRequest(uniqueOrderKey, paymentDto);
     
-    const orderKey = "ORDER" + uniqueOrderCode;
+    const orderKey = "ORDER" + uniqueOrderKey;
     await this.saveOrderToRedis(paymentRequest.orderCode, orderKey, createOrderDto);
 
     const checkoutInfo: CheckoutResponseDataType = await this.payOS.createPaymentLink(paymentRequest);
@@ -75,7 +81,7 @@ export class PaymentService {
     }
   }
 
-  private createPaymentRequest(uniqueOrderCode: number, paymentDto: CreatePaymentDto): CheckoutRequestType {
+  private createPaymentRequest(uniqueOrderCode: string, paymentDto: CreatePaymentDto): CheckoutRequestType {
     return {
       description: "THANH TOAN " + paymentDto.orderCode + String.fromCharCode(Math.floor(Math.random() * 26) + 65) + uniqueOrderCode,
       returnUrl: this.returnUrl,
@@ -160,7 +166,7 @@ export class PaymentService {
     const postfix = createOrderDto.order_items.reduce((acc, item) => {
       return acc + (item.id_pro * item.quantity * item.price);
     }, 0);
-    return postfix + Number(phone.slice(-3));
+    return postfix + Number(phone.slice(-3)) + (createOrderDto.paid === "full" ? "F" : "H");
   }
 }
 
