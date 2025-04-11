@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "antd";
+import {createInvoice} from "@apis/orderApi.js";
 
 const Invoice = () => {
   const [invoiceUrl, setInvoiceUrl] = useState(null);
@@ -29,14 +30,16 @@ const Invoice = () => {
             return;
           }
 
-          const res = await fetch("/api/order/invoice", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ persistData: JSON.parse(persistData) }),
-            credentials: "include",
-          });
+          // const res = await fetch("/api/order/invoice", {
+          //   method: "POST",
+          //   headers: {
+          //     "Content-Type": "application/json",
+          //   },
+          //   body: JSON.stringify({ persistData: JSON.parse(persistData) }),
+          //   credentials: "include",
+          // });
+
+          const res = await createInvoice(persistData);
 
           if (res.ok) {
             const data = await res.json();

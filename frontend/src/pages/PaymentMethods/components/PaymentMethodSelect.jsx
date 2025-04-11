@@ -11,12 +11,12 @@ import { checkoutPayment } from "@apis/orderApi.js";
 // import { useQueryClient } from "@tanstack/react-query";
 
 const PAYMENT_METHODS = [
-  // {
-  //   id: "momo",
-  //   name: "Ví MoMo",
-  //   description: "Thanh toán qua ví điện tử Momo",
-  //   icons: [images.momo],
-  // },
+  {
+    id: "momo",
+    name: "Ví MoMo",
+    description: "Thanh toán qua ví điện tử Momo",
+    icons: [images.momo],
+  },
   {
     id: "other",
     name: "Chuyển khoản ngân hàng (PayOS)",
@@ -74,22 +74,22 @@ const PaymentMethodSelect = () => {
       // console.log("fullPayLoad", fullPayload);
 
       // Gửi API
-      //       const res = await checkoutPayment(fullPayload);
-      const res = await fetch("http://localhost:3001/api/payment/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(fullPayload),
-        credentials: "include",
-      });
+      const res = await checkoutPayment(JSON.stringify(fullPayload));
+      // const res = await fetch("http://localhost:3001/api/payment/checkout", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(fullPayload),
+      //   credentials: "include",
+      // });
 
-      // console.log("res", res);
+      console.log("res", res);
       localStorage.setItem("url", JSON.stringify(res));
 
-      if (!res.ok) throw new Error("Có lỗi khi gửi thanh toán");
+      if (!res) throw new Error("Có lỗi khi gửi thanh toán");
 
-      const result = await res.json();
+      // const result = await res.json();
       // console.log(result);
       // console.log("persistData", localStorage.getItem("persistData"));
 
@@ -100,7 +100,7 @@ const PaymentMethodSelect = () => {
       clearCart();
       // console.log("fullData", localStorage.getItem("fullData"));
 
-      window.location.href = result.data;
+      window.location.href = res.data;
     } catch (err) {
       console.error("Lỗi khi thanh toán:", err);
       alert("Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại.");

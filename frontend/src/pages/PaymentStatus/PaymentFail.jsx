@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { XCircle, Home, RefreshCw } from 'lucide-react';
+import ordersApi from "@apis/ordersApi.js";
+import axios from "axios";
+import {cancelPayment} from "@apis/orderApi.js";
 
 export default function PaymentFail() {
     const [countdown, setCountdown] = useState(10);
@@ -12,9 +15,10 @@ export default function PaymentFail() {
                 console.log(error);
 
                 // Gọi API để hủy thanh toán
-                const res = await fetch(`http://localhost:3001/api/payment/cancel/${error}`, {
-                    method: 'GET',
-                });
+                const res = await cancelPayment(error);
+                // const res = await fetch(`http://localhost:3001/api/payment/cancel/${error}`, {
+                //     method: 'GET',
+                // });
 
                 console.log(res);
 
@@ -34,7 +38,7 @@ export default function PaymentFail() {
             setCountdown((prevCount) => {
                 if (prevCount <= 1) {
                     clearInterval(timer);
-                    window.location.href = '/'; // Tự động chuyển hướng khi đếm ngược kết thúc
+                    // window.location.href = '/'; // Tự động chuyển hướng khi đếm ngược kết thúc
                     return 0;
                 }
                 return prevCount - 1;
