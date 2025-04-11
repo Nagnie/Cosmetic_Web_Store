@@ -310,4 +310,10 @@ export class CartService {
 
     return { message: "Item removed from cart" };
   }
+
+  async clear(@Req() req: Request & { session: any }) {
+    req.session.destroy((err) => {
+      console.log("Failed to delete cart: ", err);
+    })
+  }
 }
