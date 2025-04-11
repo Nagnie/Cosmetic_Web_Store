@@ -21,8 +21,26 @@ export const finishOrder = async ({
   return response.data;
 };
 
-export const checkoutPayment = async (payload) => {
-  const response = await axios.post("/payment/checkout", payload);
+export const createInvoice = async (persistData) => {
+  const response = await axios.post("/order/invoice", {
+    persistData: JSON.parse(persistData),
+  });
+  return response.data;
+};
+
+export const checkoutPayment = async (fullPayload) => {
+  const response = await axios.post(
+      "/payment/checkout",
+      fullPayload,
+      { withCredentials: true }
+  );
+  return response.data;
+};
+
+export const cancelPayment = async (error) => {
+  const response = await axios.get(
+      `/payment/cancel/${error}`
+  );
   return response.data;
 };
 
