@@ -5,6 +5,7 @@ const PayOS = require("@payos/node");
 import {
     CheckoutRequestType,
     CheckoutResponseDataType,
+    PaymentLinkDataType,
     WebhookDataType,
     WebhookType,
 } from "@payos/node/lib/type";
@@ -141,10 +142,19 @@ export class PaymentService {
     }
 
     async cancelPayment(orderCode: number) {
-        const cancelledPaymentLink = await this.payOS.cancelPaymentLink(orderCode);
-        const [orderKey, checkoutKey] = await this.redisService.getSetMembers(String(orderCode));
+      const paymentInfo: PaymentLinkDataType = await this.getPaymentInfo(orderCode); 
+      let res = paymentInfo;
+      console.log(paymentInfo);
+      if (paymentInfo.status === "PENDING") {
+        res = await this.payOS.cancelPaymentLink(orderCode);
+      }
+      const [orderKey, checkoutKey] = await this.redisService.getSetMembers(String(orderCode));
+      try {
         await this.cleanOrderRedis(orderCode, orderKey, checkoutKey);
-        return cancelledPaymentLink;
+      } catch (error) {
+        return new ResponseDto(HttpStatus.BAD_REQUEST, "Order or payment was canceled & deleted", null);
+      }
+      return new ResponseDto(200, "Successfully", res);
     }
 
     async cleanOrderRedis(orderCode: number, orderKey: string, checkoutKey: string) {
