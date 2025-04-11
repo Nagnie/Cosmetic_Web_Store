@@ -166,7 +166,7 @@ export class PaymentService {
     const postfix = createOrderDto.order_items.reduce((acc, item) => {
       return acc + (item.id_pro * item.quantity * item.price);
     }, 0);
-    return postfix + Number(phone.slice(-3)) + createOrderDto.paid === "full" ? "F" : "H";
+    return postfix + Number(phone.slice(-3)) + (createOrderDto.paid === "full" ? "F" : "H");
   }
 }
 
