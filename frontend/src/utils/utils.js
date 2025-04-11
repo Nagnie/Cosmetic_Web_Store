@@ -77,12 +77,6 @@ export const getAvailableClassifications = (product, unavailableClasses) => {
 
 export const clearCartSession = async () => {
   try {
-    const storedData = localStorage.getItem("persistData");
-    if (!storedData) {
-      alert("Không tìm thấy thông tin đơn hàng.");
-      return;
-    }
-
     const response = await axios.get("/cart/clear_cart");
 
     if (response.status === 200) {

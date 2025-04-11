@@ -97,8 +97,8 @@ const PaymentMethodSelect = () => {
       // Xử lý khi thành công
       localStorage.removeItem("persistData");
       localStorage.setItem("fullData", JSON.stringify(fullPayload));
-      clearCartSession();
-      clearCart();
+      // clearCartSession();
+      // clearCart();
       // console.log("fullData", localStorage.getItem("fullData"));
 
       window.location.href = res.data;
