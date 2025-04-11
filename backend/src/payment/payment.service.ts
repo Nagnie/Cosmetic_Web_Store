@@ -65,17 +65,6 @@ export class PaymentService {
         console.log(checkoutInfo);
         this.savePaymentToRedis(paymentRequest.orderCode, checkoutKey, checkoutInfo);
 
-        // const sessionId = req.session.id;
-        // console.log(sessionId);
-        // this.addSessionIdToOrderSet(paymentRequest.orderCode, sessionId);
-
-        // Delete session
-        req.session.destroy((err) => {
-            if (err) {
-                console.error("Lỗi khi xóa session:", err);
-            }
-        });
-
         //proxy to payos
         return new ResponseDto(200, "Successfully", checkoutInfo.checkoutUrl);
 
