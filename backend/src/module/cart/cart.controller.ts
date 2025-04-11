@@ -56,4 +56,13 @@ export class CartController {
   ) {
     return await this.cartService.remove(req, deleteCartDto);
   }
+
+  @Get("clear_cart")
+  @ApiOperation({description: "Clear cart session"})
+  @Public()
+  async clearCart(
+    @Req() req: Request & { session: any }
+  ) {
+    return await this.cartService.clear(req);
+  }
 }
