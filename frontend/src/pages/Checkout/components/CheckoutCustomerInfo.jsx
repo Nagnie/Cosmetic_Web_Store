@@ -262,8 +262,8 @@ const CheckoutCustomerInfo = () => {
       setOrderPayload(persistData);
 
       navigate("/checkout/payment-methods");
-      console.log("Order1", order_items);
-      console.log("PersistData", persistData);
+      // console.log("Order1", order_items);
+      // console.log("PersistData", persistData);
 
       localStorage.setItem("persistData", JSON.stringify(persistData));
 
