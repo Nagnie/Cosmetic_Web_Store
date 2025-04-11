@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, Home, ArrowLeft, ExternalLink } from 'lucide-react';
+import { CheckCircle, ArrowLeft, ExternalLink } from 'lucide-react';
 
 export default function PaymentSuccess() {
     const [countdown, setCountdown] = useState(10);
@@ -15,7 +15,7 @@ export default function PaymentSuccess() {
                 if (prevCount <= 1) {
                     clearInterval(timer);
                     // Redirect when countdown reaches 0
-                    // window.location.href = '/';
+                    window.location.href = '/';
                     return 0;
                 }
                 return prevCount - 1;
@@ -42,10 +42,8 @@ export default function PaymentSuccess() {
             const data = await response.json();
 
             if (response.ok) {
-                // console.log("Invoice generated successfully:", data);
                 // Store invoice data in localStorage for the invoice page
                 localStorage.setItem("invoiceData", JSON.stringify(data.data));
-                // Redirect to invoice page
                 window.location.href = '/invoice';
             } else {
                 console.error("Error generating invoice:", data.message);
@@ -61,12 +59,12 @@ export default function PaymentSuccess() {
 
     return (
         <div className="mt-45 mb-20 flex flex-col items-center justify-center p-4">
-            <div className="max-w-md w-full rounded-lg shadow-2xl p-8 text-center">
+            <div className="max-w-md w-full rounded-lg shadow-2xl p-10 text-center">
                 <div className="mb-6">
                     <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
                 </div>
 
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">Thanh toán thành công!</h1>
+                <h1 className="text-2xl font-bold text-gray-800 mb-4">Thanh toán thành công!</h1>
                 <p className="text-gray-600 mb-6">
                     Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xác nhận.
                 </p>
@@ -79,19 +77,11 @@ export default function PaymentSuccess() {
                     <button
                         onClick={handleViewInvoice}
                         disabled={loading}
-                        className="inline-flex items-center justify-center bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors disabled:bg-green-400"
+                        className="inline-flex items-center justify-center bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors disabled:bg-green-500"
                     >
                         <ExternalLink size={18} className="mr-2" />
                         {loading ? 'Đang tải...' : 'Xem đơn hàng của tôi'}
                     </button>
-
-                    {/*<a*/}
-                    {/*    href="/"*/}
-                    {/*    className="inline-flex items-center justify-center bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"*/}
-                    {/*>*/}
-                    {/*    <Home size={18} className="mr-2" />*/}
-                    {/*    Trở về trang chủ ({countdown}s)*/}
-                    {/*</a>*/}
 
                     <button
                         onClick={() => window.history.back()}

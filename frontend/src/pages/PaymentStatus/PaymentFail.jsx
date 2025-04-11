@@ -1,22 +1,40 @@
 import { useState, useEffect } from 'react';
-import { XCircle, Home, RefreshCw, ArrowLeft } from 'lucide-react';
+import { XCircle, Home, RefreshCw } from 'lucide-react';
 
 export default function PaymentFail() {
-    const [errorCode, setErrorCode] = useState('');
     const [countdown, setCountdown] = useState(10);
 
     useEffect(() => {
-        // Giả định lấy errorCode từ URL params
-        const params = new URLSearchParams(window.location.search);
-        const error = params.get('error_code') || 'Không xác định';
-        setErrorCode(error);
+        const fetchData = async () => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const error = params.get('orderCode') || 'Không xác định';
+                console.log(error);
+
+                // Gọi API để hủy thanh toán
+                const res = await fetch(`http://localhost:3001/api/payment/cancel/${error}`, {
+                    method: 'GET',
+                });
+
+                console.log(res);
+
+                if (!res.ok) throw new Error("Có lỗi khi hủy thanh toán");
+
+                console.log('Đã hủy thanh toán thành công');
+            } catch (err) {
+                console.error('Lỗi khi hủy thanh toán:', err);
+            }
+        };
+
+        // Gọi API ngay khi component được render
+        fetchData();
 
         // Thiết lập đếm ngược để chuyển hướng
         const timer = setInterval(() => {
             setCountdown((prevCount) => {
                 if (prevCount <= 1) {
                     clearInterval(timer);
-                    // Có thể thêm chuyển hướng ở đây: window.location.href = '/'
+                    window.location.href = '/'; // Tự động chuyển hướng khi đếm ngược kết thúc
                     return 0;
                 }
                 return prevCount - 1;
@@ -28,12 +46,12 @@ export default function PaymentFail() {
 
     return (
         <div className="mt-45 mb-20 flex flex-col items-center justify-center p-4">
-            <div className="max-w-lg w-full bg-white rounded-xl shadow-2xl p-8 text-center">
+            <div className="max-w-lg w-full bg-white rounded-xl shadow-2xl p-10 text-center">
                 <div className="mb-6">
                     <XCircle className="mx-auto h-16 w-16 text-red-500" />
                 </div>
 
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">Thanh toán không thành công</h1>
+                <h1 className="text-2xl font-bold text-gray-800 mb-4">Thanh toán không thành công</h1>
                 <p className="text-gray-600 mb-6">
                     Rất tiếc, giao dịch của bạn không thể hoàn tất vào lúc này.
                 </p>
@@ -59,14 +77,6 @@ export default function PaymentFail() {
                         <Home size={18} className="mr-2" />
                         Trở về trang chủ ({countdown}s)
                     </a>
-
-                    <button
-                        onClick={() => window.history.back()}
-                        className="inline-flex items-center justify-center bg-white text-gray-600 py-2 hover:text-gray-900 transition-colors"
-                    >
-                        <ArrowLeft size={18} className="mr-1" />
-                        Quay lại
-                    </button>
                 </div>
             </div>
         </div>

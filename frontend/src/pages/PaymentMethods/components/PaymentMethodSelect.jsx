@@ -11,12 +11,12 @@ import { checkoutPayment } from "@apis/orderApi.js";
 // import { useQueryClient } from "@tanstack/react-query";
 
 const PAYMENT_METHODS = [
-  {
-    id: "momo",
-    name: "Ví MoMo",
-    description: "Thanh toán qua ví điện tử Momo",
-    icons: [images.momo],
-  },
+  // {
+  //   id: "momo",
+  //   name: "Ví MoMo",
+  //   description: "Thanh toán qua ví điện tử Momo",
+  //   icons: [images.momo],
+  // },
   {
     id: "other",
     name: "Chuyển khoản ngân hàng (PayOS)",
