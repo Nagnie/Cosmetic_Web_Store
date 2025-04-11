@@ -35,7 +35,6 @@ const Invoice = () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ persistData: JSON.parse(persistData) }),
-            credentials: "include",
           });
 
           if (res.ok) {

@@ -7,6 +7,7 @@ import images from "@assets/images/PaymentMethods";
 import PaymentMethodCard from "./PaymentMethodCard";
 import PaymentSelectCard from "./PaymentSelectCard";
 import { checkoutPayment } from "@apis/orderApi.js";
+import { clearCartSession } from "@utils/utils";
 // import { useFinishOrder } from "@hooks/useOrderQueries";
 // import { useQueryClient } from "@tanstack/react-query";
 
@@ -81,7 +82,6 @@ const PaymentMethodSelect = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(fullPayload),
-        credentials: "include",
       });
 
       // console.log("res", res);
@@ -96,7 +96,7 @@ const PaymentMethodSelect = () => {
       // Xử lý khi thành công
       localStorage.removeItem("persistData");
       localStorage.setItem("fullData", JSON.stringify(fullPayload));
-
+      clearCartSession();
       clearCart();
       // console.log("fullData", localStorage.getItem("fullData"));
 
