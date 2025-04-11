@@ -19,8 +19,8 @@ const PAYMENT_METHODS = [
   },
   {
     id: "other",
-    name: "Chuyển khoản ngân hàng (VietQR)",
-    description: "Thanh toán qua mã VietQR",
+    name: "Chuyển khoản ngân hàng (PayOS)",
+    description: "Thanh toán qua mã PayOS",
     icons: [images.other],
   },
 ];
@@ -58,15 +58,15 @@ const PaymentMethodSelect = () => {
 
       const orderPayload = JSON.parse(storedData);
 
-      console.log("orderPayload", orderPayload);
+      // console.log("orderPayload", orderPayload);
 
       const fullPayload = {
         ...orderPayload,
-        payment_method: selectedPaymentMethod,
-        payment_option: selectedPaymentSelect,
+        // payment_method: selectedPaymentMethod,
+        paid: selectedPaymentSelect,
       };
 
-      console.log("fullPayLoad", fullPayload);
+      // console.log("fullPayLoad", fullPayload);
 
       // Gửi API
 //       const res = await checkoutPayment(fullPayload);
@@ -78,17 +78,19 @@ const PaymentMethodSelect = () => {
         body: JSON.stringify(fullPayload),
       });
 
+      // console.log("res", res);
+      localStorage.setItem("url", JSON.stringify(res));
+
       if (!res.ok) throw new Error("Có lỗi khi gửi thanh toán");
 
       const result = await res.json();
-      console.log(result);
+      // console.log(result);
+      // console.log("persistData", localStorage.getItem("persistData"));
 
       // Xử lý khi thành công
-      //alert("Thanh toán thành công!");
       localStorage.removeItem("persistData");
-      // redirect sang trang cảm ơn hoặc đơn hàng
-
-      // window.location.href = "/checkout/confirmation";
+      localStorage.setItem("fullData", JSON.stringify(fullPayload));
+      // console.log("fullData", localStorage.getItem("fullData"));
 
       window.location.href = result.data;
 
