@@ -32,6 +32,15 @@ export class OrderController {
     return await this.orderService.create(req, createOrderDto);
   }
 
+  @Post("invoice")
+  @Public()
+  @ApiOperation({ summary: 'Get invoice after payment successfully' })
+  @ApiResponse({ status: 200, description: 'Successfully'})
+  @ApiBody({ type: CreateOrderDto })
+  async getInvoice(@Req() req: Request & { session: any }, @Body() createOrderDto: CreateOrderDto) {
+    return await this.orderService.getInvoice(req, createOrderDto);
+  }
+
   @Get('download-invoice')
   @Public()
   async downloadInvoice(

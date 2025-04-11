@@ -262,6 +262,11 @@ const CheckoutCustomerInfo = () => {
       setOrderPayload(persistData);
 
       navigate("/checkout/payment-methods");
+      // console.log("Order1", order_items);
+      // console.log("PersistData", persistData);
+
+      localStorage.setItem("persistData", JSON.stringify(persistData));
+
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại sau.");

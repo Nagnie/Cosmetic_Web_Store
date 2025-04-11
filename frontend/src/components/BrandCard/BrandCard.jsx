@@ -9,7 +9,7 @@ const BrandCard = ({ brand }) => {
 
     return (
         <div
-            className="relative mb-2 h-66 w-57 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
+            className="relative mb-2 h-60 w-50 md:h-66 md:w-57 overflow-hidden rounded-lg shadow-lg transition-transform hover:scale-105"
             onClick={handleClick}
         >
             {/* Image */}
@@ -21,7 +21,7 @@ const BrandCard = ({ brand }) => {
 
             {/* Gradient overlay and text */}
             <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-orange-950/50 to-transparent p-3 sm:p-4 md:p-5 lg:p-6">
-                <h3 className="text-lg font-semibold text-white hover:underline sm:text-xl md:text-2xl">
+                <h3 className="text-lg font-semibold text-white cursor-pointer hover:underline sm:text-xl md:text-2xl">
                     {brand.name}
                 </h3>
                 <p className="mt-1 text-sm text-white">

@@ -5,6 +5,7 @@ import "./App.css";
 import { useInfiniteCartItems } from "@hooks/useCartQueries.js";
 import useCartStore from "@components/Cart/ZustandCartStore.js";
 import { useEffect } from "react";
+import FloatingMessengerButton from "@components/FloatingMessengerButton.jsx";
 
 function App() {
   const itemCount = useCartStore((state) => state.itemCount);
@@ -64,6 +65,7 @@ function App() {
     <Router>
       <div className="app-container">
         <div className="content">
+          <FloatingMessengerButton />
           <Routes>
             {PublicRoutes.map((route, index) => {
               const Layout = route.layout || ((props) => <>{props.children}</>);

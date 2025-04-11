@@ -9,6 +9,7 @@ import { OrderDetail } from "@/module/order/entities/order_detail.entity";
 import { Product } from "@/module/product/entities/product.entity";
 import { Subcategory } from "@/module/subcategory/entities/subcategory.entity";
 import { User } from "@/module/user/entities/user.entity";
+import { Payment } from "@/payment/entities/payment.entity";
 import { ConfigService } from "@nestjs/config";
 import { DataSource } from "typeorm";
 // const configService = new ConfigService();
@@ -33,5 +34,6 @@ export default new DataSource({
     Combo,
     ComboDetail,
     ComboImage,
+    Payment
   ],
 });

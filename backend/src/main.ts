@@ -25,7 +25,7 @@ async function bootstrap() {
     const port = configService.get<number>("PORT") || 3000;
 
     const redisClient = createClient({
-        url: configService.get<string>("REDIS_URL") // Change IP if deploy
+        url: configService.get<string>("REDIS_URL"), // Change IP if deploy
     });
     redisClient.on("error", (err) => console.error("Redis Error:", err));
     await redisClient.connect();

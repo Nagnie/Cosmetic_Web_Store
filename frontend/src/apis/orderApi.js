@@ -21,8 +21,15 @@ export const finishOrder = async ({
   return response.data;
 };
 
+export const checkoutPayment = async (payload) => {
+  const response = await axios.post("/payment/checkout", payload);
+  return response.data;
+};
+
 export const fetchListOrderItems = async () => {
   const response = await axios.get("/order/list-product");
 
   return response.data;
 };
+
+

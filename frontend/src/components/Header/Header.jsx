@@ -132,44 +132,63 @@ const Header = () => {
             >
               <Menu>
                 {!loading &&
-                    formattedCategories.map((category) => (
-                        <SubMenu
-                            key={category.cat_id}
-                            label={category.cat_name}
-                            icon={category.icon}
-                            className="font-semibold"
-                        >
-                          {/* Link to show all products in this category */}
-                          <MenuItem
-                              component={<Link to={`/all_products?category=${encodeURIComponent(category.cat_name)}`} />}
-                              className="ps-7 font-medium"
+                    formattedCategories.map((category) => {
+                      const subcategories = category.menu[0].items;
+
+                      // Nếu chỉ có 1 subcategory, chỉ render 1 MenuItem
+                      if (subcategories.length === 1) {
+                        return (
+                            <MenuItem
+                                key={category.cat_id}
+                                component={
+                                  <Link to={`/all_products?category=${encodeURIComponent(category.cat_name)}`} />
+                                }
+                                icon={category.icon}
+                                className="font-semibold"
+                            >
+                              {category.cat_name}
+                            </MenuItem>
+                        );
+                      }
+
+                      // Nếu có nhiều hơn 1 subcategory, render SubMenu
+                      return (
+                          <SubMenu
+                              key={category.cat_id}
+                              label={category.cat_name}
+                              icon={category.icon}
+                              className="font-semibold"
                           >
-                            Tất cả
-                          </MenuItem>
+                            {/* Link to show all products in this category */}
+                            <MenuItem
+                                component={
+                                  <Link
+                                      to={`/all_products?category=${encodeURIComponent(category.cat_name)}`}
+                                  />
+                                }
+                                className="ps-7 font-medium"
+                            >
+                              Tất cả
+                            </MenuItem>
 
-                          {/* Show all subcategories */}
-                          {category.menu[0].items.map((item) => (
-                              <MenuItem
-                                  key={item.id_subcat}
-                                  component={
-                                    <Link
-                                        to={`/all_products?category=${encodeURIComponent(category.cat_name)}&subcategory=${encodeURIComponent(item.scat_name)}`}
-                                    />
-                                  }
-                                  className="ps-7 font-medium"
-                              >
-                                {item.scat_name}
-                              </MenuItem>
-                          ))}
-                        </SubMenu>
-                    ))
+                            {/* Show all subcategories */}
+                            {subcategories.map((item) => (
+                                <MenuItem
+                                    key={item.id_subcat}
+                                    component={
+                                      <Link
+                                          to={`/all_products?category=${encodeURIComponent(category.cat_name)}&subcategory=${encodeURIComponent(item.scat_name)}`}
+                                      />
+                                    }
+                                    className="ps-7 font-medium"
+                                >
+                                  {item.scat_name}
+                                </MenuItem>
+                            ))}
+                          </SubMenu>
+                      );
+                    })
                 }
-
-                {loading && (
-                    <div className="flex justify-center items-center h-32">
-                      <p>Đang tải danh mục...</p>
-                    </div>
-                )}
               </Menu>
             </Sidebar>
           </div>

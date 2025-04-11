@@ -7,7 +7,8 @@ import { PaymentMethodSelect } from "./components";
 
 const PaymentMethods = () => {
   const cartItemCount = useCartStore((state) => state.itemCount);
-
+  const storedData = localStorage.getItem("persistData");
+  console.log("storedData", storedData);
   const routes = [
     {
       title: (
