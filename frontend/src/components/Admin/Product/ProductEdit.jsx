@@ -97,6 +97,18 @@ const ProductEdit = () => {
 
     };
 
+    // Handle array fields (img_url and classification)
+    const handleArrayChange = (field, index, value) => {
+        setFormData(prev => {
+            const newArray = [...prev[field]];
+            newArray[index] = value;
+            return {
+                ...prev,
+                [field]: newArray
+            };
+        });
+    };
+
     // Add or remove array items
     const handleArrayAction = (field, action) => {
         setFormData(prev => {
