@@ -363,9 +363,13 @@ export class OrderService {
   // }
 
   private async generateInvoiceImage(createOrderDto: CreateOrderDto): Promise<string> {
-    const {name, phone, address, order_items, total_price} = createOrderDto;
+    let {name, phone, address, order_items, total_price, paid} = createOrderDto;
 
     const shipping_fee = 18000;
+
+    if(paid === "half") {
+      total_price = total_price * 2;
+    }
 
     // Calculate base width: 800 + (100 * additional items)
     const width = 800 + (Math.max(0, order_items.length - 1) * 100);
