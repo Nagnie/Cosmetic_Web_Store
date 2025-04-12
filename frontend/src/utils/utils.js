@@ -78,12 +78,12 @@ export const getAvailableClassifications = (product, unavailableClasses) => {
 export const clearCartSession = async () => {
   try {
     const response = await axios.get("/cart/clear_cart");
-
-    if (response.status === 200) {
-      // Clear the cart in localStorage
-      localStorage.removeItem("persistData");
-      localStorage.removeItem("fullData");
-    }
+    //
+    // if (response.status === 200) {
+    //   // Clear the cart in localStorage
+    //   localStorage.removeItem("persistData");
+    //   localStorage.removeItem("fullData");
+    // }
   } catch (error) {
     console.error("API call failed:", error);
   }

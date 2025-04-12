@@ -18,50 +18,42 @@ const Invoice = () => {
       setInvoiceUrl(parsedData.invoice_url.url);
       setQrCodeUrl(parsedData.qr_code_url.url);
       setIsLoading(false);
-    } else {
-      // If no data in localStorage, we might need to fetch it again
-      const fetchInvoice = async () => {
-        try {
-          const persistData = localStorage.getItem("persistData");
-
-          if (!persistData) {
-            console.error("No order data found");
-            setIsLoading(false);
-            return;
-          }
-
-          // const res = await fetch("/api/order/invoice", {
-          //   method: "POST",
-          //   headers: {
-          //     "Content-Type": "application/json",
-          //   },
-          //   body: JSON.stringify({ persistData: JSON.parse(persistData) }),
-          //   credentials: "include",
-          // });
-
-          const res = await createInvoice(persistData);
-
-          if (res.ok) {
-            const data = await res.json();
-            setInvoiceUrl(data.data.invoice_url.url);
-            setQrCodeUrl(data.data.qr_code_url.url);
-
-            // Store for future reference
-            localStorage.setItem("invoiceData", JSON.stringify(data.data));
-          } else {
-            console.error("Error fetching invoice");
-          }
-        } catch (err) {
-          console.error("API call error:", err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+    }
+      // // If no data in localStorage, we might need to fetch it again
+      // const fetchInvoice = async () => {
+      //   try {
+      //     const persistData = localStorage.getItem("persistData");
+      //     console.log("persistData", persistData);
+      //
+      //     if (!persistData) {
+      //       console.error("No order data found");
+      //       setIsLoading(false);
+      //       return;
+      //     }
+      //
+      //     const res = await createInvoice(persistData);
+      //
+      //     if (res.ok) {
+      //       const data = await res.json();
+      //       setInvoiceUrl(data.data.invoice_url.url);
+      //       setQrCodeUrl(data.data.qr_code_url.url);
+      //
+      //       // Store for future reference
+      //       localStorage.setItem("invoiceData", JSON.stringify(data.data));
+      //     } else {
+      //       console.error("Error fetching invoice");
+      //     }
+      //   } catch (err) {
+      //     console.error("API call error:", err);
+      //   } finally {
+      //     setIsLoading(false);
+      //   }
+      // };
 
       localStorage.removeItem("fullData");
       localStorage.removeItem("invoiceData");
-      fetchInvoice();
-    }
+      // fetchInvoice();
+    // }
   }, []);
 
   return (

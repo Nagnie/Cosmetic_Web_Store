@@ -21,10 +21,10 @@ export const finishOrder = async ({
   return response.data;
 };
 
-export const createInvoice = async (persistData) => {
-  const response = await axios.post("/order/invoice", {
-    persistData: JSON.parse(persistData),
-  });
+export const createInvoice = async (fullData) => {
+  const response = await axios.post("/order/invoice",
+    fullData,
+  );
   return response.data;
 };
 

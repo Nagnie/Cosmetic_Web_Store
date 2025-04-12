@@ -12,12 +12,12 @@ import { clearCartSession } from "@utils/utils";
 // import { useQueryClient } from "@tanstack/react-query";
 
 const PAYMENT_METHODS = [
-  {
-    id: "momo",
-    name: "Ví MoMo",
-    description: "Thanh toán qua ví điện tử Momo",
-    icons: [images.momo],
-  },
+  // {
+  //   id: "momo",
+  //   name: "Ví MoMo",
+  //   description: "Thanh toán qua ví điện tử Momo",
+  //   icons: [images.momo],
+  // },
   {
     id: "other",
     name: "Chuyển khoản ngân hàng (PayOS)",
@@ -60,46 +60,31 @@ const PaymentMethodSelect = () => {
 
       const orderPayload = JSON.parse(storedData);
 
-      // console.log("orderPayload", orderPayload);
-
       if (selectedPaymentSelect === "half") {
         orderPayload.total_price = Math.floor(orderPayload.total_price / 2);
       }
 
       const fullPayload = {
         ...orderPayload,
-        // payment_method: selectedPaymentMethod,
         paid: selectedPaymentSelect,
       };
 
-      // console.log("fullPayLoad", fullPayload);
 
       // Gửi API
       const res = await checkoutPayment(JSON.stringify(fullPayload));
-      // const res = await fetch("http://localhost:3001/api/payment/checkout", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(fullPayload),
-      //   credentials: "include",
-      // });
 
       console.log("res", res);
       localStorage.setItem("url", JSON.stringify(res));
 
       if (!res) throw new Error("Có lỗi khi gửi thanh toán");
 
-      // const result = await res.json();
-      // console.log(result);
-      // console.log("persistData", localStorage.getItem("persistData"));
-
       // Xử lý khi thành công
-      localStorage.removeItem("persistData");
+      // localStorage.removeItem("persistData");
       localStorage.setItem("fullData", JSON.stringify(fullPayload));
       // clearCartSession();
       // clearCart();
-      // console.log("fullData", localStorage.getItem("fullData"));
+      // console.log("persistData", localStorage.getItem("persistData"));
+      console.log("fullData", localStorage.getItem("fullData"));
 
       window.location.href = res.data;
     } catch (err) {

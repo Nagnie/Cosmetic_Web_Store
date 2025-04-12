@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { CheckCircle, ArrowLeft, ExternalLink } from "lucide-react";
 import { clearCartSession } from "@utils/utils";
 import { useCartStore } from "@components/Cart";
+import axios from "axios";
+import {createInvoice} from "@apis/orderApi.js";
 
 export default function PaymentSuccess() {
   const clearCart = useCartStore((state) => state.clearCart);
@@ -9,17 +11,17 @@ export default function PaymentSuccess() {
   const [countdown, setCountdown] = useState(10);
   const [loading, setLoading] = useState(false);
 
-  // Retrieve persistData from localStorage
   const fullData = localStorage.getItem("fullData");
+  console.log("fullData", localStorage.getItem("fullData"));
 
+  // Retrieve persistData from localStorage
   useEffect(() => {
     // Set up countdown for auto-redirect
     const timer = setInterval(() => {
       setCountdown((prevCount) => {
         if (prevCount <= 1) {
           clearInterval(timer);
-          // Redirect when countdown reaches 0
-          window.location.href = "/";
+          // window.location.href = "/";
           return 0;
         }
         return prevCount - 1;
@@ -39,22 +41,15 @@ export default function PaymentSuccess() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/api/order/invoice", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: fullData,
-      });
+      const response = await createInvoice(fullData);
+      console.log(response);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response) {
         // Store invoice data in localStorage for the invoice page
-        localStorage.setItem("invoiceData", JSON.stringify(data.data));
+        localStorage.setItem("invoiceData", JSON.stringify(response.data));
         window.location.href = "/invoice";
       } else {
-        console.error("Error generating invoice:", data.message);
+        console.error("Error generating invoice:", response.message);
         alert("Không thể tạo hóa đơn. Vui lòng thử lại sau.");
       }
     } catch (error) {
