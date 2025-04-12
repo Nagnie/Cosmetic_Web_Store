@@ -69,12 +69,11 @@ const PaymentMethodSelect = () => {
         paid: selectedPaymentSelect,
       };
 
-
       // Gửi API
       const res = await checkoutPayment(JSON.stringify(fullPayload));
 
-      console.log("res", res);
-      localStorage.setItem("url", JSON.stringify(res));
+      // console.log("res", res);
+      // localStorage.setItem("url", JSON.stringify(res));
 
       if (!res) throw new Error("Có lỗi khi gửi thanh toán");
 
@@ -84,7 +83,7 @@ const PaymentMethodSelect = () => {
       // clearCartSession();
       // clearCart();
       // console.log("persistData", localStorage.getItem("persistData"));
-      console.log("fullData", localStorage.getItem("fullData"));
+      // console.log("fullData", localStorage.getItem("fullData"));
 
       window.location.href = res.data;
     } catch (err) {

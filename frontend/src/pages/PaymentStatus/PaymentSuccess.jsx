@@ -12,7 +12,7 @@ export default function PaymentSuccess() {
   const [loading, setLoading] = useState(false);
 
   const fullData = localStorage.getItem("fullData");
-  console.log("fullData", localStorage.getItem("fullData"));
+  // console.log("fullData", localStorage.getItem("fullData"));
 
   // Retrieve persistData from localStorage
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function PaymentSuccess() {
       setCountdown((prevCount) => {
         if (prevCount <= 1) {
           clearInterval(timer);
-          // window.location.href = "/";
+          window.location.href = "/";
           return 0;
         }
         return prevCount - 1;
@@ -42,7 +42,7 @@ export default function PaymentSuccess() {
 
     try {
       const response = await createInvoice(fullData);
-      console.log(response);
+      // console.log(response);
 
       if (response) {
         // Store invoice data in localStorage for the invoice page

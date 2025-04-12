@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "antd";
-import {createInvoice} from "@apis/orderApi.js";
+// import {createInvoice} from "@apis/orderApi.js";
 
 const Invoice = () => {
   const [invoiceUrl, setInvoiceUrl] = useState(null);
@@ -49,7 +49,7 @@ const Invoice = () => {
       //     setIsLoading(false);
       //   }
       // };
-
+      localStorage.removeItem("persistData");
       localStorage.removeItem("fullData");
       localStorage.removeItem("invoiceData");
       // fetchInvoice();
