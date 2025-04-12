@@ -31,16 +31,20 @@ const Footer = () => {
                 <Phone size={18} style={{ color: "#41372d" }} />
                 <span>097 311 3685</span>
               </div>
-              <div className="flex justify-center items-center gap-2">
+              <a
+                  href="mailto:naucosmeticbmt@gmail.com"
+                  className="flex justify-center items-center gap-2 hover:underline"
+              >
                 <Mail size={18} style={{ color: "#41372d" }} />
                 <span>naucosmeticbmt@gmail.com</span>
-              </div>
-              <div className="flex justify-center items-center gap-2">
-                <MapPin size={18} style={{ color: "#41372d" }} />
-                <span className={"text-start"}>
-                  부산 서구 서대신동1가 26-4
-                </span>
-              </div>
+              </a>
+
+              {/*<div className="flex justify-center items-center gap-2">*/}
+              {/*  <MapPin size={18} style={{ color: "#41372d" }} />*/}
+              {/*  <span className={"text-start"}>*/}
+              {/*    부산 서구 서대신동1가 26-4*/}
+              {/*  </span>*/}
+              {/*</div>*/}
             </div>
           </div>
 

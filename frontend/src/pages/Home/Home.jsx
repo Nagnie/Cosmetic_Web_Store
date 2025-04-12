@@ -5,6 +5,7 @@ import { useBrands } from "@hooks/useBrandQueries.js";
 import { useProducts } from "@hooks/useProductQueries.js";
 import { useAllPosters } from "@hooks/usePosterQueries.js"
 import { numberToArray } from "@utils/utils.js";
+import BrandCardSkeleton from "@components/BrandCard/BrandCardSkeleton.jsx";
 import BrandCard from "@components/BrandCard/BrandCard.jsx";
 import VoucherCurvedSlider from "./components/VoucherCurvedSlider.jsx";
 import DiscountCard from "./components/DiscountCard.jsx";
@@ -23,6 +24,7 @@ import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
+import ProductCardSkeleton from "@components/ProductCard/ProductCardSkeleton.jsx";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -124,17 +126,17 @@ const Homepage = () => {
   };
 
   // Loader animation
-  const loaderVariants = {
-    animate: {
-      scale: [1, 1.2, 1],
-      opacity: [0.5, 1, 0.5],
-      transition: {
-        duration: 1.5,
-        repeat: Infinity,
-        repeatType: "loop"
-      }
-    }
-  };
+  // const loaderVariants = {
+  //   animate: {
+  //     scale: [1, 1.2, 1],
+  //     opacity: [0.5, 1, 0.5],
+  //     transition: {
+  //       duration: 1.5,
+  //       repeat: Infinity,
+  //       repeatType: "loop"
+  //     }
+  //   }
+  // };
 
   return (
     <div className="font-sans">
@@ -214,25 +216,23 @@ const Homepage = () => {
         </div>
 
         {brandsQuery.isLoading ? (
-            <div className="flex h-40 items-center justify-center">
-              <div
-                  className="h-16 w-16 mx-2 rounded-full"
-                  style={{ backgroundColor: "#91775e" }}
-              />
+            <div className="flex flex-wrap justify-center gap-6">
+              {[...Array(5)].map((_, index) => (
+                  <div key={index}>
+                    <BrandCardSkeleton />
+                  </div>
+              ))}
             </div>
         ) : (
-            <div
-                className="flex cursor-pointer flex-wrap justify-center gap-6"
-            >
-                {topBrands.map((brand, index) => (
-                    <div
-                        key={brand.id}
-                    >
-                      <BrandCard brand={brand} />
-                    </div>
-                ))}
+            <div className="flex cursor-pointer flex-wrap justify-center gap-6">
+              {topBrands.map((brand) => (
+                  <div key={brand.id}>
+                    <BrandCard brand={brand} />
+                  </div>
+              ))}
             </div>
         )}
+
       </section>
 
       {/*Why choose us section*/}
@@ -334,120 +334,122 @@ const Homepage = () => {
         </div>
       )}
 
-      <motion.section
-          className="my-10"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-          }}
-      >
-        <motion.h2
-            className="text-5xl text-primary-dark font-bold text-center uppercase mb-10"
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0 }
-            }}
-        >
-          Combo Mới Nhất
-        </motion.h2>
-        {comboQuery.isLoading ? (
-            <div className="flex h-60 items-center justify-center">
-              <motion.div
-                  className="h-10 w-10 rounded-full mx-2"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: 0
-                  }}
-                  style={{ backgroundColor: "#675746" }}
-              />
-              <motion.div
-                  className="h-10 w-10 rounded-full mx-2"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: 0.2
-                  }}
-                  style={{ backgroundColor: "#7a6854" }}
-              />
-              <motion.div
-                  className="h-10 w-10 rounded-full mx-2"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: 0.4
-                  }}
-                  style={{ backgroundColor: "#8b7a62" }}
-              />
-            </div>
-        ) : (
-            <motion.div
-                className="flex flex-wrap justify-center gap-8"
-                variants={{
-                  hidden: { opacity: 0 },
-                  visible: {
-                    opacity: 1,
-                    transition: {
-                      staggerChildren: 0.1
-                    }
-                  }
-                }}
-            >
-              <AnimatePresence>
-                {newestCombos.map((combo) => (
-                    <motion.div
-                        key={combo.id_combo}
-                        variants={{
-                          hidden: { opacity: 0, scale: 0.9 },
-                          visible: {
-                            opacity: 1,
-                            scale: 1,
-                            transition: {
-                              type: "spring",
-                              stiffness: 100
-                            }
-                          }
-                        }}
-                    >
-                      <ComboProductCard combo={combo} />
-                    </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-        )}
+      {/*<motion.section*/}
+      {/*    className="my-10"*/}
+      {/*    initial="hidden"*/}
+      {/*    whileInView="visible"*/}
+      {/*    viewport={{ once: true, amount: 0.2 }}*/}
+      {/*    variants={{*/}
+      {/*      hidden: { opacity: 0, y: 20 },*/}
+      {/*      visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }*/}
+      {/*    }}*/}
+      {/*>*/}
+      {/*  <motion.h2*/}
+      {/*      className="text-5xl text-primary-dark font-bold text-center uppercase mb-10"*/}
+      {/*      variants={{*/}
+      {/*        hidden: { opacity: 0, y: 20 },*/}
+      {/*        visible: { opacity: 1, y: 0 }*/}
+      {/*      }}*/}
+      {/*  >*/}
+      {/*    Combo Mới Nhất*/}
+      {/*  </motion.h2>*/}
+      {/*  {comboQuery.isLoading ? (*/}
+      {/*      <div className="flex h-60 items-center justify-center">*/}
+      {/*        <motion.div*/}
+      {/*            className="h-10 w-10 rounded-full mx-2"*/}
+      {/*            animate={{*/}
+      {/*              scale: [1, 1.5, 1],*/}
+      {/*              opacity: [0.3, 1, 0.3]*/}
+      {/*            }}*/}
+      {/*            transition={{*/}
+      {/*              duration: 1,*/}
+      {/*              repeat: Infinity,*/}
+      {/*              delay: 0*/}
+      {/*            }}*/}
+      {/*            style={{ backgroundColor: "#675746" }}*/}
+      {/*        />*/}
+      {/*        <motion.div*/}
+      {/*            className="h-10 w-10 rounded-full mx-2"*/}
+      {/*            animate={{*/}
+      {/*              scale: [1, 1.5, 1],*/}
+      {/*              opacity: [0.3, 1, 0.3]*/}
+      {/*            }}*/}
+      {/*            transition={{*/}
+      {/*              duration: 1,*/}
+      {/*              repeat: Infinity,*/}
+      {/*              delay: 0.2*/}
+      {/*            }}*/}
+      {/*            style={{ backgroundColor: "#7a6854" }}*/}
+      {/*        />*/}
+      {/*        <motion.div*/}
+      {/*            className="h-10 w-10 rounded-full mx-2"*/}
+      {/*            animate={{*/}
+      {/*              scale: [1, 1.5, 1],*/}
+      {/*              opacity: [0.3, 1, 0.3]*/}
+      {/*            }}*/}
+      {/*            transition={{*/}
+      {/*              duration: 1,*/}
+      {/*              repeat: Infinity,*/}
+      {/*              delay: 0.4*/}
+      {/*            }}*/}
+      {/*            style={{ backgroundColor: "#8b7a62" }}*/}
+      {/*        />*/}
+      {/*      </div>*/}
+      {/*  ) : (*/}
+      {/*      <motion.div*/}
+      {/*          className="flex flex-wrap justify-center gap-8"*/}
+      {/*          variants={{*/}
+      {/*            hidden: { opacity: 0 },*/}
+      {/*            visible: {*/}
+      {/*              opacity: 1,*/}
+      {/*              transition: {*/}
+      {/*                staggerChildren: 0.1*/}
+      {/*              }*/}
+      {/*            }*/}
+      {/*          }}*/}
+      {/*      >*/}
+      {/*        <AnimatePresence>*/}
+      {/*          {newestCombos.map((combo) => (*/}
+      {/*              <motion.div*/}
+      {/*                  key={combo.id_combo}*/}
+      {/*                  variants={{*/}
+      {/*                    hidden: { opacity: 0, scale: 0.9 },*/}
+      {/*                    visible: {*/}
+      {/*                      opacity: 1,*/}
+      {/*                      scale: 1,*/}
+      {/*                      transition: {*/}
+      {/*                        type: "spring",*/}
+      {/*                        stiffness: 100*/}
+      {/*                      }*/}
+      {/*                    }*/}
+      {/*                  }}*/}
+      {/*              >*/}
+      {/*                <ComboProductCard combo={combo} />*/}
+      {/*              </motion.div>*/}
+      {/*          ))}*/}
+      {/*        </AnimatePresence>*/}
+      {/*      </motion.div>*/}
+      {/*  )}*/}
 
-        <motion.button
-            className="mx-auto my-10 block rounded-lg px-4 py-2 text-white"
-            style={{ backgroundColor: "#675746" }}
-            onClick={() => navigate("/all_combos")}
-            whileHover={{ scale: 1.05, backgroundColor: "#7a6854" }}
-            whileTap={{ scale: 0.95 }}
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0 }
-            }}
-        >
-          Xem tất cả combo
-        </motion.button>
-      </motion.section>
+      {/*  <motion.button*/}
+      {/*      className="mx-auto my-10 block rounded-lg px-4 py-2 text-white"*/}
+      {/*      style={{ backgroundColor: "#675746" }}*/}
+      {/*      onClick={() => navigate("/all_combos")}*/}
+      {/*      whileHover={{ scale: 1.05, backgroundColor: "#7a6854" }}*/}
+      {/*      whileTap={{ scale: 0.95 }}*/}
+      {/*      variants={{*/}
+      {/*        hidden: { opacity: 0, y: 20 },*/}
+      {/*        visible: { opacity: 1, y: 0 }*/}
+      {/*      }}*/}
+      {/*  >*/}
+      {/*    Xem tất cả combo*/}
+      {/*  </motion.button>*/}
+      {/*</motion.section>*/}
       {/* Best Sellers Section */}
+
+
       <motion.div
-          className="md:px-10 py-10"
+          className="md:px-10 py-10 my-8"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
@@ -455,70 +457,31 @@ const Homepage = () => {
           transition={{ duration: 0.7 }}
       >
         <motion.h2
-            className="text-center text-3xl font-semibold"
+            className="text-center text-5xl font-semibold"
             variants={fadeInUp}
         >
-          Best Sellers
+          BEST SELLERS
         </motion.h2>
 
         {productsQuery.isLoading ? (
-            <div className="flex h-60 items-center justify-center">
-              <motion.div
-                  className="h-10 w-10 rounded-full bg-brown-400 mx-2"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: 0
-                  }}
-                  style={{ backgroundColor: "#91775e" }}
-              />
-              <motion.div
-                  className="h-10 w-10 rounded-full bg-brown-500 mx-2"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: 0.2
-                  }}
-                  style={{ backgroundColor: "#7a6854" }}
-              />
-              <motion.div
-                  className="h-10 w-10 rounded-full bg-brown-600 mx-2"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 1, 0.3]
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    delay: 0.4
-                  }}
-                  style={{ backgroundColor: "#675746" }}
-              />
+            <div className="mt-6 grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {[...Array(8)].map((_, index) => (
+                  <div key={index}>
+                    <ProductCardSkeleton />
+                  </div>
+              ))}
             </div>
         ) : (
-            <motion.div
+            <div
                 className="mt-6 grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                variants={staggerContainer}
             >
-              <AnimatePresence>
                 {products.map((product, index) => (
-                    <motion.div
+                    <div
                         key={product.id_pro}
-                        variants={scaleIn}
-                        custom={index}
                     >
                       <ProductCard product={product} />
-                    </motion.div>
+                    </div>
                 ))}
-              </AnimatePresence>
 
               {products.length === 0 && (
                   <motion.div
@@ -528,7 +491,7 @@ const Homepage = () => {
                     Không có sản phẩm nào
                   </motion.div>
               )}
-            </motion.div>
+            </div>
         )}
 
         <motion.button
